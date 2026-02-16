@@ -36,19 +36,20 @@ class VariantAutoCollector:
         self.api = keepa.Keepa(self.api_key)
         self.domain = "US"  # 默认美国站
     
-    def collect_variants(self, asin: str) -> Tuple[List[Dict], Dict]:
+    def collect_variants(self, asin: str, max_variants: Optional[int] = None) -> Tuple[List[Dict], Dict]:
         """
         采集单个ASIN及其所有变体的数据
         
         Args:
             asin: 任意一个变体的ASIN或父ASIN
+            max_variants: 最大采集变体数量，默认None表示采集全部
             
         Returns:
             (所有变体产品数据列表, 父产品信息)
             
         Example:
             >>> collector = VariantAutoCollector()
-            >>> variants, parent_info = collector.collect_variants("B0F6B5R47Q")
+            >>> variants, parent_info = collector.collect_variants("B0F6B5R47Q", max_variants=8)
             >>> print(f"找到 {len(variants)} 个变体")
             >>> for v in variants:
             ...     print(f"  - {v['asin']}: {v.get('color', 'N/A')} {v.get('size', 'N/A')}")
@@ -77,6 +78,11 @@ class VariantAutoCollector:
             return [main_product], {'parent_asin': main_product.get('parentAsin', asin), 'total_variations': 1}
         
         print(f"📦 发现 {len(variation_asins)} 个变体: {', '.join(variation_asins[:5])}{'...' if len(variation_asins) > 5 else ''}")
+        
+        # 限制变体数量（如果指定了max_variants）
+        if max_variants and len(variation_asins) > max_variants:
+            print(f"⚡ 限制采集数量: 从 {len(variation_asins)} 个变体中选择前 {max_variants} 个")
+            variation_asins = variation_asins[:max_variants]
         
         # 第3步: 批量查询所有变体
         all_variants = self._batch_query_variants(variation_asins)

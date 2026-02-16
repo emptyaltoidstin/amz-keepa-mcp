@@ -38,7 +38,7 @@ def validate_environment():
     return True
 
 
-def generate_complete_report(asin: str, target_moq: int = 100):
+def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int = 8):
     """
     生成完整的All-in-One HTML报告
     
@@ -51,10 +51,12 @@ def generate_complete_report(asin: str, target_moq: int = 100):
     Args:
         asin: 产品ASIN
         target_moq: 目标采购量(用于1688采购参考)
+        max_variants: 最大采集变体数量(默认8个，节省API配额)
     """
     
     print(f"📦 ASIN: {asin}")
     print(f"🎯 目标MOQ: {target_moq}")
+    print(f"🔢 最大变体数: {max_variants}")
     print()
     
     # 步骤1: 采集产品数据
@@ -67,7 +69,7 @@ def generate_complete_report(asin: str, target_moq: int = 100):
         api_key = os.getenv("KEEPA_KEY")
         collector = VariantAutoCollector(api_key)
         
-        products, parent_info = collector.collect_variants(asin)
+        products, parent_info = collector.collect_variants(asin, max_variants=max_variants)
         parent_asin = parent_info['parent_asin']
         
         print(f"   ✅ 采集完成")
@@ -197,12 +199,15 @@ def main():
 示例:
   python generate_report.py B0F6B5R47Q
   python generate_report.py B0F6B5R47Q --moq 200
+  python generate_report.py B0F6B5R47Q --max-variants 8
         """
     )
     
     parser.add_argument('asin', help='Amazon产品ASIN')
     parser.add_argument('--moq', type=int, default=100, 
                         help='目标采购量 (默认: 100)')
+    parser.add_argument('--max-variants', type=int, default=8,
+                        help='最大采集变体数量 (默认: 8，0表示不限制)')
     
     args = parser.parse_args()
     
@@ -214,7 +219,8 @@ def main():
         sys.exit(1)
     
     # 生成报告
-    results = generate_complete_report(args.asin, args.moq)
+    max_variants = None if args.max_variants == 0 else args.max_variants
+    results = generate_complete_report(args.asin, args.moq, max_variants)
     
     # 打印结果
     if results:
