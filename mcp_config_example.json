@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "amz-keepa": {
+      "command": "/Users/blobeats/Downloads/amz-keepa-mcp/venv/bin/python",
+      "args": [
+        "/Users/blobeats/Downloads/amz-keepa-mcp/server.py"
+      ],
+      "env": {
+        "KEEPA_KEY": "your_keepa_api_key_here"
+      }
+    }
+  }
+}

@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Cache
+cache/
+*.db
+*.sqlite
+*.sqlite3
+
+# Charts
+*.png
+*.jpg
+*.jpeg
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Misc
+*.bak
+*.tmp
+
+# MCP Config files with sensitive data
+claude_desktop_config.json
+claude_desktop_config_*.json
+.claude-mcp.json
+
+# Test files
+test_*.py
+demo_*.py
+run_analysis_*.py
+create_demo_report.py
+
+# Archive
+archive/
+
+# Data files
+*.csv
+*.xlsx
+*.pdf
+KeepaExport*.csv
+
+# OS files
+.DS_Store
