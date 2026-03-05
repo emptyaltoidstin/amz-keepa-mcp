@@ -1,7 +1,7 @@
 """
-Keepa API 费用提取器
+Keepa API Fee Extractor
 ==================
-从Keepa API提取真实的FBA费用和佣金数据
+Extract real FBA fee and commission data from Keepa API
 """
 
 from typing import Dict, Optional, Tuple
@@ -9,16 +9,16 @@ from typing import Dict, Optional, Tuple
 
 class KeepaFeeExtractor:
     """
-    从Keepa API产品数据中提取真实的FBA费用和佣金
+    Extract real FBA fees and commissions from Keepa API product data
     
-    Keepa API可以返回:
-    - FBA费用 (fbaFees)
-    - 佣金比例 (referralFeePercentage)
-    - 产品尺寸 (package dimensions)
-    - 产品重量 (package weight)
+    Keepa API can return:
+    - FBA fees (fbaFees)
+    - Commission ratio (referralFeePercentage)
+    - Product size (package dimensions)
+    - Product weight (package weight)
     """
     
-    # 亚马逊佣金比例表 (按类目)
+    # Amazon commission ratio table (by category)
     REFERRAL_FEE_RATES = {
         'Amazon Device Accessories': 0.45,  # 45%
         'Electronics': 0.08,  # 8%
@@ -50,76 +50,76 @@ class KeepaFeeExtractor:
     @classmethod
     def extract_fba_fee(cls, product: Dict) -> Optional[float]:
         """
-        提取FBA费用
+        Withdraw FBA fees
         
-        Keepa API可能在以下字段返回FBA费用:
-        - fbaFees (直接费用)
+        Keepa API may return FBA fees in the following fields:
+        - fbaFees (direct costs)
         - data.fbaFees
-        - 或需要从尺寸/重量计算
+        - or need to size from/Weight calculation
         """
-        # 尝试直接获取FBA费用
+        # Try to get FBA fees directly
         fba_fee = product.get('fbaFees')
         if fba_fee and isinstance(fba_fee, (int, float)) and fba_fee > 0:
-            return float(fba_fee) / 100  # Keepa可能以 cents 存储
+            return float(fba_fee) / 100  # Keepa may be stored in cents
         
-        # 从data字段获取
+        # Get from data field
         data = product.get('data', {})
         if data:
             fba_fee = data.get('fbaFees')
             if fba_fee and isinstance(fba_fee, (int, float)) and fba_fee > 0:
                 return float(fba_fee) / 100
             
-            # 从CSV数据获取
+            # Get from CSV data
             csv = data.get('csv', [])
-            # FBA费用通常在特定的CSV索引中
-            # 根据Keepa文档，FBA费用可能在特定的csv字段
-            if len(csv) > 70:  # 假设FBA费用在某个索引
-                # 这里需要根据实际Keepa数据结构确定
+            # FBA fees are usually in a specific CSV index
+            # According to Keepa documentation, FBA fees may be in specific csv fields
+            if len(csv) > 70:  # Assume that the FBA fee is on a certain index
+                # This needs to be determined based on the actual Keepa data structure
                 pass
         
-        # 如果没有直接数据，返回None让调用者估算
+        # If there is no direct data, return None to let the caller estimate
         return None
     
     @classmethod
     def extract_referral_fee_rate(cls, product: Dict) -> float:
         """
-        提取佣金比例
+        Withdraw commission ratio
         
-        优先顺序:
-        1. Keepa API直接返回的referralFeePercentage
-        2. 根据类目推断
-        3. 默认15%
+        Priority:
+        1. ReferralFeePercentage returned directly by Keepa API
+        2. Inference based on category
+        3. Default 15%
         """
-        # 尝试直接获取
+        # Try to get it directly
         referral_pct = product.get('referralFeePercentage')
         if referral_pct and isinstance(referral_pct, (int, float)) and referral_pct > 0:
             return referral_pct / 100 if referral_pct > 1 else referral_pct
         
-        # 从data字段获取
+        # Get from data field
         data = product.get('data', {})
         if data:
             referral_pct = data.get('referralFeePercentage')
             if referral_pct and isinstance(referral_pct, (int, float)) and referral_pct > 0:
                 return referral_pct / 100 if referral_pct > 1 else referral_pct
         
-        # 根据类目推断
+        # Inference based on category
         category = cls._get_main_category(product)
         if category:
             for cat_pattern, rate in cls.REFERRAL_FEE_RATES.items():
                 if cat_pattern.lower() in category.lower():
                     return rate
         
-        # 默认15%
+        # Default 15%
         return 0.15
     
     @classmethod
     def extract_referral_fee(cls, product: Dict, price: float) -> float:
         """
-        计算佣金金额
+        Calculate commission amount
         
         Args:
-            product: Keepa产品数据
-            price: 售价(USD)
+            product: Keepa product data
+            price: selling price(USD)
         """
         rate = cls.extract_referral_fee_rate(product)
         return price * rate
@@ -127,7 +127,7 @@ class KeepaFeeExtractor:
     @classmethod
     def extract_dimensions(cls, product: Dict) -> Dict[str, float]:
         """
-        提取产品尺寸 (cm)
+        Extract product dimensions (cm)
         """
         return {
             'length': product.get('packageLength', 0) or 0,
@@ -139,24 +139,24 @@ class KeepaFeeExtractor:
     @classmethod
     def extract_all_fees(cls, product: Dict, price: float) -> Dict:
         """
-        提取所有费用
+        Withdraw all fees
         
         Returns:
             {
-                'fba_fee': FBA费用,
-                'referral_rate': 佣金比例,
-                'referral_fee': 佣金金额,
-                'total_fees': 总费用,
-                'is_fba_estimated': FBA费用是否估算,
+                'fba_fee': FBA fees,
+                'referral_rate': Commission ratio,
+                'referral_fee': Commission amount,
+                'total_fees': total cost,
+                'is_fba_estimated': Are FBA fees estimated?,
             }
         """
-        # FBA费用
+        # FBA fees
         fba_fee = cls.extract_fba_fee(product)
         is_fba_estimated = fba_fee is None
         if fba_fee is None:
             fba_fee = cls._estimate_fba_fee_from_dimensions(product)
         
-        # 佣金
+        # Commission
         referral_rate = cls.extract_referral_fee_rate(product)
         referral_fee = price * referral_rate
         
@@ -171,7 +171,7 @@ class KeepaFeeExtractor:
     
     @classmethod
     def _get_main_category(cls, product: Dict) -> str:
-        """获取主类目"""
+        """Get main category"""
         category_tree = product.get('categoryTree', [])
         if category_tree:
             return category_tree[0].get('name', '')
@@ -180,31 +180,31 @@ class KeepaFeeExtractor:
     @classmethod
     def _estimate_fba_fee_from_dimensions(cls, product: Dict) -> float:
         """
-        基于尺寸估算FBA费用
+        Estimate FBA fees based on size
         
-        当Keepa API没有直接返回FBA费用时使用
+        Used when Keepa API does not directly return FBA fees
         """
         dims = cls.extract_dimensions(product)
         weight_g = dims['weight']
         
         if weight_g == 0:
-            return 3.22  # 默认
+            return 3.22  # Default
         
-        # 转换为英制
+        # Convert to imperial
         weight_lb = weight_g / 453.592
         length_in = dims['length'] / 2.54
         width_in = dims['width'] / 2.54
         height_in = dims['height'] / 2.54
         
-        # 计算体积重量
+        # Calculate volumetric weight
         volume_weight = (length_in * width_in * height_in) / 166
         billable_weight = max(weight_lb, volume_weight)
         
-        # 2026年FBA费率 (简化版)
-        # 标准尺寸 - 小号
+        # FBA rates in 2026 (Simplified version)
+        # Standard size - trumpet
         if billable_weight <= 0.75:
             return 3.22
-        # 标准尺寸 - 大号
+        # Standard size - Large size
         elif billable_weight <= 1.0:
             return 3.86
         elif billable_weight <= 1.5:
@@ -219,32 +219,32 @@ class KeepaFeeExtractor:
 
 def get_product_fees_summary(product: Dict, price: float) -> str:
     """
-    获取产品费用摘要 (用于显示)
+    Get product fee summary (for display)
     """
     extractor = KeepaFeeExtractor()
     fees = extractor.extract_all_fees(product, price)
     
     lines = [
-        f"FBA费用: ${fees['fba_fee']:.2f}" + 
-        (" (估算)" if fees['is_fba_estimated'] else " (来自Keepa)"),
-        f"佣金比例: {fees['referral_rate']*100:.1f}%",
-        f"佣金金额: ${fees['referral_fee']:.2f}",
-        f"总费用: ${fees['total_fees']:.2f}",
+        f"FBA fees: ${fees['fba_fee']:.2f}" + 
+        (" (Estimate)" if fees['is_fba_estimated'] else " (from Keepa)"),
+        f"Commission ratio: {fees['referral_rate']*100:.1f}%",
+        f"Commission amount: ${fees['referral_fee']:.2f}",
+        f"total cost: ${fees['total_fees']:.2f}",
         f"",
-        f"产品尺寸:",
-        f"  长×宽×高: {fees['dimensions']['length']:.1f}×{fees['dimensions']['width']:.1f}×{fees['dimensions']['height']:.1f} cm",
-        f"  重量: {fees['dimensions']['weight']:.0f}g",
+        f"Product size:",
+        f"  Length×width×height: {fees['dimensions']['length']:.1f}×{fees['dimensions']['width']:.1f}×{fees['dimensions']['height']:.1f} cm",
+        f"  weight: {fees['dimensions']['weight']:.0f}g",
     ]
     
     return "\n".join(lines)
 
 
 if __name__ == "__main__":
-    # 测试
-    print("Keepa费用提取器")
+    # test
+    print("Keepa fee extractor")
     print("=" * 60)
     
-    # 模拟产品数据
+    # Simulated product data
     test_product = {
         'asin': 'B0TEST001',
         'packageLength': 20,
@@ -257,8 +257,8 @@ if __name__ == "__main__":
     
     price = 45.99
     
-    print(f"\n测试产品: {test_product['asin']}")
-    print(f"售价: ${price}")
+    print(f"\ntest products: {test_product['asin']}")
+    print(f"selling price: ${price}")
     print()
     
     summary = get_product_fees_summary(test_product, price)

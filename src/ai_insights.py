@@ -1,6 +1,6 @@
 """
-AI 深度洞察生成器
-基于数据模式生成商业洞察和战略建议
+AI Deep Insight Generator
+Generate business insights and strategic recommendations based on data patterns
 """
 
 import json
@@ -11,7 +11,7 @@ from datetime import datetime
 
 @dataclass
 class Insight:
-    """洞察项"""
+    """Insight items"""
     category: str  # 'opportunity', 'risk', 'strategy', 'tactical'
     title: str
     description: str
@@ -23,21 +23,21 @@ class Insight:
 
 class AIInsightsGenerator:
     """
-    AI 深度洞察生成器
+    AI Deep Insight Generator
     
-    功能:
-    1. 商业模式分析
-    2. 竞争优势识别
-    3. 风险预警
-    4. 战略建议
-    5. 执行方案
+    Function:
+    1. Business model analysis
+    2. Identification of competitive advantages
+    3. Risk warning
+    4. Strategic advice
+    5. Execution plan
     """
     
     def __init__(self):
         self.frameworks = self._load_frameworks()
     
     def _load_frameworks(self) -> Dict:
-        """加载分析框架"""
+        """Load analysis framework"""
         return {
             'porter_forces': {
                 'threat_of_new_entrants': 'High' if 'low_barrier' else 'Medium',
@@ -52,14 +52,14 @@ class AIInsightsGenerator:
     
     def generate(self, data: Dict, clear_analysis: Dict = None) -> Dict[str, Any]:
         """
-        生成完整的 AI 洞察报告
+        Generate a complete AI insights report
         
         Args:
-            data: 处理后的产品数据
-            clear_analysis: CLEAR 分析结果（可选）
+            data: Processed product data
+            clear_analysis: CLEAR analysis results (optional)
         
         Returns:
-            AI 洞察报告
+            AI Insights Report
         """
         return {
             'business_model_analysis': self._analyze_business_model(data),
@@ -80,13 +80,13 @@ class AIInsightsGenerator:
         }
     
     def _analyze_business_model(self, data: Dict) -> Dict:
-        """分析商业模式"""
+        """Analyze business model"""
         price = data.get('current_price', 0) or 0
         margin = data.get('estimated_margin', 0) or 0
         offers = data.get('current_offers', 0) or 0
         rank = data.get('current_rank', 999999) or 999999
         
-        # 判断商业模式
+        # Determine business model
         if margin > 40 and price > 50:
             model = 'Premium'
             characteristics = ['High margin', 'Low volume', 'Brand focus']
@@ -113,13 +113,13 @@ class AIInsightsGenerator:
         }
     
     def _analyze_positioning(self, data: Dict) -> Dict:
-        """分析竞争定位"""
+        """Analyze competitive positioning"""
         
-        # 构建定位地图坐标
+        # Build positioning map coordinates
         price_score = self._normalize_price(data.get('current_price', 0))
         quality_score = (data.get('current_rating', 0) or 0) / 5.0
         
-        # 确定象限
+        # Identify the quadrants
         if price_score > 0.5 and quality_score > 0.8:
             quadrant = 'Premium Leader'
             description = 'High price, high quality - commanding market respect'
@@ -143,19 +143,19 @@ class AIInsightsGenerator:
         }
     
     def _analyze_timing(self, data: Dict) -> Dict:
-        """分析时机"""
+        """Analysis time"""
         
         rank_trend = data.get('rank_trend', '')
         price_drops = data.get('price_drops_count', 0)
         lifecycle = data.get('lifecycle_stage', '')
         offers = data.get('current_offers', 0) or 0
         
-        # 时机评分
+        # timing score
         timing_score = 50
         
-        if '上升' in rank_trend:
+        if 'rise' in rank_trend:
             timing_score += 20
-        elif '下降' in rank_trend:
+        elif 'decline' in rank_trend:
             timing_score -= 20
         
         if price_drops > 20:
@@ -163,9 +163,9 @@ class AIInsightsGenerator:
         elif price_drops < 5:
             timing_score += 10
         
-        if '成长' in lifecycle:
+        if 'grow' in lifecycle:
             timing_score += 15
-        elif '衰退' in lifecycle:
+        elif 'recession' in lifecycle:
             timing_score -= 25
         
         if offers <= 3:
@@ -173,7 +173,7 @@ class AIInsightsGenerator:
         elif offers > 20:
             timing_score -= 10
         
-        # 窗口期判断
+        # Window period judgment
         if timing_score >= 70:
             window = 'Optimal'
             window_desc = 'Market conditions favorable - act quickly'
@@ -201,7 +201,7 @@ class AIInsightsGenerator:
         }
     
     def _analyze_profit_optimization(self, data: Dict) -> Dict:
-        """分析利润优化空间"""
+        """Analyze profit optimization space"""
         
         current_margin = data.get('estimated_margin', 0) or 0
         current_price = data.get('current_price', 0) or 0
@@ -209,7 +209,7 @@ class AIInsightsGenerator:
         
         optimizations = []
         
-        # 定价优化
+        # Pricing optimization
         if current_price < avg_price * 0.95:
             price_upside = avg_price * 1.05 - current_price
             new_margin = current_margin + (price_upside / current_price * 100) if current_price > 0 else current_margin
@@ -222,7 +222,7 @@ class AIInsightsGenerator:
                 'implementation': 'Increase by 3-5% every 2 weeks, monitor BSR'
             })
         
-        # 成本优化
+        # cost optimization
         if current_margin < 25:
             cost_reduction_needed = 25 - current_margin
             optimizations.append({
@@ -234,7 +234,7 @@ class AIInsightsGenerator:
                 'implementation': 'Negotiate with suppliers, explore alternative manufacturers'
             })
         
-        # 运营优化
+        # Operation optimization
         optimizations.append({
             'lever': 'Operational Efficiency',
             'action': 'Optimize inventory turnover and reduce storage fees',
@@ -253,11 +253,11 @@ class AIInsightsGenerator:
         }
     
     def _build_risk_matrix(self, data: Dict) -> Dict:
-        """构建风险矩阵"""
+        """Build a risk matrix"""
         
         risks = []
         
-        # 市场风险
+        # market risk
         if data.get('price_volatility', 0) > 30:
             risks.append({
                 'category': 'Market',
@@ -268,7 +268,7 @@ class AIInsightsGenerator:
                 'early_warning': 'Competitor drops price >15%'
             })
         
-        # 运营风险
+        # operational risk
         if data.get('out_of_stock_days', 0) > 5:
             risks.append({
                 'category': 'Operational',
@@ -279,7 +279,7 @@ class AIInsightsGenerator:
                 'early_warning': 'Supplier delivery delays >1 week'
             })
         
-        # 竞争风险
+        # Competing risks
         if data.get('is_amazon_selling', False):
             risks.append({
                 'category': 'Competitive',
@@ -290,7 +290,7 @@ class AIInsightsGenerator:
                 'early_warning': 'Amazon consistently wins Buy Box >70%'
             })
         
-        # 财务风险
+        # financial risk
         if (data.get('estimated_margin', 0) or 0) < 20:
             risks.append({
                 'category': 'Financial',
@@ -310,7 +310,7 @@ class AIInsightsGenerator:
         }
     
     def _generate_strategic_options(self, data: Dict) -> List[Dict]:
-        """生成战略选项"""
+        """Generate strategic options"""
         
         options = []
         
@@ -318,7 +318,7 @@ class AIInsightsGenerator:
         offers = data.get('current_offers', 0) or 0
         rank = data.get('current_rank', 999999) or 999999
         
-        # 选项 1: 快速进入
+        # Option 1: Quick entry
         if margin > 20 and offers <= 10:
             options.append({
                 'strategy': 'Fast Market Entry',
@@ -335,7 +335,7 @@ class AIInsightsGenerator:
                 'when_to_choose': 'When timing score >70 and margin >25%'
             })
         
-        # 选项 2: 差异化进入
+        # Option 2: Differentiated entry
         if offers > 10 or data.get('is_amazon_selling', False):
             options.append({
                 'strategy': 'Differentiated Entry',
@@ -352,8 +352,8 @@ class AIInsightsGenerator:
                 'when_to_choose': 'When facing strong competition'
             })
         
-        # 选项 3: 等待观察
-        if data.get('price_volatility', 0) > 35 or '下降' in data.get('rank_trend', ''):
+        # Option 3: Wait and see
+        if data.get('price_volatility', 0) > 35 or 'decline' in data.get('rank_trend', ''):
             options.append({
                 'strategy': 'Wait and Monitor',
                 'description': 'Observe market stabilization before entering',
@@ -369,7 +369,7 @@ class AIInsightsGenerator:
                 'when_to_choose': 'When market conditions are unstable'
             })
         
-        # 选项 4: 放弃
+        # Option 4: give up
         if margin < 15 and offers > 20:
             options.append({
                 'strategy': 'Pass and Pivot',
@@ -389,7 +389,7 @@ class AIInsightsGenerator:
         return options
     
     def _build_execution_roadmap(self, data: Dict) -> Dict:
-        """构建执行路线图"""
+        """Build an execution roadmap"""
         
         return {
             'phase_1_preparation': {
@@ -435,11 +435,11 @@ class AIInsightsGenerator:
         }
     
     def _identify_success_factors(self, data: Dict) -> List[Dict]:
-        """识别关键成功因素"""
+        """Identify critical success factors"""
         
         factors = []
         
-        # 产品质量
+        # product quality
         if (data.get('current_rating', 0) or 0) >= 4.5:
             factors.append({
                 'factor': 'Product Quality',
@@ -455,7 +455,7 @@ class AIInsightsGenerator:
                 'maintenance': 'Address review pain points, upgrade materials'
             })
         
-        # 价格竞争力
+        # price competitiveness
         if (data.get('current_price', 0) or 0) <= (data.get('avg_price', 0) or 999):
             factors.append({
                 'factor': 'Price Positioning',
@@ -464,8 +464,8 @@ class AIInsightsGenerator:
                 'maintenance': 'Monitor competitor pricing, maintain value perception'
             })
         
-        # 市场时机
-        if '上升' in data.get('rank_trend', ''):
+        # market timing
+        if 'rise' in data.get('rank_trend', ''):
             factors.append({
                 'factor': 'Market Timing',
                 'status': 'Favorable',
@@ -483,7 +483,7 @@ class AIInsightsGenerator:
         return factors
     
     def _identify_failure_modes(self, data: Dict) -> List[Dict]:
-        """识别失败模式"""
+        """Identify failure patterns"""
         
         failures = []
         
@@ -517,11 +517,11 @@ class AIInsightsGenerator:
         return failures
     
     def _generate_insights_list(self, data: Dict) -> List[Insight]:
-        """生成洞察列表"""
+        """Generate a list of insights"""
         
         insights = []
         
-        # 机会洞察
+        # Opportunity insights
         if (data.get('current_offers', 100) or 100) <= 5 and (data.get('estimated_margin', 0) or 0) > 25:
             insights.append(Insight(
                 category='opportunity',
@@ -533,7 +533,7 @@ class AIInsightsGenerator:
                 action_items=['Secure reliable supplier quickly', 'Enter market before competition', 'Build early review advantage']
             ))
         
-        # 风险洞察
+        # Risk Insights
         if data.get('price_volatility', 0) > 30:
             insights.append(Insight(
                 category='risk',
@@ -545,8 +545,8 @@ class AIInsightsGenerator:
                 action_items=['Monitor price daily', 'Set automated repricing rules', 'Maintain price flexibility']
             ))
         
-        # 战略洞察
-        if '上升' in data.get('rank_trend', ''):
+        # strategic insights
+        if 'rise' in data.get('rank_trend', ''):
             insights.append(Insight(
                 category='strategy',
                 title='Rising Demand Wave',
@@ -561,12 +561,12 @@ class AIInsightsGenerator:
     
     # Helper methods
     def _normalize_price(self, price: float) -> float:
-        """归一化价格"""
-        # 假设 $50 为参考点
+        """normalized price"""
+        # hypothesis $50 is the reference point
         return min(price / 50, 2.0) / 2.0
     
     def _calculate_model_fit(self, data: Dict, model: str) -> int:
-        """计算模式匹配度"""
+        """Calculate pattern matching"""
         score = 50
         
         if model == 'Premium':
@@ -583,7 +583,7 @@ class AIInsightsGenerator:
         return min(100, score)
     
     def _assess_model_transition(self, data: Dict, current_model: str) -> List[str]:
-        """评估模式转换可能性"""
+        """Evaluate mode switching possibilities"""
         transitions = []
         
         if current_model == 'Commodity' and (data.get('current_rating', 0) or 0) > 4.5:
@@ -595,12 +595,12 @@ class AIInsightsGenerator:
         return transitions
     
     def _calculate_competitive_distance(self, data: Dict) -> float:
-        """计算竞争距离"""
+        """Calculate competitive distance"""
         offers = data.get('current_offers', 0) or 0
         return max(0, 1 - (offers / 30))
     
     def _identify_white_space(self, data: Dict) -> List[str]:
-        """识别空白机会"""
+        """Identify white space opportunities"""
         spaces = []
         
         if (data.get('current_offers', 0) or 0) < 5:
@@ -612,22 +612,22 @@ class AIInsightsGenerator:
         return spaces
     
     def _suggest_entry_months(self, data: Dict) -> List[int]:
-        """建议进入月份"""
-        # 简化逻辑：避开 Q4（竞争激烈）
+        """It is recommended to enter the month"""
+        # Simplified logic: avoid Q4 (high competition)
         return [1, 2, 3, 4, 5]
     
     def _suggest_avoid_months(self, data: Dict) -> List[int]:
-        """建议避开月份"""
-        return [11, 12]  # Q4 竞争激烈
+        """It is recommended to avoid months"""
+        return [11, 12]  # Q4 Competition is fierce
     
     def _calculate_break_even(self, data: Dict) -> Dict:
-        """计算盈亏平衡"""
+        """Calculate break-even"""
         price = data.get('current_price', 0) or 0
         margin = data.get('estimated_margin', 0) or 0
         
         if margin > 0:
             daily_profit_per_unit = price * (margin / 100) / 30
-            fixed_costs = 500  # 假设固定成本
+            fixed_costs = 500  # Assuming fixed costs
             be_units = fixed_costs / (price * margin / 100) if margin > 0 else 9999
             
             return {
@@ -639,7 +639,7 @@ class AIInsightsGenerator:
         return {'error': 'Cannot calculate with zero/negative margin'}
     
     def _estimate_daily_sales(self, data: Dict) -> int:
-        """估算日销量"""
+        """Estimated daily sales"""
         rank = data.get('current_rank', 999999) or 999999
         if rank < 1000:
             return 50
@@ -652,18 +652,18 @@ class AIInsightsGenerator:
         return 2
     
     def _prioritize_risks(self, risks: List[Dict]) -> List[Dict]:
-        """风险优先级排序"""
+        """Risk prioritization"""
         priority_map = {'High': 3, 'Medium': 2, 'Low': 1}
         return sorted(risks, key=lambda x: priority_map.get(x.get('impact'), 0), reverse=True)
     
     def _assess_data_completeness(self, data: Dict) -> int:
-        """评估数据完整度"""
+        """Assess data completeness"""
         required = ['current_price', 'current_rank', 'current_rating', 'current_offers']
         present = sum(1 for field in required if data.get(field) is not None)
         return int(present / len(required) * 100)
     
     def generate_ai_report(self, ai_analysis: Dict, asin: str) -> str:
-        """生成 AI 洞察报告"""
+        """Generate AI insights report"""
         
         business = ai_analysis.get('business_model_analysis', {})
         positioning = ai_analysis.get('competitive_positioning', {})
@@ -673,46 +673,46 @@ class AIInsightsGenerator:
         options = ai_analysis.get('strategic_options', [])
         roadmap = ai_analysis.get('execution_roadmap', {})
         
-        report = f"""# 🤖 AI 深度洞察报告
+        report = f"""# 🤖 AI in-depth insight report
 
 **ASIN**: {asin}  
-**分析时间**: {datetime.now().strftime('%Y-%m-%d %H:%M')}  
-**AI 版本**: v1.0 | **数据完整度**: {ai_analysis.get('metadata', {}).get('data_completeness', 0)}%
+**Analysis time**: {datetime.now().strftime('%Y-%m-%d %H:%M')}  
+**AI version**: v1.0 | **Data integrity**: {ai_analysis.get('metadata', {}).get('data_completeness', 0)}%
 
 ---
 
-## 🎯 商业模式分析
+## 🎯 Business model analysis
 
-### 识别模式: {business.get('identified_model', 'Unknown')}
+### Identify patterns: {business.get('identified_model', 'Unknown')}
 
-**模式特征**:
+**pattern characteristics**:
 """
         
         for char in business.get('characteristics', []):
             report += f"- {char}\n"
         
         report += f"""
-**关键成功因素**: {business.get('key_success_factor', 'Unknown')}
+**critical success factors**: {business.get('key_success_factor', 'Unknown')}
 
-**模式匹配度**: {business.get('suitability_score', 0)}/100
+**pattern matching**: {business.get('suitability_score', 0)}/100
 
 """
         
         if business.get('model_transition_potential'):
-            report += "**模式演进可能**: " + ", ".join(business['model_transition_potential']) + "\n\n"
+            report += "**Model evolution is possible**: " + ", ".join(business['model_transition_potential']) + "\n\n"
         
         report += f"""---
 
-## 🗺️ 竞争定位
+## 🗺️ Competitive positioning
 
-### 定位象限: {positioning.get('positioning_quadrant', 'Unknown')}
+### positioning quadrant: {positioning.get('positioning_quadrant', 'Unknown')}
 
 {positioning.get('description', '')}
 
-**价格位置**: {positioning.get('price_position', 0):.0%}  
-**质量位置**: {positioning.get('quality_position', 0):.0%}
+**price position**: {positioning.get('price_position', 0):.0%}  
+**mass position**: {positioning.get('quality_position', 0):.0%}
 
-### 市场空白机会
+### Market gap opportunity
 """
         
         for space in positioning.get('white_space_opportunities', []):
@@ -722,48 +722,48 @@ class AIInsightsGenerator:
 
 ---
 
-## ⏰ 时机分析
+## ⏰ Timing analysis
 
-### 时机评分: {timing.get('timing_score', 0)}/100
+### timing score: {timing.get('timing_score', 0)}/100
 
-**市场窗口**: {timing.get('market_window', 'Unknown')}  
+**market window**: {timing.get('market_window', 'Unknown')}  
 {timing.get('window_description', '')}
 
-**紧急程度**: {timing.get('urgency_assessment', 'Unknown')}
+**Urgency**: {timing.get('urgency_assessment', 'Unknown')}
 
-**建议进入月份**: {timing.get('optimal_entry_months', [])}  
-**建议避开月份**: {timing.get('months_to_avoid', [])}
+**It is recommended to enter the month**: {timing.get('optimal_entry_months', [])}  
+**It is recommended to avoid months**: {timing.get('months_to_avoid', [])}
 
 ---
 
-## 💰 利润优化
+## 💰 Profit Optimization
 
-### 当前利润率: {profit.get('current_margin', 0):.1f}%
+### current profit margin: {profit.get('current_margin', 0):.1f}%
 
-**与目标差距**: {profit.get('margin_gap_to_target', 0):.1f}%
+**gap with target**: {profit.get('margin_gap_to_target', 0):.1f}%
 
-### 优化机会
+### Optimization opportunities
 
 """
         
         for opt in profit.get('optimization_opportunities', []):
             report += f"""
 **{opt.get('lever')}**
-- 行动: {opt.get('action')}
-- 潜在影响: {opt.get('potential_impact')}
-- 预计新利润率: {opt.get('new_margin_estimate')}
-- 置信度: {opt.get('confidence')}
-- 实施方案: {opt.get('implementation')}
+- action: {opt.get('action')}
+- potential impact: {opt.get('potential_impact')}
+- Estimated new profit margin: {opt.get('new_margin_estimate')}
+- Confidence: {opt.get('confidence')}
+- Implementation plan: {opt.get('implementation')}
 
 """
         
         report += f"""---
 
-## ⚠️ 风险矩阵
+## ⚠️Risk Matrix
 
-### 整体风险等级: {risks.get('overall_risk_level', 'Unknown')}
+### overall risk level: {risks.get('overall_risk_level', 'Unknown')}
 
-| 风险 | 类别 | 概率 | 影响 | 缓解措施 |
+| risk | Category | Probability | influence | Mitigation measures |
 |------|------|------|------|----------|
 """
         
@@ -774,33 +774,33 @@ class AIInsightsGenerator:
 
 ---
 
-## 🎲 战略选项
+## 🎲 Strategic options
 
 """
         
         for i, option in enumerate(options, 1):
             report += f"""
-### 选项 {i}: {option.get('strategy')}
+### Options {i}: {option.get('strategy')}
 
 {option.get('description')}
 
-- **投资水平**: {option.get('investment_level')}
-- **时间线**: {option.get('timeline')}
-- **成功概率**: {option.get('probability_of_success')}
-- **预期 ROI**: {option.get('expected_roi')}
+- **investment level**: {option.get('investment_level')}
+- **timeline**: {option.get('timeline')}
+- **Probability of success**: {option.get('probability_of_success')}
+- **Expected ROI**: {option.get('expected_roi')}
 
-**关键行动**:
+**key actions**:
 """
             for action in option.get('key_actions', []):
                 report += f"- {action}\n"
             
-            report += f"\n**何时选择**: {option.get('when_to_choose')}\n"
+            report += f"\n**When to choose**: {option.get('when_to_choose')}\n"
         
         report += f"""
 
 ---
 
-## 🗓️ 执行路线图
+## 🗓️ Execution Roadmap
 
 """
         
@@ -808,40 +808,40 @@ class AIInsightsGenerator:
             phase_name = phase.replace('_', ' ').title()
             report += f"""
 ### {phase_name}
-**周期**: {details.get('duration')}
+**cycle**: {details.get('duration')}
 
-**关键里程碑**:
+**key milestones**:
 """
             for milestone in details.get('key_milestones', []):
                 report += f"- [ ] {milestone}\n"
             
-            report += f"\n**决策门**: {details.get('decision_gate')}\n"
+            report += f"\n**decision gate**: {details.get('decision_gate')}\n"
         
         report += """
 
 ---
 
-## 🎯 总结建议
+## 🎯 Summary suggestions
 
-基于 AI 综合分析，建议：
+Based on AI comprehensive analysis, it is recommended:
 
 """
         
         if timing.get('timing_score', 0) >= 70 and risks.get('overall_risk_level') != 'High':
-            report += "✅ **建议进入** - 市场条件 favorable，风险可控\n\n"
-            report += "采取 **" + options[0]['strategy'] + "** 策略\n"
+            report += "✅ **Recommended to enter** - Market conditions are favorable and risks are controllable\n\n"
+            report += "take **" + options[0]['strategy'] + "** Strategy\n"
         elif timing.get('timing_score', 0) >= 50:
-            report += "⚠️ **谨慎进入** - 需要更充分的准备和差异化\n\n"
-            report += "采取 **" + (options[1]['strategy'] if len(options) > 1 else options[0]['strategy']) + "** 策略\n"
+            report += "⚠️ **Enter with caution** - Needs greater preparation and differentiation\n\n"
+            report += "take **" + (options[1]['strategy'] if len(options) > 1 else options[0]['strategy']) + "** Strategy\n"
         else:
-            report += "❌ **建议观望** - 当前时机不佳，等待更好的窗口\n"
+            report += "❌ **It is recommended to wait and see** - Bad timing right now, wait for a better window\n"
         
         report += """
 
 ---
 
-*本报告由 AI 深度分析引擎生成，结合 CLEAR 架构数据*  
-*建议结合人工判断做出最终决策*
+*This report is generated by the AI in-depth analysis engine and combined with CLEAR architecture data*  
+*It is recommended to use manual judgment to make the final decision*
 """
         
         return report

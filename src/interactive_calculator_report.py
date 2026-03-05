@@ -1,7 +1,7 @@
 """
-交互式精算师报告生成器
+Interactive Actuarial Report Generator
 ========================
-内置计算器，只需填入采购成本（RMB），自动计算完整报告
+Built-in calculator, just fill in the purchase cost (RMB) and automatically calculate the complete report
 """
 
 import json
@@ -11,25 +11,25 @@ from typing import Dict, List
 
 class InteractiveCalculatorReport:
     """
-    交互式报告生成器
+    Interactive report generator
     
-    特点：
-    - 内置计算器，只需填入采购成本（RMB）
-    - 自动计算头程运费（12RMB/kg）
-    - 实时汇率转换
-    - 即时更新利润分析
+    Features:
+    - Built-in calculator, just fill in the purchase cost (RMB)
+    - Automatically calculate first-way freight (12RMB/kg）
+    - Live exchange rate conversion
+    - Instantly updated profit analysis
     """
     
     def __init__(self):
-        # 默认参数
-        self.shipping_rate_rmb_per_kg = 12  # 船运价格：12RMB/kg
-        self.default_weight_kg = 0.5  # 默认产品重量0.5kg
-        self.exchange_rate = 7.2  # 汇率：1 USD = 7.2 RMB
-        self.tariff_rate = 0.15  # 关税率：15%
+        # Default parameters
+        self.shipping_rate_rmb_per_kg = 12  # Shipping price: 12RMB/kg
+        self.default_weight_kg = 0.5  # Default product weight 0.5kg
+        self.exchange_rate = 7.2  # Exchange rate: 1 USD = 7.2 RMB
+        self.tariff_rate = 0.15  # Tariff rate: 15%
         
     def generate(self, asin: str, products: List[Dict], analysis_data: Dict, 
                  output_path: str) -> str:
-        """生成交互式报告"""
+        """Generate interactive reports"""
         
         html = self._build_interactive_html(asin, products, analysis_data)
         
@@ -40,9 +40,9 @@ class InteractiveCalculatorReport:
     
     def _build_interactive_html(self, asin: str, products: List[Dict], 
                                 analysis_data: Dict) -> str:
-        """构建交互式HTML"""
+        """Build interactive HTML"""
         
-        # 准备变体数据JSON
+        # Prepare variant data JSON
         variants_json = json.dumps(analysis_data.get('variants', []), 
                                    ensure_ascii=False, default=str)
         
@@ -51,7 +51,7 @@ class InteractiveCalculatorReport:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>交互式精算师分析报告 | {asin}</title>
+    <title>Interactive Actuary Analysis Report | {asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         
@@ -459,29 +459,29 @@ class InteractiveCalculatorReport:
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>交互式精算师分析报告</h1>
-            <div class="subtitle">填入采购成本，即时计算完整利润分析</div>
+            <h1>Interactive Actuary Analysis Report</h1>
+            <div class="subtitle">Fill in the purchase cost and calculate the complete profit analysis instantly</div>
             <div class="subtitle" style="margin-top: 10px;">ASIN: {asin}</div>
         </header>
         
         <!-- Calculator Panel -->
         <div class="calculator-panel">
-            <div class="panel-title">成本计算器</div>
+            <div class="panel-title">cost calculator</div>
             
             <div class="input-grid">
                 <div class="input-group">
-                    <label>采购成本 (必填)</label>
+                    <label>Procurement cost (Required)</label>
                     <div class="input-wrapper">
                         <input type="number" id="procurementCost" 
-                               placeholder="例如: 35" 
+                               placeholder="For example: 35" 
                                oninput="calculateAll()">
                         <span class="unit">RMB</span>
                     </div>
-                    <div class="input-hint">供应商报价（人民币）</div>
+                    <div class="input-hint">Supplier's quotation (RMB)</div>
                 </div>
                 
                 <div class="input-group">
-                    <label>产品重量</label>
+                    <label>Product weight</label>
                     <div class="input-wrapper">
                         <input type="number" id="productWeight" 
                                value="{self.default_weight_kg}" 
@@ -489,22 +489,22 @@ class InteractiveCalculatorReport:
                                oninput="calculateAll()">
                         <span class="unit">kg</span>
                     </div>
-                    <div class="input-hint">用于计算头程运费</div>
+                    <div class="input-hint">Used to calculate first-way freight</div>
                 </div>
                 
                 <div class="input-group">
-                    <label>船运价格</label>
+                    <label>shipping price</label>
                     <div class="input-wrapper">
                         <input type="number" id="shippingRate" 
                                value="{self.shipping_rate_rmb_per_kg}" 
                                oninput="calculateAll()">
                         <span class="unit">RMB/kg</span>
                     </div>
-                    <div class="input-hint">默认12 RMB/kg</div>
+                    <div class="input-hint">Default 12 RMB/kg</div>
                 </div>
                 
                 <div class="input-group">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <div class="input-wrapper">
                         <input type="number" id="exchangeRate" 
                                value="{self.exchange_rate}" 
@@ -512,28 +512,28 @@ class InteractiveCalculatorReport:
                                oninput="calculateAll()">
                         <span class="unit">RMB/USD</span>
                     </div>
-                    <div class="input-hint">默认7.2</div>
+                    <div class="input-hint">Default 7.2</div>
                 </div>
             </div>
             
             <!-- Calculation Breakdown -->
             <div class="calc-breakdown">
-                <div class="breakdown-title">成本构成明细</div>
+                <div class="breakdown-title">Cost composition details</div>
                 <div class="breakdown-grid">
                     <div class="breakdown-item">
-                        <span class="breakdown-label">采购成本</span>
+                        <span class="breakdown-label">Procurement cost</span>
                         <span class="breakdown-value" id="displayProcurement">-</span>
                     </div>
                     <div class="breakdown-item">
-                        <span class="breakdown-label">头程运费</span>
+                        <span class="breakdown-label">First leg freight</span>
                         <span class="breakdown-value" id="displayShipping">-</span>
                     </div>
                     <div class="breakdown-item">
-                        <span class="breakdown-label">关税 (15%)</span>
+                        <span class="breakdown-label">tariff (15%)</span>
                         <span class="breakdown-value" id="displayTariff">-</span>
                     </div>
                     <div class="breakdown-item highlight">
-                        <span class="breakdown-label">总COGS</span>
+                        <span class="breakdown-label">Total COGS</span>
                         <span class="breakdown-value" id="displayTotalCOGS">-</span>
                     </div>
                 </div>
@@ -541,21 +541,21 @@ class InteractiveCalculatorReport:
             
             <!-- Formula Display -->
             <div class="formula-display">
-                <div class="formula-title">计算公式</div>
+                <div class="formula-title">Calculation formula</div>
                 <div class="formula">
-                    <span class="highlight">COGS (USD)</span> = [采购成本(RMB) + (重量(kg) × 船运价格(RMB/kg))] × 1.15(关税) ÷ 汇率<br>
-                    <span id="formulaExample" style="color: var(--text-muted);">等待输入...</span>
+                    <span class="highlight">COGS (USD)</span> = [Procurement cost(RMB) + (weight(kg) × Shipping price(RMB/kg))] × 1.15(tariff) ÷ exchange rate<br>
+                    <span id="formulaExample" style="color: var(--text-muted);">Waiting for input...</span>
                 </div>
             </div>
             
             <!-- Settings Summary -->
             <div class="settings-panel">
                 <div class="setting-item">
-                    <span class="setting-label">头程运费估算</span>
+                    <span class="setting-label">First leg freight estimate</span>
                     <span class="setting-value" id="settingShipping">{self.default_weight_kg}kg × {self.shipping_rate_rmb_per_kg}RMB = {self.default_weight_kg * self.shipping_rate_rmb_per_kg}RMB</span>
                 </div>
                 <div class="setting-item">
-                    <span class="setting-label">关税率</span>
+                    <span class="setting-label">tariff rate</span>
                     <span class="setting-value">15%</span>
                 </div>
                 <div class="setting-item">
@@ -563,7 +563,7 @@ class InteractiveCalculatorReport:
                     <span class="setting-value">15%</span>
                 </div>
                 <div class="setting-item">
-                    <span class="setting-label">亚马逊佣金</span>
+                    <span class="setting-label">Amazon commission</span>
                     <span class="setting-value">15%</span>
                 </div>
             </div>
@@ -571,17 +571,17 @@ class InteractiveCalculatorReport:
         
         <!-- Results Section -->
         <div class="results-section" id="resultsSection" style="display: none;">
-            <div class="section-title">变体利润分析</div>
+            <div class="section-title">Variant Profit Analysis</div>
             
             <div class="variant-grid" id="variantGrid">
-                <!-- 变体卡片将通过JavaScript动态生成 -->
+                <!-- Variation cards will be dynamically generated via JavaScript -->
             </div>
             
             <!-- Summary -->
             <div class="summary-card">
-                <div class="summary-label">预计月度总利润</div>
+                <div class="summary-label">Estimated monthly total profit</div>
                 <div class="summary-value" id="totalProfit">$0</div>
-                <div class="summary-hint">基于当前COGS计算</div>
+                <div class="summary-hint">Calculated based on current COGS</div>
             </div>
             
             <!-- Verdict -->
@@ -593,10 +593,10 @@ class InteractiveCalculatorReport:
     </div>
     
     <script>
-        // 变体数据
+        // variant data
         const variantsData = {variants_json};
         
-        // 计算所有
+        // Count all
         function calculateAll() {{
             const procurementRMB = parseFloat(document.getElementById('procurementCost').value) || 0;
             const weightKg = parseFloat(document.getElementById('productWeight').value) || {self.default_weight_kg};
@@ -608,34 +608,34 @@ class InteractiveCalculatorReport:
                 return;
             }}
             
-            // 计算成本
+            // Calculate cost
             const shippingRMB = weightKg * shippingRate;
             const subtotalRMB = procurementRMB + shippingRMB;
             const tariffRMB = subtotalRMB * 0.15;
             const totalRMB = subtotalRMB + tariffRMB;
             const cogsUSD = totalRMB / exchangeRate;
             
-            // 更新显示
+            // Update display
             document.getElementById('displayProcurement').textContent = procurementRMB.toFixed(2) + ' RMB';
             document.getElementById('displayShipping').textContent = shippingRMB.toFixed(2) + ' RMB (' + weightKg + 'kg × ' + shippingRate + 'RMB/kg)';
             document.getElementById('displayTariff').textContent = tariffRMB.toFixed(2) + ' RMB';
             document.getElementById('displayTotalCOGS').textContent = '$' + cogsUSD.toFixed(2) + ' USD';
             
-            // 更新公式示例
+            // Update formula example
             const formulaText = `COGS = [${{procurementRMB}} + (${{weightKg}} × ${{shippingRate}})] × 1.15 ÷ ${{exchangeRate}} = $${{cogsUSD.toFixed(2)}}`;
             document.getElementById('formulaExample').textContent = formulaText;
             
-            // 更新设置显示
+            // Update settings display
             document.getElementById('settingShipping').textContent = `${{weightKg}}kg × ${{shippingRate}}RMB = ${{shippingRMB.toFixed(0)}}RMB`;
             
-            // 计算并显示变体分析
+            // Calculate and display variant analysis
             calculateVariants(cogsUSD);
             
-            // 显示结果区域
+            // Show results area
             document.getElementById('resultsSection').style.display = 'block';
         }}
         
-        // 计算变体利润
+        // Calculate variant profit
         function calculateVariants(cogsUSD) {{
             const variantGrid = document.getElementById('variantGrid');
             variantGrid.innerHTML = '';
@@ -649,20 +649,20 @@ class InteractiveCalculatorReport:
                 const organicPct = variant.organic_pct || 0.65;
                 const adPct = variant.ad_pct || 0.35;
                 
-                // 计算成本
+                // Calculate cost
                 const fbaFee = 3.22;
                 const referralFee = price * 0.15;
                 const returnCost = price * 0.05 * 0.3;
                 const storageFee = 0.06;
                 const operatingCost = fbaFee + referralFee + returnCost + storageFee;
                 
-                // TACOS广告成本
+                // TACOS Advertising Cost
                 const monthlyRevenue = price * sales;
                 const monthlyAdBudget = monthlyRevenue * 0.15;
                 const monthlyAdOrders = sales * adPct;
                 const adCostPerUnit = monthlyAdOrders > 0 ? monthlyAdBudget / monthlyAdOrders : 0;
                 
-                // 利润计算
+                // Profit calculation
                 const organicProfit = price - cogsUSD - operatingCost;
                 const adProfit = organicProfit - adCostPerUnit;
                 const blendedProfit = organicProfit * organicPct + adProfit * adPct;
@@ -672,32 +672,32 @@ class InteractiveCalculatorReport:
                 totalProfit += monthlyProfit;
                 totalSales += sales;
                 
-                // 创建变体卡片
+                // Create variant cards
                 const card = document.createElement('div');
                 card.className = 'variant-card';
                 card.innerHTML = `
                     <div class="variant-header">
                         <div class="variant-info">
-                            <h3>${{variant.color || '颜色'}} - ${{variant.size || '尺寸'}}</h3>
+                            <h3>${{variant.color || 'color'}} - ${{variant.size || 'Size'}}</h3>
                             <div class="variant-asin">${{variant.asin}}</div>
                         </div>
                         <div class="variant-price">$${{price.toFixed(2)}}</div>
                     </div>
                     <div class="variant-metrics">
                         <div class="metric-box">
-                            <label>月销量</label>
+                            <label>monthly sales</label>
                             <div class="value">${{sales}}</div>
                         </div>
                         <div class="metric-box">
-                            <label>月利润</label>
+                            <label>monthly profit</label>
                             <div class="value ${{monthlyProfit > 0 ? 'positive' : 'negative'}}">$${{monthlyProfit.toFixed(0)}}</div>
                         </div>
                         <div class="metric-box">
-                            <label>利润率</label>
+                            <label>profit margin</label>
                             <div class="value ${{margin > 0 ? 'positive' : 'negative'}}">${{margin.toFixed(1)}}%</div>
                         </div>
                         <div class="metric-box">
-                            <label>COGS占比</label>
+                            <label>COGS proportion</label>
                             <div class="value">${{((cogsUSD/price)*100).toFixed(1)}}%</div>
                         </div>
                     </div>
@@ -705,36 +705,36 @@ class InteractiveCalculatorReport:
                 variantGrid.appendChild(card);
             }});
             
-            // 更新总利润
+            // Update total profit
             document.getElementById('totalProfit').textContent = '$' + totalProfit.toFixed(0);
             
-            // 更新决策
+            // update decision
             updateVerdict(totalProfit, totalSales);
         }}
         
-        // 更新决策
+        // update decision
         function updateVerdict(totalProfit, totalSales) {{
-            const avgMargin = (totalProfit / (totalSales * 30)) * 100; // 假设均价$30
+            const avgMargin = (totalProfit / (totalSales * 30)) * 100; // Assuming average price$30
             
             let verdict = 'avoid';
             let confidence = 60;
-            let text = '建议避免';
+            let text = 'Recommended to avoid';
             
             if (avgMargin > 15) {{
                 verdict = 'proceed';
                 confidence = 78;
-                text = '建议投资';
+                text = 'Recommended investment';
             }} else if (avgMargin > 5) {{
                 verdict = 'caution';
                 confidence = 65;
-                text = '谨慎考虑';
+                text = 'Consider carefully';
             }}
             
             const verdictText = document.getElementById('verdictText');
             verdictText.textContent = text;
             verdictText.className = 'verdict-text ' + verdict;
             
-            document.getElementById('verdictConfidence').textContent = '置信度 ' + confidence + '%';
+            document.getElementById('verdictConfidence').textContent = 'Confidence ' + confidence + '%';
         }}
     </script>
 </body>
@@ -743,10 +743,10 @@ class InteractiveCalculatorReport:
         return html
 
 
-# 便捷函数
+# Convenience function
 def generate_interactive_report(asin: str, products: List[Dict], 
                                 analysis_data: Dict, output_path: str = None) -> str:
-    """生成交互式报告"""
+    """Generate interactive reports"""
     if output_path is None:
         output_path = f'cache/reports/{asin}_INTERACTIVE_CALCULATOR.html'
     

@@ -1,7 +1,7 @@
 """
-亚马逊产品分析报告生成器
+Amazon Product Analysis Report Generator
 ============================
-基于Keepa 163指标生成专业HTML分析报告
+Generate professional HTML analysis reports based on Keepa 163 indicators
 """
 
 import json
@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 class ReportGenerator:
-    """生成基于Keepa数据的HTML分析报告"""
+    """Generate HTML analysis reports based on Keepa data"""
     
     def generate_report(self, 
                        asin: str,
@@ -19,18 +19,18 @@ class ReportGenerator:
                        factors: dict,
                        market_report: dict) -> str:
         """
-        生成完整HTML报告
+        Generate full HTML report
         
         Args:
-            asin: 产品ASIN
-            product_data: 163指标数据
-            factors: 6维度因子分析结果
-            market_report: 市场可行性报告
+            asin: Product ASIN
+            product_data: 163 indicator data
+            factors: 6-dimensional factor analysis results
+            market_report: Market Feasibility Report
             
         Returns:
-            HTML字符串
+            HTML string
         """
-        # 提取关键指标
+        # Extract key indicators
         title = product_data.get('Title', 'Unknown Product')
         brand = product_data.get('Brand', 'N/A')
         current_rank = self._safe_int(product_data.get('Sales Rank: Current', 0))
@@ -41,48 +41,48 @@ class ReportGenerator:
         offer_count = self._safe_int(product_data.get('New Offer Count: Current', 0))
         return_rate = product_data.get('Return Rate', 'N/A')
         
-        # 计算综合评分
+        # Calculate overall score
         factor_score = sum(f.score * f.weight for f in factors.values())
         market_score = market_report['market_feasibility']['overall_score']
         overall_score = (factor_score + market_score) / 2
         
-        # 决策建议
+        # Decision suggestions
         if overall_score >= 70:
-            decision = "🟢 推荐考虑"
+            decision = "🟢 Recommended to consider"
             decision_color = "#4ade80"
         elif overall_score >= 50:
-            decision = "🟡 谨慎评估"
+            decision = "🟡 Evaluate carefully"
             decision_color = "#fbbf24"
         else:
-            decision = "🔴 建议放弃"
+            decision = "🔴 It is recommended to give up"
             decision_color = "#f87171"
         
-        # 生成因子卡片
+        # Generate factor cards
         factor_cards = self._generate_factor_cards(factors)
         
-        # 生成指标表格
+        # Generate indicator table
         metrics_table = self._generate_metrics_table(product_data)
         
-        # 生成维度评分HTML
+        # Generate dimension scoring HTML
         dimension_scores_html = self._generate_dimension_scores(market_report)
         
-        # 当前日期
+        # current date
         current_date = datetime.now().strftime('%Y-%m-%d')
         
-        # 市场可行性颜色
+        # Market feasibility color
         market_score_val = market_report['market_feasibility']['overall_score']
         market_color = '#4ade80' if market_score_val >= 70 else '#fbbf24' if market_score_val >= 50 else '#f87171'
         
-        # 战略建议
-        recommendations = market_report.get('strategic_recommendations', ['建议结合具体运营数据进行进一步评估。'])
-        first_recommendation = recommendations[0] if recommendations else '建议结合具体运营数据进行进一步评估。'
+        # strategic advice
+        recommendations = market_report.get('strategic_recommendations', ['It is recommended to conduct further evaluation based on specific operational data.'])
+        first_recommendation = recommendations[0] if recommendations else 'It is recommended to conduct further evaluation based on specific operational data.'
         
         html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亚马逊产品分析报告 - {asin}</title>
+    <title>Amazon Product Analysis Report - {asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         
@@ -332,81 +332,81 @@ class ReportGenerator:
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 亚马逊产品分析报告</h1>
+            <h1>📊 Amazon Product Analysis Report</h1>
             <div class="meta">
                 <span>ASIN: {asin}</span>
-                <span>分析日期: {current_date}</span>
-                <span>数据源: Keepa API (163指标)</span>
+                <span>Analysis date: {current_date}</span>
+                <span>data source: Keepa API (163 indicators)</span>
             </div>
             <div class="product-title">{title}</div>
         </div>
         
         <div class="card">
-            <h2 class="card-title">📈 关键指标概览</h2>
+            <h2 class="card-title">📈 Overview of key indicators</h2>
             <div class="metrics-grid">
                 <div class="metric-box">
                     <div class="metric-value highlight-price">${new_price:.2f}</div>
-                    <div class="metric-label">当前价格</div>
+                    <div class="metric-label">current price</div>
                     <div class="metric-sub">New: Current</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value highlight-rank">{current_rank:,}</div>
-                    <div class="metric-label">销售排名</div>
+                    <div class="metric-label">sales ranking</div>
                     <div class="metric-sub">Sales Rank</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value">{monthly_sales}</div>
-                    <div class="metric-label">月销量</div>
+                    <div class="metric-label">monthly sales</div>
                     <div class="metric-sub">Bought in past month</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value">{review_rating:.1f}</div>
-                    <div class="metric-label">评分</div>
-                    <div class="metric-sub">{review_count:,} 评价</div>
+                    <div class="metric-label">score</div>
+                    <div class="metric-sub">{review_count:,} Evaluation</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value">{offer_count}</div>
-                    <div class="metric-label">卖家数</div>
+                    <div class="metric-label">Number of sellers</div>
                     <div class="metric-sub">New Offer Count</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value">{return_rate}</div>
-                    <div class="metric-label">退货率</div>
+                    <div class="metric-label">return rate</div>
                     <div class="metric-sub">Return Rate</div>
                 </div>
             </div>
         </div>
         
         <div class="card">
-            <h2 class="card-title">🔍 六维深度因子分析</h2>
+            <h2 class="card-title">🔍 Six-dimensional deep factor analysis</h2>
             <div class="factor-grid">
                 {factor_cards}
             </div>
         </div>
         
         <div class="card">
-            <h2 class="card-title">📊 市场可行性评估</h2>
+            <h2 class="card-title">📊 Market feasibility assessment</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 {dimension_scores_html}
             </div>
             <div style="margin-top: 25px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 1.1em;">综合可行性评分</span>
+                    <span style="font-size: 1.1em;">Overall feasibility score</span>
                     <span style="font-size: 2em; font-weight: 700; color: {market_color};">{market_score_val:.0f}/100</span>
                 </div>
                 <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 0.95em; line-height: 1.6;">
-                    <strong>分析结论:</strong> {market_report['market_feasibility']['recommendation']}
+                    <strong>Analysis conclusion:</strong> {market_report['market_feasibility']['recommendation']}
                 </div>
             </div>
         </div>
         
         <div class="card">
             <h2 class="card-title" style="cursor: pointer;" onclick="document.getElementById('metrics-detail').style.display = document.getElementById('metrics-detail').style.display === 'none' ? 'block' : 'none';">
-                📋 163指标详情 (点击展开/折叠)
+                📋 163 indicator details (Click to expand/fold)
             </h2>
             <div id="metrics-detail" style="display: none;">
                 <p style="color: #94a3b8; margin-bottom: 20px; font-size: 0.9em;">
-                    以下数据来自Keepa Product Viewer API。
+                    The following data comes from the Keepa Product Viewer API.
                 </p>
                 <div class="metrics-section">
                     <table class="metrics-table">
@@ -417,20 +417,20 @@ class ReportGenerator:
         </div>
         
         <div class="decision-box">
-            <div class="decision-label">基于数据分析的最终建议</div>
+            <div class="decision-label">Final recommendations based on data analysis</div>
             <div class="decision-value">{decision}</div>
             <div class="decision-reason">
-                综合评分: <strong>{overall_score:.0f}/100</strong><br>
-                六维因子得分: <strong>{factor_score:.0f}/100</strong> | 
-                市场可行性: <strong>{market_score:.0f}/100</strong><br><br>
+                Overall rating: <strong>{overall_score:.0f}/100</strong><br>
+                Six-Dimensional Factor Score: <strong>{factor_score:.0f}/100</strong> | 
+                market feasibility: <strong>{market_score:.0f}/100</strong><br><br>
                 {first_recommendation}
             </div>
         </div>
         
         <div class="footer">
-            <p>本报告基于 Keepa API 163个指标自动生成</p>
-            <p>分析引擎: 深度因子挖掘 + 市场可行性评估</p>
-            <p style="margin-top: 15px; opacity: 0.7;">© 亚马逊产品分析系统 | 数据驱动决策</p>
+            <p>This report is automatically generated based on 163 indicators of Keepa API</p>
+            <p>Analysis engine: Deep factor mining + Market feasibility assessment</p>
+            <p style="margin-top: 15px; opacity: 0.7;">© Amazon Product Analysis System | data driven decision making</p>
         </div>
     </div>
 </body>
@@ -439,14 +439,14 @@ class ReportGenerator:
         return html
     
     def _generate_factor_cards(self, factors: dict) -> str:
-        """生成因子评分卡片"""
+        """Generate factor score cards"""
         factor_names = {
-            'operational_health': '运营健康度',
-            'selection_quality': '选品质量',
-            'competition_landscape': '竞争态势',
-            'risk_warning': '风险预警',
-            'growth_potential': '增长潜力',
-            'operational_efficiency': '运营效率',
+            'operational_health': 'operational health',
+            'selection_quality': 'Selection quality',
+            'competition_landscape': 'competitive situation',
+            'risk_warning': 'Risk warning',
+            'growth_potential': 'growth potential',
+            'operational_efficiency': 'operational efficiency',
         }
         
         cards = []
@@ -466,8 +466,8 @@ class ReportGenerator:
                         <div class="progress-bar {score_class}" style="width: {f.score}%"></div>
                     </div>
                     <div class="factor-meta">
-                        <span>权重 {f.weight:.0%}</span>
-                        <span>置信度 {f.confidence:.0%}</span>
+                        <span>weight {f.weight:.0%}</span>
+                        <span>Confidence {f.confidence:.0%}</span>
                     </div>
                 </div>
             '''
@@ -476,54 +476,54 @@ class ReportGenerator:
         return '\n'.join(cards)
     
     def _generate_metrics_table(self, data: dict) -> str:
-        """生成指标详情表格"""
-        # 分类
+        """Generate indicator details table"""
+        # Classification
         categories = {
-            '基本信息': [],
-            '销售排名': [],
-            '价格数据': [],
-            '卖家竞争': [],
-            '评价数据': [],
-            '库存物流': [],
-            '产品属性': [],
-            '包装尺寸': [],
-            '内容资产': [],
-            '其他': [],
+            'Basic information': [],
+            'sales ranking': [],
+            'price data': [],
+            'Seller competition': [],
+            'Evaluation data': [],
+            'Inventory logistics': [],
+            'Product attributes': [],
+            'Packing size': [],
+            'content assets': [],
+            'Others': [],
         }
         
         for field in data.keys():
             if field in ['ASIN', 'Locale', 'Image Count', 'Title', 'Parent Title', 'Last Update'] or field == 'Image':
-                categories['基本信息'].append(field)
+                categories['Basic information'].append(field)
             elif 'Sales Rank' in field or 'Bought' in field or 'monthly sold' in field:
-                categories['销售排名'].append(field)
+                categories['sales ranking'].append(field)
             elif any(kw in field for kw in ['Current', 'avg.', '90 days', '180 days']) and 'Offer' not in field:
-                categories['价格数据'].append(field)
+                categories['price data'].append(field)
             elif 'Offer' in field or 'Buy Box' in field or 'Winner' in field:
-                categories['卖家竞争'].append(field)
+                categories['Seller competition'].append(field)
             elif 'Review' in field or 'Rating' in field or 'Return Rate' in field:
-                categories['评价数据'].append(field)
+                categories['Evaluation data'].append(field)
             elif 'Stock' in field or 'OOS' in field:
-                categories['库存物流'].append(field)
+                categories['Inventory logistics'].append(field)
             elif any(kw in field for kw in ['Brand', 'Manufacturer', 'Color', 'Size', 'Style']):
-                categories['产品属性'].append(field)
+                categories['Product attributes'].append(field)
             elif field.startswith('Package:') or field.startswith('Item:'):
-                categories['包装尺寸'].append(field)
+                categories['Packing size'].append(field)
             elif 'Video' in field or 'A+' in field:
-                categories['内容资产'].append(field)
+                categories['content assets'].append(field)
             else:
-                categories['其他'].append(field)
+                categories['Others'].append(field)
         
         rows = []
         for category, fields in categories.items():
             if not fields:
                 continue
             
-            rows.append(f'<tr><td colspan="2" class="category-header">📁 {category} ({len(fields)}个字段)</td></tr>')
+            rows.append(f'<tr><td colspan="2" class="category-header">📁 {category} ({len(fields)}fields)</td></tr>')
             
             for field in sorted(fields):
                 value = data.get(field)
                 
-                # 格式化值
+                # Format value
                 if value is None or (isinstance(value, float) and math.isnan(value)):
                     display = '<span class="na-value">N/A</span>'
                 elif isinstance(value, float):
@@ -534,7 +534,7 @@ class ReportGenerator:
                         str_val = str_val[:97] + '...'
                     display = str_val
                 
-                # 高亮
+                # Highlight
                 if field in ['New: Current'] and display != 'N/A':
                     display = f'<span class="highlight-price">{display}</span>'
                 elif field in ['Sales Rank: Current'] and display != 'N/A':
@@ -545,18 +545,18 @@ class ReportGenerator:
         return '\n'.join(rows)
     
     def _generate_dimension_scores(self, market_report: dict) -> str:
-        """生成维度评分HTML"""
+        """Generate dimension scoring HTML"""
         dimension_scores = market_report['market_feasibility'].get('dimension_scores', {})
         
         if not dimension_scores:
-            return '<div style="color: #94a3b8;">暂无详细维度评分</div>'
+            return '<div style="color: #94a3b8;">No detailed dimension score yet</div>'
         
-        # 维度名称映射
+        # Dimension name mapping
         dimension_names = {
-            'demand': '需求评估',
-            'competition': '竞争强度',
-            'price_stability': '价格稳定性',
-            'supply_chain': '供应链健康度',
+            'demand': 'needs assessment',
+            'competition': 'competitive intensity',
+            'price_stability': 'price stability',
+            'supply_chain': 'Supply chain health',
         }
         
         colors = {
@@ -581,7 +581,7 @@ class ReportGenerator:
         return '\n'.join(html_parts)
     
     def _safe_float(self, val) -> float:
-        """安全转float"""
+        """Convert safely to float"""
         try:
             if val is None or (isinstance(val, float) and val != val):
                 return 0.0
@@ -590,7 +590,7 @@ class ReportGenerator:
             return 0.0
     
     def _safe_int(self, val) -> int:
-        """安全转int"""
+        """safe transfer to int"""
         try:
             if val is None:
                 return 0
@@ -604,7 +604,7 @@ def generate_html_report(asin: str,
                         factors: dict,
                         market_report: dict,
                         output_path: str):
-    """便捷函数：生成HTML报告并保存"""
+    """Convenience function: generate HTML report and save it"""
     generator = ReportGenerator()
     html = generator.generate_report(asin, product_data, factors, market_report)
     

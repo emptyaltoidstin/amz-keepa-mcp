@@ -1,6 +1,6 @@
 """
-缓存管理器
-管理 Keepa API 响应缓存，节省 Token 消耗
+cache manager
+Manage Keepa API response cache to save Token consumption
 """
 
 import os

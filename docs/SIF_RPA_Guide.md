@@ -1,74 +1,74 @@
-# SIF 关键词工具 RPA 自动化指南
+# SIF Keyword Tool RPA Automation Guide
 
-> 基于 Chrome DevTools 抓取的官方页面结构整理
-> 最后更新: 2026-02-15
-> 适用版本: SIF 网页版 + 插件版
-
----
-
-## 目录
-
-1. [系统概述](#系统概述)
-2. [认证与登录](#认证与登录)
-3. [核心功能页面 URL](#核心功能页面-url)
-4. [RPA 操作指南](#rpa-操作指南)
-5. [数据提取规范](#数据提取规范)
-6. [反爬策略与限制](#反爬策略与限制)
-7. [自动化脚本示例](#自动化脚本示例)
-8. [常见问题](#常见问题)
+> Organizing the official page structure based on Chrome DevTools crawling
+> last updated: 2026-02-15
+> Applicable version: SIF web version + Plug-in version
 
 ---
 
-## 系统概述
+## Table of contents
 
-### 产品定位
+1. [System overview](#System overview)
+2. [Authentication and login](#Authentication and login)
+3. [Core function page URL](#Core function page-url)
+4. [RPA operations guide](#rpa-Operation guide)
+5. [Data extraction specifications](#Data extraction specifications)
+6. [Anti-crawling strategies and restrictions](#Anti-crawling strategies and restrictions)
+7. [Automation script example](#Automation script example)
+8. [FAQ](#FAQ)
 
-SIF 是专注于亚马逊站内流量分析的关键词运营工具，提供：
-- 销量查询（精确到变体/属性级别）
-- 流量结构分析
-- 关键词反查
-- 广告架构透视
-- 竞价查询
-- 时光机（历史数据追踪）
-- 拓词与相关性筛查
+---
 
-### 支持站点
+## System overview
 
-| 站点 | 代码 | 数据开始时间 |
+### Product positioning
+
+SIF is a keyword operation tool focused on Amazon site traffic analysis. It provides:
+- Sales query (accurate to variant/attribute level)
+- Traffic structure analysis
+- Keyword reverse search
+- Advertising Architecture Perspective
+- Bid inquiry
+- Time machine (historical data tracking)
+- Word expansion and correlation screening
+
+### support site
+
+| site | code | Data start time |
 |------|------|-------------|
-| 美国 | US | 2021-11 |
-| 德国 | DE | 2021-11 |
-| 英国 | UK | 2021-11 |
-| 日本 | JP | 2021-11 |
-| 加拿大 | CA | 2021-11 |
-| 法国 | FR | 2021-11 |
-| 西班牙 | ES | 2021-11 |
-| 意大利 | IT | 2021-11 |
-| 澳大利亚 | AU | 2025-03-23 |
-| 墨西哥 | MX | 2025-03-23 |
-| 巴西 | BR | 2025-03-23 |
-| 阿联酋 | AE | 2025-03-23 |
+| United States | US | 2021-11 |
+| germany | DE | 2021-11 |
+| United Kingdom | UK | 2021-11 |
+| Japan | JP | 2021-11 |
+| Canada | CA | 2021-11 |
+| france | FR | 2021-11 |
+| spain | ES | 2021-11 |
+| Italy | IT | 2021-11 |
+| Australia | AU | 2025-03-23 |
+| mexico | MX | 2025-03-23 |
+| Brazil | BR | 2025-03-23 |
+| United Arab Emirates | AE | 2025-03-23 |
 
-### 版本功能差异
+### Version function differences
 
-| 功能 | 基础版 | 旗舰版 |
+| Function | Basic version | Ultimate version |
 |------|--------|--------|
-| 查销量 | ✅ | ✅ |
-| 查流量结构 | ✅ | ✅ |
-| 反查流量词 | ✅ | ✅ |
-| 查竞价 | 2次/天 | 无限 |
-| 广告透视仪 | ❌ | ✅ |
-| 时光机 | ❌ | ✅ |
-| 多竞品拓词 | 50 ASIN/次 | 100 ASIN/次 |
-| 以词拓词历史 | 仅1个月 | 所有历史 |
-| 每日坑位监控 | 50词 | 200词 |
-| 小时排名监控 | 1元/周 | 1元/周 |
+| Check sales | ✅ | ✅ |
+| Check traffic structure | ✅ | ✅ |
+| Check traffic words | ✅ | ✅ |
+| Check bidding | 2 times/day | unlimited |
+| Advertising perspective | ❌ | ✅ |
+| time machine | ❌ | ✅ |
+| Extension of keywords for multiple competing products | 50 ASIN/Second-rate | 100 ASIN/Second-rate |
+| Expanding the history of words with words | only 1 month | All history |
+| Daily pit monitoring | 50 words | 200 words |
+| Hourly ranking monitoring | 1 yuan/week | 1 yuan/week |
 
 ---
 
-## 认证与登录
+## Authentication and login
 
-### 登录页面
+### Login page
 
 ```
 URL: https://www.sif.com/Login
@@ -76,64 +76,64 @@ Method: POST
 Content-Type: application/json
 ```
 
-### 登录流程
+### Login process
 
-**Step 1: 访问登录页**
+**Step 1: Visit login page**
 ```python
-# Selenium 示例
+# Selenium example
 driver.get("https://www.sif.com/Login")
 
-# 等待登录表单加载
+# Wait for the login form to load
 wait = WebDriverWait(driver, 10)
 wait.until(EC.presence_of_element_located((By.ID, "username")))
 ```
 
-**Step 2: 输入凭证**
+**Step 2: Enter credentials**
 ```python
-# 定位输入框
+# Position input box
 username_input = driver.find_element(By.ID, "username")
 password_input = driver.find_element(By.ID, "password")
 
-# 输入凭证
+# Enter credentials
 username_input.send_keys("your_username")
 password_input.send_keys("your_password")
 ```
 
-**Step 3: 点击登录**
+**Step 3: Click to log in**
 ```python
-# 方式1: 点击登录按钮
+# Way 1: Click the login button
 login_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
 login_button.click()
 
-# 方式2: 按回车键
+# Way 2: Press enter key
 password_input.send_keys(Keys.RETURN)
 ```
 
-**Step 4: 验证登录成功**
+**Step 4: Verify successful login**
 ```python
-# 检查是否跳转到功能页面或出现用户头像
+# Check whether it jumps to the function page or the user avatar appears
 try:
     wait.until(EC.presence_of_element_located((By.CLASS_NAME, "user-avatar")))
-    print("登录成功")
+    print("Login successful")
 except:
-    # 检查错误信息
+    # Check error messages
     error_msg = driver.find_elements(By.CLASS_NAME, "error-message")
     if error_msg:
-        print(f"登录失败: {error_msg[0].text}")
+        print(f"Login failed: {error_msg[0].text}")
 ```
 
-### Token/Session 管理
+### Token/Session management
 
 ```python
-# 获取 Cookie
+# Get Cookie
 cookies = driver.get_cookies()
 
-# 保存 Cookie 供后续使用
+# Save cookie for later use
 import json
 with open('sif_cookies.json', 'w') as f:
     json.dump(cookies, f)
 
-# 后续会话加载 Cookie
+# Load cookies for subsequent sessions
 driver.get("https://www.sif.com")
 with open('sif_cookies.json', 'r') as f:
     cookies = json.load(f)
@@ -142,30 +142,30 @@ for cookie in cookies:
 driver.refresh()
 ```
 
-### 登录状态检查
+### Login status check
 
 ```python
 def check_login_status(driver):
-    """检查当前是否已登录"""
+    """Check if you are currently logged in"""
     driver.get("https://www.sif.com")
     time.sleep(2)
     
-    # 检查是否存在登录按钮
-    login_buttons = driver.find_elements(By.LINK_TEXT, "登录")
+    # Check if login button exists
+    login_buttons = driver.find_elements(By.LINK_TEXT, "Login")
     
     if login_buttons:
         return False
     
-    # 检查是否存在用户相关元素
+    # Check if user related elements exist
     user_elements = driver.find_elements(By.CLASS_NAME, "user-menu")
     return len(user_elements) > 0
 ```
 
 ---
 
-## 核心功能页面 URL
+## Core function page URL
 
-### 1. 查销量 (Sales)
+### 1. Check sales (Sales)
 
 ```
 URL Pattern: https://www.sif.com/Sales?country={country}
@@ -173,299 +173,299 @@ Parameters:
   - country: US, UK, DE, JP, CA, FR, ES, IT, AU, MX, BR, AE
 ```
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 查询 | `input[placeholder*="ASIN"]` | 输入 ASIN，多 ASIN 用逗号分隔(最多10个) |
-| 关键词查询 | `input[placeholder*="关键词"]` | 输入关键词查询该词下产品销量 |
-| 站点切换 | `select[name="country"]` | 切换不同亚马逊站点 |
-| 查询按钮 | `button:contains("查询")` | 执行查询 |
-| 下载按钮 | `button:contains("下载")` | 下载 Excel/CSV 数据 |
+| ASIN lookup | `input[placeholder*="ASIN"]` | Enter the ASIN, separate multiple ASINs with commas(Up to 10) |
+| Keyword query | `input[placeholder*="keywords"]` | Enter a keyword to query the sales volume of products under this keyword |
+| Site switching | `select[name="country"]` | Switch between different Amazon sites |
+| Query button | `button:contains("Query")` | Execute query |
+| download button | `button:contains("Download")` | Download Excel/CSV data |
 
-**数据字段:**
+**data fields:**
 - ASIN
-- 变体属性 (Color/Size)
-- 月销量 (格式: 50+ 代表 50-99)
-- 月销量趋势
-- 评论数
-- 评分星级
-- 价格
+- Variant properties (Color/Size)
+- monthly sales (Format: 50+ Represents 50-99)
+- Monthly sales trends
+- Number of comments
+- Rating stars
+- price
 
 ---
 
-### 2. 查流量结构 (Traffic Structure)
+### 2. Check the traffic structure (Traffic Structure)
 
 ```
 URL Pattern: https://www.sif.com/TrafficStructure?country={country}&asin={asin}
 ```
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `input[name="asin"]` | 输入要查询的 ASIN |
-| 时间范围 | `select[name="timeRange"]` | 7天/30天/历史所有 |
-| 变体筛选 | `.variant-selector` | 选择特定变体 |
-| 属性筛选 | `.attribute-selector` | 按 Color/Size 筛选 |
-| 流量类型筛选 | `.traffic-type-filter` | 自然/广告/推荐/关联 |
+| ASIN input | `input[name="asin"]` | Enter the ASIN you want to query |
+| time range | `select[name="timeRange"]` | 7 days/30 days/All history |
+| Variant screening | `.variant-selector` | Select a specific variant |
+| Attribute filter | `.attribute-selector` | Press Color/Size filter |
+| Traffic type filtering | `.traffic-type-filter` | nature/advertise/recommend/association |
 
-**流量类型说明:**
-| 类型 | 说明 |
+**Traffic type description:**
+| Type | Description |
 |------|------|
-| 自然搜索 | Organic Search |
-| PPC广告 | Sponsored Products |
-| Deal活动 | Deals |
-| 搜索推荐 | Search Recommendation |
-| 关联流量 | Related Products |
+| organic search | Organic Search |
+| PPC advertising | Sponsored Products |
+| Deal activities | Deals |
+| Search recommendations | Search Recommendation |
+| associated traffic | Related Products |
 
 ---
 
-### 3. 反查流量词 (Reverse Search)
+### 3. Check traffic words (Reverse Search)
 
 ```
 URL Pattern: https://www.sif.com/ReverseSearch?country={country}&asin={asin}
 ```
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `input[name="asin"]` | 输入 ASIN |
-| 对比模式 | `button[data-mode="compare"]` | 多 ASIN 对比 |
-| 时间选择 | `select[name="dateRange"]` | 7天/30天/历史 |
-| 父体查询 | `checkbox[name="parentAsin"]` | 查询父体所有流量词 |
-| 筛选排序 | `.filter-panel select` | 按流量占比/排名筛选 |
+| ASIN input | `input[name="asin"]` | Enter ASIN |
+| contrast mode | `button[data-mode="compare"]` | Multiple ASIN comparison |
+| Time selection | `select[name="dateRange"]` | 7 days/30 days/history |
+| Parent query | `checkbox[name="parentAsin"]` | Query all traffic words of the parent body |
+| Filter sort | `.filter-panel select` | According to traffic proportion/Rank filter |
 
-**数据字段:**
-- 关键词
-- 流量占比 (%)
-- 搜索排名
-- 曝光位置
-- 自然/广告流量分布
-- 周搜索量 (ABA数据)
+**data fields:**
+- keywords
+- Traffic proportion (%)
+- search ranking
+- exposure position
+- nature/Ad traffic distribution
+- Weekly search volume (ABA data)
 
 ---
 
-### 4. 广告透视仪 (Ad Intelligence) ⭐ 旗舰版
+### 4. Advertising perspective (Ad Intelligence) ⭐ Ultimate version
 
 ```
 URL Pattern: https://www.sif.com/AdIntelligence?country={country}&asin={asin}
 ```
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `input[name="asin"]` | 输入竞品 ASIN |
-| 广告活动筛选 | `select[name="campaignId"]` | 筛选特定广告活动 |
-| 投放变体筛选 | `select[name="targetAsin"]` | 查看特定变体广告 |
-| 广告词搜索 | `input[name="keyword"]` | 搜索特定广告词 |
-| 时间范围 | `select[name="timeRange"]` | 选择分析时间段 |
+| ASIN input | `input[name="asin"]` | Enter the competing ASIN |
+| Campaign filters | `select[name="campaignId"]` | Filter specific campaigns |
+| Serving variant filtering | `select[name="targetAsin"]` | View specific variation ads |
+| Ad word search | `input[name="keyword"]` | Search for specific ad terms |
+| time range | `select[name="timeRange"]` | Select analysis time period |
 
-**核心数据:**
-- 广告活动 ID
-- 投放小组 (Ad Group)
-- 投放词和匹配模式
-- 流量占比
-- ASIN 定位广告数据
+**core data:**
+- Campaign ID
+- Delivery team (Ad Group)
+- Delivery terms and matching patterns
+- Traffic proportion
+- ASIN Targeted Advertising Data
 
 ---
 
-### 5. 查竞价 (Bid Query)
+### 5. Check the bidding (Bid Query)
 
 ```
 URL Pattern: https://www.sif.com/BidQuery?country={country}&keyword={keyword}
 ```
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| 关键词输入 | `input[name="keyword"]` | 单个/批量输入关键词 |
-| 广告类型切换 | `.ad-type-tabs` | SP / SB 切换 |
-| 匹配模式选择 | `select[name="matchType"]` | Exact/Phrase/Broad |
-| 时间选择 | `select[name="dateRange"]` | 周/月数据 |
-| 拓展查询 | `button[data-action="expand"]` | 拓展相关词竞价 |
-| 下载按钮 | `button:contains("下载")` | 导出竞价数据 |
+| Keyword input | `input[name="keyword"]` | single/Enter keywords in batches |
+| Advertising type switch | `.ad-type-tabs` | SP / SB switch |
+| Match mode selection | `select[name="matchType"]` | Exact/Phrase/Broad |
+| Time selection | `select[name="dateRange"]` | week/Monthly data |
+| Expand query | `button[data-action="expand"]` | Expand related word bidding |
+| download button | `button:contains("Download")` | Export bidding data |
 
-**数据字段:**
-- 关键词
-- 建议竞价 (SP/SB)
-- ABA Top3 集中度
-- Top3 产品主图
-- 搜索量趋势
+**data fields:**
+- keywords
+- Suggested bid (SP/SB)
+- ABA Top3 Concentration
+- Top3 product main picture
+- Search volume trends
 
 ---
 
-### 6. 时光机 (Time Machine) ⭐ 旗舰版
+### 6. Time machine (Time Machine) ⭐ Ultimate version
 
 ```
 URL Pattern: https://www.sif.com/TimeMachine?country={country}&asin={asin}
 ```
 
-**子功能:**
+**sub function:**
 
-#### 6.1 流量时光机
+#### 6.1 Traffic time machine
 ```
 URL: https://www.sif.com/TimeMachine/Traffic?asin={asin}
 ```
-- 竞品运营打法复现
-- 流量变化诊断
+- Competitive product operation tactics reappear
+- Flow change diagnosis
 
-#### 6.2 产品时光机
+#### 6.2 Product time machine
 ```
 URL: https://www.sif.com/TimeMachine/Product?asin={asin}
 ```
-- 季节性产品追踪
-- 节日产品趋势
+- Seasonal product tracking
+- Holiday Product Trends
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `input[name="asin"]` | 输入 ASIN |
-| 时间轴拖动 | `.timeline-slider` | 选择历史时间点 |
-| 对比模式 | `button[data-mode="compare"]` | 对比不同时间点 |
-| 变更筛选 | `.change-filter` | 筛选特定类型变更 |
+| ASIN input | `input[name="asin"]` | Enter ASIN |
+| Timeline drag | `.timeline-slider` | Select historical time point |
+| contrast mode | `button[data-mode="compare"]` | Compare different time points |
+| Change filter | `.change-filter` | Filter for specific types of changes |
 
-**追踪变更类型:**
-- Coupon 价格变化
-- Prime 价格变化
-- 主图变更
-- 标题变更
-- 广告活动变更
+**Track change types:**
+- Coupon price changes
+- Prime price changes
+- Main image change
+- Title changes
+- Campaign changes
 
 ---
 
-### 7. 拓词 & 筛查 (Keyword Expansion)
+### 7. Extension of words & screening (Keyword Expansion)
 
 ```
 URL Pattern: https://www.sif.com/KeywordExpansion
 ```
 
-**子功能 URL:**
+**Subfunction URL:**
 
-| 功能 | URL |
+| Function | URL |
 |------|-----|
-| 多竞品拓词 | `/KeywordExpansion/Competitor` |
-| 以词拓词 | `/KeywordExpansion/Keyword` |
-| 细分品类拓词 | `/KeywordExpansion/Category` |
-| 批量导入筛查 | `/KeywordExpansion/Import` |
+| Extension of keywords for multiple competing products | `/KeywordExpansion/Competitor` |
+| Expand words from words | `/KeywordExpansion/Keyword` |
+| Subcategory extensions | `/KeywordExpansion/Category` |
+| Batch import screening | `/KeywordExpansion/Import` |
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `textarea[name="asins"]` | 批量输入 ASIN(50-100个) |
-| 相关性阈值 | `input[name="relevanceThreshold"]` | 设置相关性判定标准 |
-| 开始拓词 | `button:contains("开始拓词")` | 执行拓词 |
-| 自动筛查 | `button:contains("自动筛查")` | AI 自动判断相关性 |
-| 手动标记 | `.relevance-toggle` | 手动标记相关/不相关 |
-| 保存词库 | `button:contains("保存到词库")` | 保存筛选结果 |
-| 高级筛选 | `.advanced-filter-panel` | 多条件组合筛选 |
+| ASIN input | `textarea[name="asins"]` | Enter ASINs in bulk(50-100) |
+| Relevance threshold | `input[name="relevanceThreshold"]` | Set relevance criteria |
+| Start expanding words | `button:contains("Start expanding words")` | Execute extension |
+| automatic screening | `button:contains("automatic screening")` | AI automatically determines relevance |
+| Manual marking | `.relevance-toggle` | Manual tagging related/Not relevant |
+| Save thesaurus | `button:contains("Save to vocabulary")` | Save filter results |
+| Advanced filtering | `.advanced-filter-panel` | Multiple condition combination filtering |
 
-**筛查指标:**
-- 相关性评分
-- 自然位前4占位率
-- 流量占比
-- 搜索量
+**screening index:**
+- Relevance score
+- The top 4 occupancy rates of natural bits
+- Traffic proportion
+- search volume
 
 ---
 
-### 8. 选词 (Keyword Selection)
+### 8. Word choice (Keyword Selection)
 
 ```
 URL Pattern: https://www.sif.com/KeywordSelection
 ```
 
-**子功能:**
+**sub function:**
 
-| 功能 | URL |
+| Function | URL |
 |------|-----|
-| 点击转化率 | `/KeywordSelection/ConversionRate` |
-| 竞品数量 | `/KeywordSelection/CompetitorCount` |
-| 流量位竞争格局 | `/KeywordSelection/CompetitionLandscape` |
+| click conversion rate | `/KeywordSelection/ConversionRate` |
+| Number of competing products | `/KeywordSelection/CompetitorCount` |
+| Traffic position competition landscape | `/KeywordSelection/CompetitionLandscape` |
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| 关键词输入 | `textarea[name="keywords"]` | 批量输入关键词 |
-| 时间范围 | `select[name="timeRange"]` | 选择数据时间范围 |
-| 转化率排序 | `.sort-by-conversion` | 按转化率排序 |
-| ACOS 筛选 | `input[name="acosRange"]` | 筛选 ACOS 范围 |
-| 下载报告 | `button:contains("下载")` | 导出分析数据 |
+| Keyword input | `textarea[name="keywords"]` | Enter keywords in batches |
+| time range | `select[name="timeRange"]` | Select data time range |
+| Conversion rate sorting | `.sort-by-conversion` | Sort by conversion rate |
+| ACOS filter | `input[name="acosRange"]` | Filter ACOS ranges |
+| Download report | `button:contains("Download")` | Export analysis data |
 
-**数据字段:**
-- 关键词转化率
+**data fields:**
+- keyword conversion rate
 - ACOS
-- CPA (广告订单平均推广成本)
-- 建议竞价
-- 竞品数量
-- 流量位竞争格局
+- CPA (Insertion order average promotion cost)
+- Suggested bid
+- Number of competing products
+- Traffic position competition landscape
 
 ---
 
-### 9. 查坑位/推排名 (Rank Tracking)
+### 9. Check the pit location/Push ranking (Rank Tracking)
 
 ```
 URL Pattern: https://www.sif.com/RankTracking
 ```
 
-**子功能:**
+**sub function:**
 
-| 功能 | URL | 说明 |
+| Function | URL | Description |
 |------|-----|------|
-| 坑位快照 | `/RankTracking/Snapshot` | 快速查看关键词排名 |
-| 每日排名 | `/RankTracking/Daily` | 每日排名监控 |
-| 小时排名 | `/RankTracking/Hourly` | 小时级排名监控(付费) |
+| Pit snapshot | `/RankTracking/Snapshot` | Quickly check keyword rankings |
+| Daily ranking | `/RankTracking/Daily` | Daily ranking monitoring |
+| Hourly ranking | `/RankTracking/Hourly` | Hourly ranking monitoring(Pay) |
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| ASIN 输入 | `input[name="asin"]` | 输入监控 ASIN |
-| 关键词输入 | `input[name="keyword"]` | 输入监控关键词 |
-| 添加监控 | `button:contains("添加监控")` | 添加监控词 |
-| 监控列表 | `.tracking-list` | 查看所有监控词 |
-| 排名趋势 | `.rank-chart` | 查看排名变化趋势 |
-| 删除监控 | `.remove-tracking-btn` | 删除监控词 |
+| ASIN input | `input[name="asin"]` | Enter monitoring ASIN |
+| Keyword input | `input[name="keyword"]` | Enter monitoring keywords |
+| Add monitoring | `button:contains("Add monitoring")` | Add monitoring words |
+| Monitoring list | `.tracking-list` | View all monitoring words |
+| Ranking trends | `.rank-chart` | View ranking trends |
+| Delete monitoring | `.remove-tracking-btn` | Delete monitoring words |
 
-**限制说明:**
-- 基础版: 50词/日
-- 旗舰版: 200词/日
-- 小时排名: 1元/周/词
+**Restrictions:**
+- Basic version: 50 words/day
+- Ultimate version: 200 words/day
+- Hourly ranking: 1 yuan/week/word
 
 ---
 
-### 10. 产品库/词库 (Library)
+### 10. Product library/vocabulary (Library)
 
 ```
 URL Pattern: https://www.sif.com/Library
 ```
 
-**子功能 URL:**
+**Subfunction URL:**
 
-| 功能 | URL |
+| Function | URL |
 |------|-----|
-| 产品库 | `/Library/Products` |
-| 词库 | `/Library/Keywords` |
+| Product library | `/Library/Products` |
+| vocabulary | `/Library/Keywords` |
 
-**页面操作:**
+**Page operations:**
 
-| 操作 | 元素定位 | 说明 |
+| Operation | element positioning | Description |
 |------|----------|------|
-| 添加产品 | `button:contains("添加产品")` | 添加关注产品 |
-| 添加词库 | `button:contains("新建词库")` | 创建新词库 |
-| 词频统计 | `.word-frequency-btn` | 查看词频统计 |
-| 批量操作 | `.batch-action-dropdown` | 批量导入/导出 |
+| Add product | `button:contains("Add product")` | Add products to follow |
+| Add vocabulary | `button:contains("Create new vocabulary")` | Create new vocabulary |
+| Word frequency statistics | `.word-frequency-btn` | View word frequency statistics |
+| Batch operations | `.batch-action-dropdown` | Batch import/Export |
 
 ---
 
-## RPA 操作指南
+## RPA operations guide
 
-### 通用等待策略
+### universal waiting strategy
 
 ```python
 from selenium.webdriver.support.ui import WebDriverWait
@@ -478,9 +478,9 @@ class SIFAutomation:
         self.wait = WebDriverWait(driver, 30)
     
     def wait_for_loading(self):
-        """等待加载完成"""
+        """Wait for loading to complete"""
         try:
-            # 等待加载动画消失
+            # Wait for loading animation to disappear
             self.wait.until(EC.invisibility_of_element_located(
                 (By.CSS_SELECTOR, ".loading-spinner, .ant-spin")
             ))
@@ -488,47 +488,47 @@ class SIFAutomation:
             pass
     
     def wait_for_data_table(self):
-        """等待数据表格加载"""
+        """Wait for the data table to load"""
         self.wait.until(EC.presence_of_element_located(
             (By.CSS_SELECTOR, ".data-table, .ant-table")
         ))
 ```
 
-### 查销量自动化
+### Automated sales check
 
 ```python
 def query_sales_by_asin(driver, asins, country="US"):
     """
-    通过 ASIN 查询销量
+    Check sales by ASIN
     
     Args:
         driver: Selenium WebDriver
-        asins: ASIN 列表 (最多10个)
-        country: 站点代码
+        asins: ASIN list (Up to 10)
+        country: site code
     """
-    # 构建 URL
-    asin_str = ",".join(asins[:10])  # 最多10个
+    # Build URL
+    asin_str = ",".join(asins[:10])  # Up to 10
     url = f"https://www.sif.com/Sales?country={country}&asin={asin_str}"
     driver.get(url)
     
-    # 等待加载
+    # waiting to load
     time.sleep(3)
     
-    # 检查是否需要点击查询按钮
-    query_buttons = driver.find_elements(By.XPATH, "//button[contains(text(),'查询')]")
+    # Check if you need to click the query button
+    query_buttons = driver.find_elements(By.XPATH, "//button[contains(text(),'Query')]")
     if query_buttons:
         query_buttons[0].click()
-        time.sleep(5)  # 等待数据加载
+        time.sleep(5)  # Wait for data to load
     
-    # 提取数据
+    # Extract data
     data = extract_sales_data(driver)
     return data
 
 def extract_sales_data(driver):
-    """提取销量数据"""
+    """Extract sales data"""
     data = []
     
-    # 定位表格行
+    # Locate table row
     rows = driver.find_elements(By.CSS_SELECTOR, ".data-table tbody tr")
     
     for row in rows:
@@ -545,39 +545,39 @@ def extract_sales_data(driver):
                 }
                 data.append(record)
         except Exception as e:
-            print(f"解析行数据出错: {e}")
+            print(f"Error parsing row data: {e}")
     
     return data
 ```
 
-### 反查流量词自动化
+### Automatically check traffic words
 
 ```python
 def reverse_search_keywords(driver, asin, country="US", date_range="30"):
     """
-    反查 ASIN 流量词
+    Check ASIN traffic words
     
     Args:
         driver: Selenium WebDriver
-        asin: 目标 ASIN
-        country: 站点
-        date_range: 时间范围 (7/30/all)
+        asin: Target ASIN
+        country: site
+        date_range: time range (7/30/all)
     """
     url = f"https://www.sif.com/ReverseSearch?country={country}&asin={asin}&range={date_range}"
     driver.get(url)
     
-    # 等待数据加载
+    # Wait for data to load
     time.sleep(5)
     
-    # 提取关键词数据
+    # Extract keyword data
     keywords = extract_keyword_data(driver)
     return keywords
 
 def extract_keyword_data(driver):
-    """提取关键词数据"""
+    """Extract keyword data"""
     keywords = []
     
-    # 滚动加载所有数据
+    # Scroll to load all data
     last_height = driver.execute_script("return document.body.scrollHeight")
     while True:
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -587,7 +587,7 @@ def extract_keyword_data(driver):
             break
         last_height = new_height
     
-    # 提取表格数据
+    # Extract table data
     rows = driver.find_elements(By.CSS_SELECTOR, ".keyword-table tbody tr")
     
     for row in rows:
@@ -610,36 +610,36 @@ def extract_keyword_data(driver):
     return keywords
 ```
 
-### 广告透视仪自动化 (旗舰版)
+### Advertising perspective machine automation (Ultimate version)
 
 ```python
 def analyze_ad_intelligence(driver, asin, country="US"):
     """
-    分析广告架构
+    Analyze advertising architecture
     
     Args:
         driver: Selenium WebDriver
-        asin: 竞品 ASIN
-        country: 站点
+        asin: Competitor ASIN
+        country: site
     """
     url = f"https://www.sif.com/AdIntelligence?country={country}&asin={asin}"
     driver.get(url)
     
-    time.sleep(5)  # 等待广告数据加载
+    time.sleep(5)  # Waiting for ad data to load
     
-    # 检查是否有权限
-    if "upgrade" in driver.page_source.lower() or "旗舰版" in driver.page_source:
-        print("需要旗舰版权限")
+    # Check if you have permission
+    if "upgrade" in driver.page_source.lower() or "Ultimate version" in driver.page_source:
+        print("Requires Ultimate Edition permissions")
         return None
     
     ad_data = extract_ad_data(driver)
     return ad_data
 
 def extract_ad_data(driver):
-    """提取广告数据"""
+    """Extract advertising data"""
     campaigns = []
     
-    # 获取广告活动列表
+    # Get a list of advertising campaigns
     campaign_elements = driver.find_elements(By.CSS_SELECTOR, ".campaign-item")
     
     for campaign in campaign_elements:
@@ -647,7 +647,7 @@ def extract_ad_data(driver):
             campaign_id = campaign.find_element(By.CSS_SELECTOR, ".campaign-id").text
             keywords = []
             
-            # 获取该活动下的关键词
+            # Get the keywords under this activity
             keyword_rows = campaign.find_elements(By.CSS_SELECTOR, ".keyword-row")
             for row in keyword_rows:
                 keyword_data = {
@@ -668,43 +668,43 @@ def extract_ad_data(driver):
     return campaigns
 ```
 
-### 查竞价自动化
+### Check bidding automation
 
 ```python
 def query_keyword_bids(driver, keywords, country="US", ad_type="SP"):
     """
-    批量查询关键词竞价
+    Query keyword bidding in batches
     
     Args:
         driver: Selenium WebDriver
-        keywords: 关键词列表
-        country: 站点
-        ad_type: SP 或 SB
+        keywords: keyword list
+        country: site
+        ad_type: SP or SB
     """
     url = f"https://www.sif.com/BidQuery?country={country}"
     driver.get(url)
     
-    # 输入关键词
+    # Enter keywords
     keyword_input = driver.find_element(By.CSS_SELECTOR, "textarea[name='keywords']")
     keyword_input.clear()
     keyword_input.send_keys("\n".join(keywords))
     
-    # 选择广告类型
+    # Select ad type
     ad_type_tab = driver.find_element(By.CSS_SELECTOR, f".ad-type-tab[data-type='{ad_type}']")
     ad_type_tab.click()
     
-    # 点击查询
-    query_btn = driver.find_element(By.XPATH, "//button[contains(text(),'查询')]")
+    # Click to query
+    query_btn = driver.find_element(By.XPATH, "//button[contains(text(),'Query')]")
     query_btn.click()
     
-    time.sleep(5)  # 等待结果
+    time.sleep(5)  # Waiting for results
     
-    # 提取竞价数据
+    # Extract bidding data
     bid_data = extract_bid_data(driver)
     return bid_data
 
 def extract_bid_data(driver):
-    """提取竞价数据"""
+    """Extract bidding data"""
     bids = []
     
     rows = driver.find_elements(By.CSS_SELECTOR, ".bid-table tbody tr")
@@ -726,69 +726,69 @@ def extract_bid_data(driver):
     return bids
 ```
 
-### 批量下载数据
+### Download data in batches
 
 ```python
 def download_data(driver, file_name=None):
     """
-    触发数据下载
+    Trigger data download
     
     Args:
         driver: Selenium WebDriver
-        file_name: 自定义文件名 (可选)
+        file_name: Custom file name (Optional)
     """
-    # 找到下载按钮
-    download_btn = driver.find_element(By.XPATH, "//button[contains(text(),'下载') or contains(@class, 'download')]")
+    # Find the download button
+    download_btn = driver.find_element(By.XPATH, "//button[contains(text(),'Download') or contains(@class, 'download')]")
     download_btn.click()
     
-    # 如果有文件名输入框
+    # If there is a file name input box
     try:
         filename_input = driver.find_element(By.CSS_SELECTOR, "input[name='filename']")
         if file_name:
             filename_input.clear()
             filename_input.send_keys(file_name)
         
-        # 确认下载
-        confirm_btn = driver.find_element(By.XPATH, "//button[contains(text(),'确认') or contains(text(),'下载')]")
+        # Confirm download
+        confirm_btn = driver.find_element(By.XPATH, "//button[contains(text(),'Confirm') or contains(text(),'Download')]")
         confirm_btn.click()
     except:
         pass
     
-    # 等待下载完成
+    # Wait for download to complete
     time.sleep(3)
 ```
 
 ---
 
-## 数据提取规范
+## Data extraction specifications
 
-### 数据字段映射表
+### Data field mapping table
 
-| 功能 | 字段名 | 数据类型 | 示例 |
+| Function | Field name | data type | Example |
 |------|--------|----------|------|
-| 查销量 | asin | string | B08N5WRWNW |
-| 查销量 | monthly_sales | string | 200+ |
-| 查销量 | variant_color | string | Black |
-| 查销量 | variant_size | string | Large |
-| 反查流量词 | keyword | string | wireless mouse |
-| 反查流量词 | traffic_share | string | 15.2% |
-| 反查流量词 | search_rank | int | 3 |
-| 反查流量词 | organic_share | string | 80% |
-| 反查流量词 | ad_share | string | 20% |
-| 广告透视仪 | campaign_id | string | 123456789 |
-| 广告透视仪 | ad_group | string | Group-A |
-| 广告透视仪 | match_type | string | EXACT |
-| 查竞价 | suggested_bid | float | 2.5 |
-| 查竞价 | bid_range | string | $1.5-$3.0 |
-| 查竞价 | acos | float | 15.2 |
+| Check sales | asin | string | B08N5WRWNW |
+| Check sales | monthly_sales | string | 200+ |
+| Check sales | variant_color | string | Black |
+| Check sales | variant_size | string | Large |
+| Check traffic words | keyword | string | wireless mouse |
+| Check traffic words | traffic_share | string | 15.2% |
+| Check traffic words | search_rank | int | 3 |
+| Check traffic words | organic_share | string | 80% |
+| Check traffic words | ad_share | string | 20% |
+| Advertising perspective | campaign_id | string | 123456789 |
+| Advertising perspective | ad_group | string | Group-A |
+| Advertising perspective | match_type | string | EXACT |
+| Check bidding | suggested_bid | float | 2.5 |
+| Check bidding | bid_range | string | $1.5-$3.0 |
+| Check bidding | acos | float | 15.2 |
 
-### 数据清洗规则
+### Data cleaning rules
 
 ```python
 def clean_sales_number(sales_str):
     """
-    清洗销量数据
-    50+ -> 50-99 范围
+    Clean sales data
+    50+ -> 50-99 range
     """
     if not sales_str or sales_str == "-":
         return None
@@ -817,7 +817,7 @@ def clean_sales_number(sales_str):
             return None
 
 def clean_percentage(pct_str):
-    """清洗百分比数据"""
+    """Clean percentage data"""
     if not pct_str:
         return None
     
@@ -830,20 +830,20 @@ def clean_percentage(pct_str):
 
 ---
 
-## 反爬策略与限制
+## Anti-crawling strategies and restrictions
 
-### 已知限制
+### Known limitations
 
-| 限制类型 | 限制值 | 说明 |
+| Restriction type | limit value | Description |
 |----------|--------|------|
-| 登录会话 | 需保持活跃 | 长时间不操作会自动退出 |
-| 查询频率 | 未公开 | 建议单 IP 每秒不超过 1 次查询 |
-| 多 ASIN 查询 | 10个/次 | 销量查询最多同时查 10 个 ASIN |
-| 拓词 ASIN 数 | 基础50/旗舰100 | 多竞品拓词限制 |
-| 坑位监控 | 基础50/旗舰200 | 每日监控词数限制 |
-| 竞价查询 | 基础2次/旗舰无限 | 查竞价功能限制 |
+| Login session | need to stay active | It will automatically exit if it is not used for a long time. |
+| Query frequency | Undisclosed | It is recommended that a single IP should not query more than 1 time per second |
+| Multiple ASIN lookup | 10/Second-rate | Sales query can query up to 10 ASINs at the same time |
+| Extension word ASIN number | Basic 50/Flagship 100 | Limitations on word expansion for multiple competing products |
+| Pit location monitoring | Basic 50/Flagship 200 | Daily monitoring word limit |
+| Bid inquiry | Basic 2 times/flagship unlimited | Check bidding function restrictions |
 
-### 反爬建议
+### Anti-climbing suggestions
 
 ```python
 import random
@@ -852,12 +852,12 @@ import time
 class AntiDetection:
     @staticmethod
     def random_delay(min_sec=2, max_sec=5):
-        """随机延迟"""
+        """random delay"""
         time.sleep(random.uniform(min_sec, max_sec))
     
     @staticmethod
     def human_like_scroll(driver):
-        """模拟人类滚动"""
+        """Simulate human scrolling"""
         for i in range(3):
             driver.execute_script(
                 f"window.scrollTo(0, {random.randint(300, 700) * (i+1)});"
@@ -866,31 +866,31 @@ class AntiDetection:
     
     @staticmethod
     def add_human_behavior(driver):
-        """添加人类行为特征"""
-        # 随机鼠标移动
+        """Add human behavior characteristics"""
+        # Random mouse movement
         actions = ActionChains(driver)
         actions.move_by_offset(random.randint(-50, 50), random.randint(-50, 50))
         actions.perform()
 ```
 
-### 安全建议
+### Security advice
 
-1. **使用企业版账号**: 企业版有更高并发和更宽松限制
-2. **控制查询频率**: 避免短时间内大量查询
-3. **使用代理 IP**: 多账号/多 IP 分散请求
-4. **监控账号状态**: 定期检查是否被限制
+1. **Use an enterprise account**: Enterprise Edition has higher concurrency and looser limits
+2. **Control query frequency**: Avoid large number of queries in a short period of time
+3. **Use proxy IP**: Multiple accounts/Multiple IP distributed requests
+4. **Monitor account status**: Check regularly to see if you are restricted
 
 ---
 
-## 自动化脚本示例
+## Automation script example
 
-### 完整工作流: 竞品分析
+### Complete workflow: Competitive product analysis
 
 ```python
 #!/usr/bin/env python3
 """
-SIF 竞品分析自动化脚本
-功能: 查询竞品销量 -> 反查流量词 -> 分析广告架构 -> 导出报告
+SIF competitive product analysis automation script
+Function: Check sales of competing products -> Check traffic words -> Analyze advertising architecture -> Export report
 """
 
 import json
@@ -911,45 +911,45 @@ class SIFCompetitorAnalyzer:
         self.results = {}
     
     def login(self):
-        """登录 SIF"""
+        """Login to SIF"""
         self.driver.get("https://www.sif.com/Login")
         
-        # 输入凭证
+        # Enter credentials
         self.driver.find_element(By.ID, "username").send_keys(self.username)
         self.driver.find_element(By.ID, "password").send_keys(self.password)
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
-        # 等待登录成功
+        # Wait for successful login
         time.sleep(3)
-        print("登录成功")
+        print("Login successful")
     
     def analyze_competitor(self, asin, country="US"):
         """
-        完整竞品分析流程
+        Complete competitive product analysis process
         
         Args:
-            asin: 竞品 ASIN
-            country: 站点
+            asin: Competitor ASIN
+            country: site
         """
-        print(f"开始分析 ASIN: {asin}")
+        print(f"Start analyzing ASINs: {asin}")
         
-        # Step 1: 查销量
-        print("  查询销量...")
+        # Step 1: Check sales
+        print("  Check sales...")
         sales_data = self._query_sales(asin, country)
         
-        # Step 2: 查流量结构
-        print("  查询流量结构...")
+        # Step 2: Check traffic structure
+        print("  Query traffic structure...")
         traffic_data = self._query_traffic_structure(asin, country)
         
-        # Step 3: 反查流量词
-        print("  反查流量词...")
+        # Step 3: Check traffic words
+        print("  Check traffic words...")
         keywords_data = self._reverse_search_keywords(asin, country)
         
-        # Step 4: 广告透视 (如果可用)
-        print("  分析广告架构...")
+        # Step 4: Advertising perspective (if available)
+        print("  Analyze advertising architecture...")
         ad_data = self._analyze_ad_intelligence(asin, country)
         
-        # 汇总结果
+        # Summary results
         self.results[asin] = {
             "timestamp": datetime.now().isoformat(),
             "country": country,
@@ -959,19 +959,19 @@ class SIFCompetitorAnalyzer:
             "ads": ad_data
         }
         
-        print(f"分析完成: {asin}")
+        print(f"Analysis completed: {asin}")
         return self.results[asin]
     
     def _query_sales(self, asin, country):
-        """查询销量"""
+        """Check sales"""
         url = f"https://www.sif.com/Sales?country={country}&asin={asin}"
         self.driver.get(url)
         time.sleep(4)
         
-        # 提取数据
+        # Extract data
         data = []
         rows = self.driver.find_elements(By.CSS_SELECTOR, ".data-table tbody tr")
-        for row in rows[:5]:  # 取前5个变体
+        for row in rows[:5]:  # Take the top 5 variations
             cells = row.find_elements(By.TAG_NAME, "td")
             if len(cells) >= 4:
                 data.append({
@@ -983,12 +983,12 @@ class SIFCompetitorAnalyzer:
         return data
     
     def _query_traffic_structure(self, asin, country):
-        """查询流量结构"""
+        """Query traffic structure"""
         url = f"https://www.sif.com/TrafficStructure?country={country}&asin={asin}"
         self.driver.get(url)
         time.sleep(4)
         
-        # 提取流量分布
+        # Extract traffic distribution
         traffic_types = {}
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".traffic-type-card")
         for elem in elements:
@@ -1002,12 +1002,12 @@ class SIFCompetitorAnalyzer:
         return traffic_types
     
     def _reverse_search_keywords(self, asin, country):
-        """反查流量词"""
+        """Check traffic words"""
         url = f"https://www.sif.com/ReverseSearch?country={country}&asin={asin}"
         self.driver.get(url)
         time.sleep(5)
         
-        # 提取前20个关键词
+        # Extract the first 20 keywords
         keywords = []
         rows = self.driver.find_elements(By.CSS_SELECTOR, ".keyword-table tbody tr")
         for row in rows[:20]:
@@ -1022,19 +1022,19 @@ class SIFCompetitorAnalyzer:
         return keywords
     
     def _analyze_ad_intelligence(self, asin, country):
-        """分析广告架构 (旗舰版)"""
+        """Analyze advertising architecture (Ultimate version)"""
         url = f"https://www.sif.com/AdIntelligence?country={country}&asin={asin}"
         self.driver.get(url)
         time.sleep(5)
         
-        # 检查是否旗舰版
+        # Check if it is Ultimate version
         if "upgrade" in self.driver.page_source.lower():
-            return {"error": "需要旗舰版权限"}
+            return {"error": "Requires Ultimate Edition permissions"}
         
-        # 提取广告活动
+        # Extract advertising campaigns
         campaigns = []
         elements = self.driver.find_elements(By.CSS_SELECTOR, ".campaign-item")
-        for elem in elements[:5]:  # 取前5个活动
+        for elem in elements[:5]:  # Take the top 5 activities
             try:
                 campaign_id = elem.find_element(By.CSS_SELECTOR, ".campaign-id").text
                 keywords_count = len(elem.find_elements(By.CSS_SELECTOR, ".keyword-row"))
@@ -1048,36 +1048,36 @@ class SIFCompetitorAnalyzer:
         return campaigns
     
     def export_report(self, filename=None):
-        """导出分析报告"""
+        """Export analysis report"""
         if not filename:
             filename = f"sif_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(self.results, f, ensure_ascii=False, indent=2)
         
-        print(f"报告已保存: {filename}")
+        print(f"Report saved: {filename}")
         return filename
     
     def close(self):
-        """关闭浏览器"""
+        """Close browser"""
         self.driver.quit()
 
 
-# 使用示例
+# Usage example
 if __name__ == "__main__":
     analyzer = SIFCompetitorAnalyzer("your_username", "your_password")
     
     try:
-        # 登录
+        # Login
         analyzer.login()
         
-        # 分析竞品
+        # Analyze competing products
         competitors = ["B08N5WRWNW", "B08N5M7S6K"]
         for asin in competitors:
             analyzer.analyze_competitor(asin, country="US")
-            time.sleep(5)  # 间隔避免频繁
+            time.sleep(5)  # Avoid frequent intervals
         
-        # 导出报告
+        # Export report
         analyzer.export_report("competitor_analysis.json")
         
     finally:
@@ -1086,12 +1086,12 @@ if __name__ == "__main__":
 
 ---
 
-## 常见问题
+## FAQ
 
-### Q1: 登录后页面跳转异常？
+### Q1: The page jumps abnormally after logging in?
 
 ```python
-# 处理登录后的重定向
+# Handling post-login redirects
 def handle_redirect(driver, target_url):
     max_wait = 10
     waited = 0
@@ -1101,20 +1101,20 @@ def handle_redirect(driver, target_url):
         time.sleep(1)
         waited += 1
     
-    # 手动导航到目标页面
+    # Manually navigate to target page
     driver.get(target_url)
     return True
 ```
 
-### Q2: 数据加载慢或超时？
+### Q2: Data loading slowly or timing out?
 
 ```python
-# 增加重试机制
+# Add retry mechanism
 def query_with_retry(driver, url, max_retries=3):
     for i in range(max_retries):
         try:
             driver.get(url)
-            # 等待特定元素
+            # wait for specific element
             WebDriverWait(driver, 30).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, ".data-loaded"))
             )
@@ -1126,18 +1126,18 @@ def query_with_retry(driver, url, max_retries=3):
     return False
 ```
 
-### Q3: 如何处理验证码？
+### Q3: How to deal with verification codes?
 
-目前 SIF 在登录时较少出现验证码，如遇到建议：
-1. 使用打码平台 API
-2. 人工介入处理
-3. 使用已登录的 Cookie 会话
+Currently, SIF rarely displays verification codes when logging in. If you encounter any suggestions:
+1. Use coding platform API
+2. Manual intervention processing
+3. Use logged in cookie session
 
-### Q4: 如何处理弹窗/提示？
+### Q4: How to deal with pop-ups/Tips?
 
 ```python
 def close_popup(driver):
-    """关闭可能的弹窗"""
+    """Close possible pop-ups"""
     popup_selectors = [
         ".modal-close",
         ".ant-modal-close",
@@ -1156,23 +1156,23 @@ def close_popup(driver):
 
 ---
 
-## 相关链接
+## Related links
 
-| 链接 | 说明 |
+| link | Description |
 |------|------|
-| https://www.sif.com | SIF 官网 |
-| https://www.sif.com/Login | 登录页 |
-| https://www.idcspy.com/sif.html | 功能介绍与定价 |
-| https://www.sif.com/extension | 浏览器插件下载 |
+| https://www.sif.com | SIF official website |
+| https://www.sif.com/Login | Login page |
+| https://www.idcspy.com/sif.html | Function introduction and pricing |
+| https://www.sif.com/extension | Browser plug-in download |
 
 ---
 
-## 更新日志
+## Change log
 
-| 日期 | 版本 | 更新内容 |
+| Date | version | Update content |
 |------|------|----------|
-| 2026-02-15 | v1.0 | 初始版本，覆盖12个站点主要功能 |
+| 2026-02-15 | v1.0 | Initial version, covering 12 main site functions |
 
 ---
 
-*本文档基于 SIF 网页版结构整理，实际使用时请根据页面更新调整选择器。*
+*This document is organized based on the structure of the SIF web version. Please adjust the selector according to page updates during actual use.*

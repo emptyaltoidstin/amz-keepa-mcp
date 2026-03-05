@@ -1,102 +1,102 @@
-# 统一报告修复完成 ✓
+# Unified reporting repair completed ✓
 
-## 问题
-之前的统一报告缺失了销量、BSR、评分、评论等关键 Keepa 指标。
+## question
+The previous unified report was missing key Keepa metrics such as sales, BSR, ratings, and comments.
 
-## 解决方案
-创建了增强版报告生成器 `unified_report_v2.py`
+## solution
+Created enhanced report generator `unified_report_v2.py`
 
-## 修复内容
+## Fix content
 
-### 1. 新增完整指标展示
+### 1. Added complete indicator display
 
-**变体分析表现在包含:**
-- ✅ 变体名称 + ASIN
-- ✅ 重量 (g)
-- ✅ 价格 ($)
-- ✅ **月销量** (Keepa `boughtInPastMonth`)
+**The variant analysis table now contains:**
+- ✅ Variant name + ASIN
+- ✅ Weight (g)
+- ✅ Price ($)
+- ✅ **monthly sales** (Keepa `boughtInPastMonth`)
 - ✅ **BSR** (Keepa `salesRank`)
-- ✅ **评分** (Keepa `stars`)
-- ✅ **评论数** (Keepa `reviewCount`)
-- ✅ **退货率** (基于类目估算)
-- ✅ **FBA费用** (基于尺寸重量计算)
-- ✅ **佣金比例** (基于类目: Electronics 8%)
-- ✅ **COGS** (填入采购价后计算)
-- ✅ **利润** (填入采购价后计算)
+- ✅ **score** (Keepa `stars`)
+- ✅ **Number of comments** (Keepa `reviewCount`)
+- ✅ **return rate** (Category-based estimation)
+- ✅ **FBA fees** (Calculated based on dimensional weight)
+- ✅ **Commission ratio** (Based on category: Electronics 8%)
+- ✅ **COGS** (Calculate after filling in the purchase price)
+- ✅ **profit** (Calculate after filling in the purchase price)
 
-### 2. 新增产品信息面板
+### 2. Added new product information panel
 
-**顶部信息栏显示:**
-- 产品标题
-- 品牌
-- 类目
-- 总变体数
-- 月均总销量
-- 总评论数
-- 平均售价
-- 平均评分
-- 包装重量
+**The top information bar displays:**
+- product title
+- brand
+- Category
+- Total number of variants
+- Average monthly total sales
+- Total comments
+- average selling price
+- average rating
+- Packing weight
 
-### 3. 报告结构
+### 3. Report structure
 
 ```
-统一精算师报告 v2
-├── 头部: 产品信息 (品牌/类目/总销量/评论/评分)
-├── 计算器: 交互式成本计算
-├── 仪表板: 汇总指标 (利润/销量/利润率/ROI)
-├── 建议: 投资决策 (GO/谨慎/避免)
-├── 变体表: 完整Keepa指标 (12列)
-├── 帕累托: 80/20核心变体分析
-├── 风险: 风险评估列表
-└── 行动: 30-60-90天行动计划
+Unified Actuarial Report v2
+├── Head: product information (brand/Category/total sales/Comment/score)
+├── Calculator: Interactive costing
+├── Dashboard: Summary indicators (profit/Sales volume/profit margin/ROI)
+├── Suggestions: investment decision (GO/cautious/avoid)
+├── Variation table: Complete Keepa Indicators (12 columns)
+├── Pareto: 80/20 core variant analysis
+├── Risk: Risk assessment list
+└── Action: 30-60-90 day action plan
 ```
 
-## 使用方式
+## Usage
 
 ```bash
 python generate_report.py B0F6B5R47Q
 ```
 
-## 输出示例
+## Output example
 
 ```
-✅ 统一精算师报告 v2 生成完成!
+✅ The unified actuary report v2 is generated!
 
-📊 分析摘要:
-   • 父ASIN: B0F6B5R47Q
-   • 变体数量: 9
+📊 Analysis summary:
+   • Parent ASIN: B0F6B5R47Q
+   • Number of variants: 9
 
-📁 生成的报告:
+📁 Generated reports:
    cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
 
-📋 报告包含:
-   ✅ 产品信息 (品牌/类目/总销量/评论数/评分)
-   ✅ 交互式成本计算器 (填入1688采购价即计算)
-   ✅ 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)
-   ✅ 帕累托分析 (80/20核心变体识别)
-   ✅ 风险评估
-   ✅ 投资建议与行动计划
+📋 Report contains:
+   ✅ Product information (brand/Category/total sales/Number of comments/score)
+   ✅Interactive cost calculator (Fill in the 1688 purchase price and it will be calculated.)
+   ✅ Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)
+   ✅ Pareto analysis (80/20 core variant identification)
+   ✅Risk assessment
+   ✅ Investment advice and action plan
 ```
 
-## 更新文件
+## update file
 
-- `src/unified_report_v2.py` - 新的增强版报告生成器
-- `generate_report.py` - 更新使用 v2 版本
+- `src/unified_report_v2.py` - New enhanced report generator
+- `generate_report.py` - Updated to use v2 version
 
-## 验证结果
+## Verification results
 
 ```
-📊 报告内容检查:
+📊 Report content check:
    ✅ BSR
-   ✅ 评分
-   ✅ 评论
-   ✅ 退货率
-   ✅ FBA费
-   ✅ 佣金
-   ✅ 月销量
-   ✅ 帕累托
+   ✅ Rating
+   ✅ Comments
+   ✅ Return rate
+   ✅ FBA fee
+   ✅ Commission
+   ✅Monthly sales
+   ✅ Pareto
 ```
 
-## 下一步
+## Next step
 
-运行 `python generate_report.py <ASIN>` 即可获得包含完整 Keepa 指标的统一报告！
+run `python generate_report.py <ASIN>` Get unified reporting with complete Keepa metrics!

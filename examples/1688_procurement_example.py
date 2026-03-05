@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
-1688 以图搜图采购价格示例
+1688 Example of purchasing price by searching pictures
 ==========================
-演示如何使用1688 API自动获取采购价格
+Demonstrate how to use 1688 API to automatically obtain purchase prices
 
-前置条件:
-1. 安装依赖: pip install -r requirements.txt
-2. 设置环境变量: export TMAPI_TOKEN=your_token
-3. 或在 .env 文件中配置
+Preconditions:
+1. Install dependencies: pip install -r requirements.txt
+2. Set environment variables: export TMAPI_TOKEN=your_token
+3. Or configure in .env file
 
-获取TMAPI Token:
-- 访问 https://tmapi.top
-- 注册账号
-- 创建应用获取 API Token
+Get TMAPI Token:
+- access https://tmapi.top
+- Register an account
+- Create an application to obtain API Token
 """
 
 import os
 import sys
 
-# 添加src到路径
+# Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from procurement_analyzer import (
@@ -28,23 +28,23 @@ from procurement_analyzer import (
 
 
 def example_1_basic_search():
-    """示例1: 基本采购价格搜索"""
+    """Example 1: Basic purchase price search"""
     print("\n" + "="*80)
-    print("示例1: 基本采购价格搜索")
+    print("Example 1: Basic purchase price search")
     print("="*80)
     
-    # 检查环境变量
+    # Check environment variables
     tmapi_token = os.getenv("TMAPI_TOKEN")
     if not tmapi_token:
-        print("\n⚠️  请先设置 TMAPI_TOKEN 环境变量")
+        print("\n⚠️ Please set up TMAPI first_TOKEN environment variable")
         print("   export TMAPI_TOKEN=your_token_here")
-        print("\n   获取Token: https://tmapi.top")
+        print("\n Get Token: https://tmapi.top")
         return
     
-    # 创建分析器
+    # Create analyzer
     analyzer = SmartProcurementAnalyzer.from_env()
     
-    # 模拟Keepa产品数据
+    # Simulate Keepa product data
     test_product = {
         "asin": "B0EXAMPLE1",
         "title": "Wireless Bluetooth Headphones",
@@ -52,7 +52,7 @@ def example_1_basic_search():
         "packageLength": 20,
         "packageWidth": 15,
         "packageHeight": 8,
-        "imagesCSV": "41ZulE5Q6OL,51Q3+gP8+WL",  # 模拟图片ID
+        "imagesCSV": "41ZulE5Q6OL,51Q3+gP8+WL",  # Simulate picture ID
         "data": {
             "images": [
                 "https://m.media-amazon.com/images/I/41ZulE5Q6OL._AC_SL1000_.jpg"
@@ -60,57 +60,57 @@ def example_1_basic_search():
         }
     }
     
-    print("\n📦 测试产品:")
+    print("\n📦 Test product:")
     print(f"   ASIN: {test_product['asin']}")
-    print(f"   重量: {test_product['packageWeight']}g")
-    print(f"   图片: {test_product['data']['images'][0]}")
+    print(f"   weight: {test_product['packageWeight']}g")
+    print(f"   pictures: {test_product['data']['images'][0]}")
     
-    print("\n🔍 搜索1688采购价格...")
+    print("\n🔍 Search 1688 purchase price...")
     result = analyzer.analyze_product(test_product, target_moq=50)
     
-    print("\n📊 搜索结果:")
-    print(f"   找到价格: {'✅ 是' if result.found else '❌ 否'}")
+    print("\n📊 search results:")
+    print(f"   find price: {'✅ Yes' if result.found else '❌ No'}")
     
     if result.found:
-        print(f"   采购价格: ¥{result.price_rmb:.2f}")
+        print(f"   purchase price: ¥{result.price_rmb:.2f}")
         print(f"   MOQ: {result.moq}")
-        print(f"   供应商: {result.supplier}")
-        print(f"   匹配度: {result.match_score:.2%}")
-        print(f"   置信度: {result.confidence}")
-        print(f"   头程运费: ¥{result.shipping_cost_rmb:.2f}")
-        print(f"   总COGS: ${result.total_cogs_usd:.2f}")
-        print(f"   1688链接: {result.source_url}")
+        print(f"   supplier: {result.supplier}")
+        print(f"   Matching degree: {result.match_score:.2%}")
+        print(f"   Confidence: {result.confidence}")
+        print(f"   First leg freight: ¥{result.shipping_cost_rmb:.2f}")
+        print(f"   Total COGS: ${result.total_cogs_usd:.2f}")
+        print(f"   1688 link: {result.source_url}")
     else:
-        print(f"   备注: {result.note}")
+        print(f"   Remarks: {result.note}")
 
 
 def example_2_full_report():
-    """示例2: 生成完整的自动采购价格报告"""
+    """Example 2: Generate complete automated purchase price reports"""
     print("\n" + "="*80)
-    print("示例2: 生成完整自动采购价格报告")
+    print("Example 2: Generate complete automated purchase price reports")
     print("="*80)
     
-    # 检查环境变量
+    # Check environment variables
     tmapi_token = os.getenv("TMAPI_TOKEN")
     keepa_key = os.getenv("KEEPA_KEY")
     
     if not tmapi_token or not keepa_key:
-        print("\n⚠️  请设置环境变量:")
+        print("\n⚠️ Please set environment variables:")
         if not keepa_key:
             print("   export KEEPA_KEY=your_keepa_key")
         if not tmapi_token:
             print("   export TMAPI_TOKEN=your_tmapi_token")
         return
     
-    # 测试ASIN
-    test_asin = "B0F6B5R47Q"  # 请替换为实际的ASIN
+    # Test ASIN
+    test_asin = "B0F6B5R47Q"  # Please replace with actual ASIN
     
-    print(f"\n🚀 为 ASIN {test_asin} 生成自动采购价格报告...")
-    print("\n这将自动:")
-    print("   1. 从Keepa获取产品数据")
-    print("   2. 从1688搜索采购价格")
-    print("   3. 计算完整成本")
-    print("   4. 生成精算师报告")
+    print(f"\n🚀 is ASIN {test_asin} Generate automatic purchase price reports...")
+    print("\nThis will automatically:")
+    print("   1. Get product data from Keepa")
+    print("   2. Search purchase price from 1688")
+    print("   3. Calculate the full cost")
+    print("   4. Generate actuary report")
     
     try:
         report_path, analyses = generate_auto_procurement_report(
@@ -118,29 +118,29 @@ def example_2_full_report():
             target_moq=100
         )
         
-        print(f"\n✅ 报告已生成: {report_path}")
+        print(f"\n✅ Report generated: {report_path}")
         
-        # 打印采购分析摘要
-        print("\n💰 采购价格摘要:")
+        # Print Procurement Analysis Summary
+        print("\n💰 Purchase Price Summary:")
         for asin, analysis in analyses.items():
             if analysis.found:
                 print(f"   {asin}: ¥{analysis.price_rmb:.2f} (MOQ:{analysis.moq})")
             else:
-                print(f"   {asin}: 未找到 - {analysis.note}")
+                print(f"   {asin}: not found - {analysis.note}")
         
     except Exception as e:
-        print(f"\n❌ 错误: {e}")
+        print(f"\n❌ error: {e}")
 
 
 def example_3_manual_input():
-    """示例3: 手动输入采购价格（无API时）"""
+    """Example 3: Manually enter purchase price (without API)"""
     print("\n" + "="*80)
-    print("示例3: 手动输入采购价格")
+    print("Example 3: Manually enter purchase price")
     print("="*80)
     
-    print("\n📝 在没有1688 API时，您可以手动输入采购价格:")
+    print("\n📝 When there is no 1688 API, you can manually enter the purchase price:")
     
-    # 创建不带API的分析器
+    # Create analyzer without API
     analyzer = SmartProcurementAnalyzer(tmapi_token=None)
     
     test_product = {
@@ -151,97 +151,97 @@ def example_3_manual_input():
     
     result = analyzer.analyze_product(test_product)
     
-    print(f"\n   产品: {test_product['asin']}")
-    print(f"   重量: {test_product['packageWeight']}g")
-    print(f"   头程运费(自动计算): ¥{result.shipping_cost_rmb:.2f}")
+    print(f"\n products: {test_product['asin']}")
+    print(f"   weight: {test_product['packageWeight']}g")
+    print(f"   First leg freight(Automatic calculation): ¥{result.shipping_cost_rmb:.2f}")
     print(f"\n   {result.note}")
     
-    print("\n💡 在交互式报告中填入采购成本即可自动计算:")
-    print("   1. 打开 *_ALLINONE_INTERACTIVE.html 报告")
-    print("   2. 在'采购成本'输入框填入价格")
-    print("   3. 系统自动计算完整利润分析")
+    print("\n💡 Fill in the purchase cost in the interactive report and it will be automatically calculated:")
+    print("   1. open *_ALLINONE_INTERACTIVE.html report")
+    print("   2. in'Procurement cost'Fill in the price in the input box")
+    print("   3. The system automatically calculates complete profit analysis")
 
 
 def example_4_api_usage_guide():
-    """示例4: API使用指南"""
+    """Example 4: API usage guide"""
     print("\n" + "="*80)
-    print("1688 API 使用指南")
+    print("1688 API Usage Guide")
     print("="*80)
     
     guide = """
-【方案对比】
+[Comparison of plans]
 
-1️⃣ TMAPI (推荐)
-   优点: 简单快速，无需企业资质
-   缺点: 收费服务
-   价格: 约 $0.01-0.05/次调用
-   获取: https://tmapi.top
+1️⃣ TMAPI (recommend)
+   advantage: Simple and fast, no corporate qualifications required
+   shortcoming: Charged service
+   price: approx. $0.01-0.05/calls
+   get: https://tmapi.top
    
-2️⃣ 1688官方开放平台
-   优点: 免费
-   缺点: 需要企业资质申请
-   获取: https://open.1688.com
+2️⃣ 1688 official open platform
+   advantage: free
+   shortcoming: Requires enterprise qualification application
+   get: https://open.1688.com
    
-3️⃣ 手动输入
-   优点: 免费，准确
-   缺点: 耗时
-   使用: 打开交互式报告，填入成本
+3️⃣ Manual input
+   advantage: Free and accurate
+   shortcoming: time consuming
+   use: Open the interactive report and fill in the costs
 
-【使用流程】
+【Usage process】
 
-1. 注册TMAPI (https://tmapi.top)
-   - 注册账号
-   - 创建应用
-   - 获取 API Token
+1. Register TMAPI (https://tmapi.top)
+   - Register an account
+   - Create app
+   - Get API Token
 
-2. 配置环境变量
+2. Configure environment variables
    export TMAPI_TOKEN=your_token_here
    export KEEPA_KEY=your_keepa_key
 
-3. 运行分析
+3. Run the analysis
    from procurement_analyzer import generate_auto_procurement_report
    report, analyses = generate_auto_procurement_report('B0XXXXXX')
 
-【注意事项】
+【Notes】
 
-⚠️ 图片限制:
-   - 1688以图搜图主要支持阿里系平台图片
-   - Amazon图片可能需要先转换到阿里图床
+⚠️ Image restrictions:
+   - 1688’s image search mainly supports Alibaba platform images
+   - Amazon images may need to be converted to Alibaba Pictures first
    
-⚠️ 匹配准确度:
-   - 以图搜图的准确度取决于图片质量和数据库覆盖
-   - 建议人工确认关键产品的采购价格
+⚠️ Matching accuracy:
+   - The accuracy of image search depends on image quality and database coverage
+   - It is recommended to manually confirm the purchase price of key products
    
-⚠️ MOQ考量:
-   - 注意MOQ是否适合您的采购量
-   - 系统会标注MOQ高于目标值的情况
+⚠️MOQ consideration:
+   - Pay attention to whether the MOQ is suitable for your purchasing volume
+   - The system will mark the situation when the MOQ is higher than the target value
 
-【成本计算公式】
+[Cost calculation formula]
 
-总COGS (USD) = [采购价(RMB) + 头程运费(RMB)] × 1.15(关税) ÷ 汇率
+Total COGS (USD) = [purchase price(RMB) + First leg freight(RMB)] × 1.15(tariff) ÷ exchange rate
 
-其中:
-- 头程运费 = 重量(kg) × 12 RMB/kg
-- 汇率 = 7.2 RMB/USD (可配置)
-- 关税 = 15% (可配置)
+in:
+- First leg freight = weight(kg) × 12 RMB/kg
+- exchange rate = 7.2 RMB/USD (Configurable)
+- tariff = 15% (Configurable)
 """
     
     print(guide)
 
 
 if __name__ == "__main__":
-    print("1688 以图搜图采购价格示例")
+    print("1688 Example of purchasing price by searching pictures")
     print("=" * 80)
     
-    # 显示菜单
-    print("\n选择示例:")
-    print("   1. 基本采购价格搜索")
-    print("   2. 生成完整自动报告")
-    print("   3. 手动输入示例")
-    print("   4. API使用指南")
-    print("   0. 全部运行")
+    # Show menu
+    print("\nSelect example:")
+    print("   1. Basic purchase price search")
+    print("   2. Generate complete automated reports")
+    print("   3. Manual input example")
+    print("   4. API usage guide")
+    print("   0. Run all")
     
-    choice = input("\n输入选项 (0-4): ").strip()
+    choice = input("\nInput options (0-4): ").strip()
     
     if choice == "1":
         example_1_basic_search()
@@ -256,6 +256,6 @@ if __name__ == "__main__":
         example_3_manual_input()
         example_4_api_usage_guide()
         print("\n" + "="*80)
-        print("示例2需要实际的API Key，请配置后再运行")
+        print("Example 2 requires the actual API Key, please configure it before running")
     else:
-        print("无效选项")
+        print("Invalid option")

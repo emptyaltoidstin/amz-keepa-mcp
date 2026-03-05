@@ -1,32 +1,32 @@
-# Amz-Keepa-MCP 依赖
-# 安装: pip install -r requirements.txt
+# Amz-Keepa-MCP dependency
+# Installation: pip install -r requirements.txt
 
 # MCP SDK
 mcp>=1.0.0
 
-# Keepa API 客户端
+# Keepa API client
 keepa>=1.3.0
 
-# 数据处理
+# Data processing
 pandas>=2.0.0
 numpy>=1.24.0
 
-# 可视化
+# Visualization
 matplotlib>=3.7.0
 seaborn>=0.12.0
 
-# 科学计算
+# scientific computing
 scipy>=1.10.0
 
-# HTTP客户端
+# HTTP client
 requests>=2.31.0
 
-# 异步支持 (可选)
+# Asynchronous support (Optional)
 aiohttp>=3.9.0
 
-# 其他工具
+# Other tools
 python-dotenv>=1.0.0
 
-# Keepa依赖 (自动安装)
+# Keepa depends on (Automatic installation)
 # - websocket-client
 # - tqdm

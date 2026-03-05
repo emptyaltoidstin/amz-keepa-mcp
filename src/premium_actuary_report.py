@@ -1,8 +1,8 @@
 """
 Premium Actuary Report Generator
 =================================
-基于 premium-design skill 的高级精算师报告
-暗黑极简风格，奢华细节，数据透明
+Based on premium-senior actuary report of design skill
+Dark minimalist style, luxurious details, and data transparency
 """
 
 import json
@@ -13,13 +13,13 @@ from src.amazon_actuary_final import LinkPortfolioAnalysis, VariantAnalysisResul
 
 class PremiumReportGenerator:
     """
-    高级精算师报告生成器
+    Senior Actuary Report Generator
     
-    特点：
-    - 暗黑极简风格 (Dark Minimalist)
-    - 数据完全透明 (显示原始Keepa数据)
-    - 销量计算逻辑清晰展示
-    - 交互式图表
+    Features:
+    - Dark minimalist style (Dark Minimalist)
+    - Complete data transparency (Show raw Keepa data)
+    - Sales calculation logic is clearly displayed
+    - Interactive charts
     """
     
     def __init__(self):
@@ -40,16 +40,16 @@ class PremiumReportGenerator:
     
     def generate(self, analysis: LinkPortfolioAnalysis, raw_products: List[Dict], 
                  output_path: str) -> str:
-        """生成高级报告"""
+        """Generate advanced reports"""
         html = self._build_html(analysis, raw_products)
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html)
         return output_path
     
     def _build_html(self, analysis: LinkPortfolioAnalysis, raw_products: List[Dict]) -> str:
-        """构建HTML"""
+        """Build HTML"""
         
-        # 计算真实vs估算销量
+        # Calculate real vs estimated sales
         sales_calculation = self._analyze_sales_calculation(raw_products)
         
         html = f'''<!DOCTYPE html>
@@ -57,7 +57,7 @@ class PremiumReportGenerator:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>精算师分析报告 | {analysis.parent_asin}</title>
+    <title>Actuary analysis report | {analysis.parent_asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         
@@ -408,7 +408,7 @@ class PremiumReportGenerator:
         <!-- Header -->
         <header class="header">
             <div class="header-label">Amazon FBA Actuary Report</div>
-            <h1>精算师分析报告</h1>
+            <h1>Actuary analysis report</h1>
             <div class="header-meta">{analysis.parent_asin} · {datetime.now().strftime('%Y.%m.%d')}</div>
         </header>
         
@@ -471,7 +471,7 @@ class PremiumReportGenerator:
         return html
     
     def _analyze_sales_calculation(self, raw_products: List[Dict]) -> Dict:
-        """分析销量计算逻辑"""
+        """Analyze sales calculation logic"""
         variants_data = []
         total_real_sales = 0
         total_estimated_sales = 0
@@ -482,7 +482,7 @@ class PremiumReportGenerator:
             bought = p.get('boughtInPastMonth', 0)
             bsr = self._get_current_bsr(p)
             
-            # 判断数据来源
+            # Determine data source
             if isinstance(bought, (int, float)) and bought > 0:
                 data_source = 'real'
                 sales = int(bought)
@@ -501,13 +501,13 @@ class PremiumReportGenerator:
                 'raw_bought': bought,
             })
         
-        # 检测是否是共享数据
+        # Check whether it is shared data
         is_shared = False
         if real_data_count == len(raw_products) and len(raw_products) > 1:
             sales_values = [v['sales'] for v in variants_data if v['data_source'] == 'real']
             if len(set(sales_values)) == 1:
                 is_shared = True
-                # 重新计算分配后的销量
+                # Recalculate sales volume after distribution
                 total_sales = sales_values[0]
                 variants_data = self._allocate_sales(variants_data, total_sales)
         
@@ -521,7 +521,7 @@ class PremiumReportGenerator:
         }
     
     def _allocate_sales(self, variants_data: List[Dict], total_sales: int) -> List[Dict]:
-        """按比例分配销量"""
+        """Prorate sales volume"""
         all_bsr = [v['bsr'] for v in variants_data]
         
         for v in variants_data:
@@ -540,7 +540,7 @@ class PremiumReportGenerator:
         return variants_data
     
     def _render_sales_calculation(self, calc: Dict) -> str:
-        """渲染销量计算流程"""
+        """Render sales calculation process"""
         if calc['is_shared_data']:
             return f'''
             <div class="calculation-flow">
@@ -589,16 +589,16 @@ class PremiumReportGenerator:
             '''
     
     def _render_variant_table(self, analysis: LinkPortfolioAnalysis, raw_products: List[Dict]) -> str:
-        """渲染变体表"""
+        """Render variant table"""
         rows = []
         
         for i, variant in enumerate(analysis.variants, 1):
-            # 找到对应的raw product
+            # Find the corresponding raw product
             raw = next((p for p in raw_products if p.get('asin') == variant.asin), {})
             bought_raw = raw.get('boughtInPastMonth', 'N/A')
             bsr = variant.metrics.sales_rank_current
             
-            # 确定数据来源标签
+            # Identify data source tags
             if bought_raw != 'N/A' and bought_raw > 0:
                 if hasattr(variant, '_allocated') and variant._allocated:
                     source_tag = '<span class="data-source-tag allocated">Allocated</span>'
@@ -607,7 +607,7 @@ class PremiumReportGenerator:
             else:
                 source_tag = '<span class="data-source-tag estimated">Estimated</span>'
             
-            # 销量明细
+            # Sales details
             sales_detail = f"BSR: {bsr:,}" if bought_raw == 'N/A' or bought_raw == 0 else f"Raw: {bought_raw}"
             
             rows.append(f'''
@@ -666,7 +666,7 @@ class PremiumReportGenerator:
         '''
     
     def _get_current_bsr(self, product: Dict) -> int:
-        """获取当前BSR"""
+        """Get the current BSR"""
         data = product.get('data', {})
         df = data.get('df_SALES')
         if df is not None and not df.empty:
@@ -677,7 +677,7 @@ class PremiumReportGenerator:
         return 999999
     
     def _estimate_from_bsr(self, bsr: int) -> int:
-        """从BSR估算销量"""
+        """Estimating sales volume from BSR"""
         if bsr < 1000:
             return int(1500 * (1000 / bsr) ** 0.5)
         elif bsr < 10000:

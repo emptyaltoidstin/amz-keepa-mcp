@@ -1,269 +1,269 @@
-# 163项指标中文词典
+# 163 indicators Chinese dictionary
 
-## 使用说明
+## Instructions for use
 
-本文档列出了Keepa Product Viewer CSV格式的163个指标及其简体中文翻译。
+This document lists 163 metrics in Keepa Product Viewer CSV format and their Simplified Chinese translations.
 
-## 指标分类
+## Indicator classification
 
-### 1. 基础信息 (18项)
+### 1. Basic information (18 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Locale | 站点 | 亚马逊站点 (com/cn等) |
-| Image | 主图 | 产品主图URL |
-| Image Count | 图片数量 | 产品图片总数 |
-| Title | 标题 | 产品完整标题 |
-| Parent Title | 父标题 | 父ASIN标题 |
-| Description & Features: Description | 产品描述 | 长描述文本 |
-| Description & Features: Short Description | 简短描述 | 短描述文本 |
-| Description & Features: Feature 1-10 | 卖点1-10 | 产品卖点列表 |
+| Locale | site | Amazon site (com/cn etc.) |
+| Image | Main picture | Product main image URL |
+| Image Count | Number of pictures | Total number of product images |
+| Title | title | Product full title |
+| Parent Title | parent title | Parent ASIN title |
+| Description & Features: Description | product description | long description text |
+| Description & Features: Short Description | short description | short description text |
+| Description & Features: Feature 1-10 | Selling point 1-10 | Product selling point list |
 
-### 2. 销售表现 (8项)
+### 2. Sales performance (8 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Sales Rank: Current | 当前销售排名 | 当前BSR排名 |
-| Sales Rank: 90 days avg. | 90天平均排名 | 90天平均BSR |
-| Sales Rank: Drops last 90 days | 90天排名下降次数 | 排名下滑次数 |
-| Sales Rank: Reference | 排名参考类目 | 主要类目名称 |
-| Sales Rank: Display Group | 展示分组 | 网站展示分组 |
-| Sales Rank: Subcategory Sales Ranks | 子类目排名 | 各子类目BSR |
-| Bought in past month | 过去30天销量 | 真实销量数据 |
-| 90 days change % monthly sold | 90天销量变化率 | 销量变化百分比 |
+| Sales Rank: Current | Current sales ranking | Current BSR ranking |
+| Sales Rank: 90 days avg. | 90-day average ranking | 90-day average BSR |
+| Sales Rank: Drops last 90 days | Number of ranking drops in 90 days | Number of ranking drops |
+| Sales Rank: Reference | Ranking reference category | Main category name |
+| Sales Rank: Display Group | Display grouping | Website display grouping |
+| Sales Rank: Subcategory Sales Ranks | Subcategory ranking | BSR for each subcategory |
+| Bought in past month | Sales volume in the past 30 days | Real sales data |
+| 90 days change % monthly sold | 90-day sales change rate | Sales volume change percentage |
 
-### 3. 退货与评论 (5项)
+### 3. Returns and Comments (5 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Return Rate | 退货率 | 产品退货比例 |
-| Reviews: Rating | 评分 | 平均星级 |
-| Reviews: Rating Count | 评分数量 | 评分总数 |
-| Reviews: Review Count - Format Specific | 评论数量 | 评论总数 |
-| Last Price Change | 最后价格变动 | 最近价格变更时间 |
+| Return Rate | return rate | Product return ratio |
+| Reviews: Rating | score | average star rating |
+| Reviews: Rating Count | Number of ratings | Total number of ratings |
+| Reviews: Review Count - Format Specific | Number of comments | Total number of comments |
+| Last Price Change | last price change | Last price change time |
 
-### 4. Buy Box (15项)
+### 4. Buy Box (15 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Buy Box: Buy Box Seller | Buy Box卖家 | 当前赢得Buy Box的卖家 |
-| Buy Box: Shipping Country | 发货国家 | Buy Box卖家发货国 |
-| Buy Box: Strikethrough Price | 划线价 | 原价/参考价 |
-| Buy Box: % Amazon 90 days | 90天Amazon自营占比 | Amazon赢得Buy Box比例 |
-| Buy Box: % Top Seller 90 days | 90天头部卖家占比 | 头部卖家Buy Box占比 |
-| Buy Box: Winner Count 90 days | 90天Buy Box卖家数 | 不同卖家数量 |
-| Buy Box: Standard Deviation 90 days | 90天价格标准差 | 价格波动程度 |
-| Buy Box: Flipability 90 days | 90天Buy Box轮换度 | Buy Box切换频率 |
-| Buy Box: Is FBA | 是否FBA | 当前是否为FBA卖家 |
-| Buy Box: Unqualified | 是否不合格 | 是否有不合格状态 |
-| Buy Box: Prime Eligible | 是否Prime | 是否Prime配送 |
-| Buy Box: Subscribe & Save | 是否订阅省 | 是否支持订阅省 |
-| Suggested Lower Price | 建议更低价格 | 亚马逊建议价格 |
-| Lightning Deals: Current | 当前秒杀 | 是否在进行秒杀 |
-| Warehouse Deals: Current | 当前仓库deals | 仓库deal状态 |
+| Buy Box: Buy Box Seller | Buy Box seller | Sellers currently winning the Buy Box |
+| Buy Box: Shipping Country | Shipping country | Buy Box seller shipping country |
+| Buy Box: Strikethrough Price | crossed price | original price/reference price |
+| Buy Box: % Amazon 90 days | 90-day Amazon self-operated ratio | Amazon wins Buy Box ratio |
+| Buy Box: % Top Seller 90 days | Proportion of top sellers in 90 days | Proportion of top sellers’ Buy Box |
+| Buy Box: Winner Count 90 days | Number of Buy Box sellers in 90 days | Number of different sellers |
+| Buy Box: Standard Deviation 90 days | 90-day price standard deviation | Price volatility |
+| Buy Box: Flipability 90 days | 90-day Buy Box rotation | Buy Box switching frequency |
+| Buy Box: Is FBA | Whether FBA | Are you currently an FBA seller? |
+| Buy Box: Unqualified | Is it unqualified? | Is there any unqualified status? |
+| Buy Box: Prime Eligible | Prime or not | Is it shipped by Prime? |
+| Buy Box: Subscribe & Save | Whether to subscribe to save | Whether to support subscription province |
+| Suggested Lower Price | Suggest a lower price | Amazon suggested price |
+| Lightning Deals: Current | Current flash sale | Is there a flash sale going on? |
+| Warehouse Deals: Current | Current warehouse deals | Warehouse deal status |
 
-### 5. Amazon自营价格 (16项)
+### 5. Amazon self-operated prices (16 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Amazon: Current | Amazon自营当前价 | 当前售价 |
-| Amazon: 30 days avg. | Amazon自营30天均价 | 30天平均价 |
-| Amazon: 90 days avg. | Amazon自营90天均价 | 90天平均价 |
-| Amazon: 180 days avg. | Amazon自营180天均价 | 180天平均价 |
-| Amazon: 365 days avg. | Amazon自营365天均价 | 365天平均价 |
-| Amazon: 1 day drop % | 1天降价幅度 | 1天内降价百分比 |
-| Amazon: 7 days drop % | 7天降价幅度 | 7天内降价百分比 |
-| Amazon: 30 days drop % | 30天降价幅度 | 30天内降价百分比 |
-| Amazon: 90 days drop % | 90天降价幅度 | 90天内降价百分比 |
-| Amazon: Drop since last visit | 上次访问以来降价 | 自上次访问降价金额 |
-| Amazon: Drop % since last visit | 上次访问以来降价幅度 | 自上次访问降价百分比 |
-| Amazon: Last visit | 上次访问时间 | 上次数据采集时间 |
-| Amazon: Is Lowest | 是否最低价 | 当前是否历史最低 |
-| Amazon: Is Lowest 90 days | 是否90天最低 | 是否90天内最低 |
-| Amazon: Lowest | 历史最低价 | 历史最低售价 |
-| Amazon: Highest | 历史最高价 | 历史最高售价 |
+| Amazon: Current | Amazon self-operated current price | Current selling price |
+| Amazon: 30 days avg. | Amazon self-operated 30-day average price | 30-day average price |
+| Amazon: 90 days avg. | Amazon self-operated 90-day average price | 90-day average price |
+| Amazon: 180 days avg. | Amazon self-operated 180-day average price | 180-day average price |
+| Amazon: 365 days avg. | Amazon self-operated 365-day average price | 365-day average price |
+| Amazon: 1 day drop % | 1 day price reduction | Price reduction percentage within 1 day |
+| Amazon: 7 days drop % | Price reduction within 7 days | Price reduction percentage within 7 days |
+| Amazon: 30 days drop % | Price reduction within 30 days | Price reduction percentage within 30 days |
+| Amazon: 90 days drop % | Price reduction within 90 days | Price reduction percentage within 90 days |
+| Amazon: Drop since last visit | Price reduced since last visit | Price reduction amount since last visit |
+| Amazon: Drop % since last visit | Price reduction since last visit | Price reduction percentage since last visit |
+| Amazon: Last visit | last access time | Last data collection time |
+| Amazon: Is Lowest | Is it the lowest price? | Is it currently the lowest in history? |
+| Amazon: Is Lowest 90 days | Is the 90-day minimum | Is it the lowest within 90 days? |
+| Amazon: Lowest | historical low price | Historical lowest selling price |
+| Amazon: Highest | historical high price | Highest selling price in history |
 
-### 6. 新品价格 (13项)
+### 6. New product price (13 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| New: Current | 新品当前价 | 第三方新品当前价 |
-| New: 30 days avg. | 新品30天均价 | 30天平均价 |
-| New: 90 days avg. | 新品90天均价 | 90天平均价 |
-| New: 180 days avg. | 新品180天均价 | 180天平均价 |
-| New: 365 days avg. | 新品365天均价 | 365天平均价 |
-| New: 1 day drop % | 新品1天降价幅度 | 1天内降价百分比 |
-| New: 7 days drop % | 新品7天降价幅度 | 7天内降价百分比 |
-| New: 30 days drop % | 新品30天降价幅度 | 30天内降价百分比 |
-| New: 90 days drop % | 新品90天降价幅度 | 90天内降价百分比 |
-| New: Drop since last visit | 新品上次访问以来降价 | 自上次访问降价 |
-| New: Drop % since last visit | 新品上次访问以来降价幅度 | 降价百分比 |
-| New: Lowest | 新品历史最低价 | 历史最低售价 |
-| New: Highest | 新品历史最高价 | 历史最高售价 |
+| New: Current | New product current price | Current price of third-party new products |
+| New: 30 days avg. | 30-day average price of new products | 30-day average price |
+| New: 90 days avg. | 90-day average price of new products | 90-day average price |
+| New: 180 days avg. | 180-day average price of new products | 180-day average price |
+| New: 365 days avg. | 365-day average price of new products | 365-day average price |
+| New: 1 day drop % | One-day price reduction for new products | Price reduction percentage within 1 day |
+| New: 7 days drop % | 7-day price reduction for new products | Price reduction percentage within 7 days |
+| New: 30 days drop % | New product 30-day price reduction | Price reduction percentage within 30 days |
+| New: 90 days drop % | 90-day price reduction for new products | Price reduction percentage within 90 days |
+| New: Drop since last visit | New product price reduced since last visit | Price reduced since last visit |
+| New: Drop % since last visit | New product price reduction since last visit | Price reduction percentage |
+| New: Lowest | New product lowest price in history | Historical lowest selling price |
+| New: Highest | New product’s highest price in history | Highest selling price in history |
 
-### 7. 二手价格 (4项)
+### 7. Second-hand price (4 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Used: Current | 二手当前价 | 二手商品当前价 |
-| Used: 90 days avg. | 二手90天均价 | 90天平均价 |
-| Used: Lowest | 二手最低价 | 历史最低售价 |
-| Used: Highest | 二手最高价 | 历史最高售价 |
+| Used: Current | Second-hand current price | Current price of second-hand goods |
+| Used: 90 days avg. | Second-hand 90-day average price | 90-day average price |
+| Used: Lowest | Second hand lowest price | Historical lowest selling price |
+| Used: Highest | Second-hand highest price | Highest selling price in history |
 
-### 8. 库存 (6项)
+### 8. Inventory (6 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Amazon: Stock | Amazon自营库存 | 当前库存量 |
-| Amazon: 90 days OOS | 90天缺货率 | 90天内缺货比例 |
-| Amazon: OOS Count 30 days | 30天缺货次数 | 30天内缺货次数 |
-| Amazon: OOS Count 90 days | 90天缺货次数 | 90天内缺货次数 |
-| Amazon: Availability of the Amazon offer | Amazon自营availability | 可用性状态 |
-| Amazon: Amazon offer shipping delay | Amazon自营发货延迟 | 发货延迟时间 |
+| Amazon: Stock | Amazon self-operated inventory | Current inventory |
+| Amazon: 90 days OOS | 90-day out-of-stock rate | Out-of-stock ratio within 90 days |
+| Amazon: OOS Count 30 days | Number of out-of-stocks in 30 days | Number of out-of-stocks within 30 days |
+| Amazon: OOS Count 90 days | Number of out-of-stocks in 90 days | Number of out-of-stocks within 90 days |
+| Amazon: Availability of the Amazon offer | Amazon self-operated availability | Availability status |
+| Amazon: Amazon offer shipping delay | Amazon self-operated shipment delayed | Shipping delay time |
 
-### 9. 费用 (6项)
+### 9. Fees (6 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| FBA Pick&Pack Fee | FBA取件包装费 | FBA处理费 |
-| Referral Fee % | 佣金比例 | 亚马逊佣金百分比 |
-| Referral Fee based on current Buy Box price | 当前佣金金额 | 基于Buy Box价格的佣金 |
-| List Price: Current | 标价当前 | 产品标价 |
-| List Price: 30 days avg. | 标价30天均价 | 30天平均标价 |
-| List Price: 90 days avg. | 标价90天均价 | 90天平均标价 |
+| FBA Pick&Pack Fee | FBA pickup and packaging fee | FBA processing fee |
+| Referral Fee % | Commission ratio | Amazon commission percentage |
+| Referral Fee based on current Buy Box price | Current commission amount | Commission based on Buy Box price |
+| List Price: Current | List price current | product price |
+| List Price: 30 days avg. | List price 30 days average price | 30-day average list price |
+| List Price: 90 days avg. | List price 90-day average price | 90-day average list price |
 
-### 10. 竞争 (7项)
+### 10. Competition (7 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Total Offer Count | 总卖家数 | 所有卖家数量 |
-| New Offer Count: Current | 新品卖家数 | 新品卖家数量 |
-| Used Offer Count: Current | 二手卖家数 | 二手卖家数量 |
-| Count of retrieved live offers: New, FBA | FBA新品卖家数 | FBA新品卖家 |
-| Count of retrieved live offers: New, FBM | FBM新品卖家数 | FBM新品卖家 |
-| Tracking since | 开始追踪日期 | 数据追踪开始时间 |
-| Listed since | 上架日期 | 产品上架时间 |
+| Total Offer Count | Total number of sellers | Quantity of all sellers |
+| New Offer Count: Current | Number of new product sellers | Number of new product sellers |
+| Used Offer Count: Current | Number of second-hand sellers | Number of second-hand sellers |
+| Count of retrieved live offers: New, FBA | Number of FBA new product sellers | FBA new product seller |
+| Count of retrieved live offers: New, FBM | Number of FBM new product sellers | FBM new product seller |
+| Tracking since | Start tracking date | Data tracking start time |
+| Listed since | Release date | Product shelf time |
 
-### 11. 类目 (5项)
+### 11. Category (5 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| URL: Amazon | 亚马逊链接 | 产品详情页URL |
-| Categories: Root | 根类目 | 顶级类目 |
-| Categories: Sub | 子类目 | 子级类目 |
-| Categories: Tree | 类目路径 | 完整类目路径 |
-| Website Display Group: Name | 网站展示组名称 | 展示分组名称 |
+| URL: Amazon | Amazon link | Product details page URL |
+| Categories: Root | root category | top category |
+| Categories: Sub | subcategory | subcategory |
+| Categories: Tree | Category path | Full category path |
+| Website Display Group: Name | Website display group name | Display group name |
 
-### 12. 产品代码 (8项)
+### 12. Product code (8 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| ASIN | ASIN | 亚马逊标准识别号 |
-| Imported by Code | 进口代码 | 进口商代码 |
-| Product Codes: UPC | UPC | 通用产品代码 |
-| Product Codes: EAN | EAN | 欧洲商品编号 |
-| Product Codes: GTIN | GTIN | 全球贸易项目代码 |
-| Product Codes: PartNumber | 零件号 | 制造商零件号 |
-| Parent ASIN | 父ASIN | 父产品ASIN |
-| Variation ASINs | 变体ASIN列表 | 所有变体ASIN |
+| ASIN | ASIN | Amazon Standard Identification Number |
+| Imported by Code | import code | Importer code |
+| Product Codes: UPC | UPC | Universal Product Code |
+| Product Codes: EAN | EAN | European article number |
+| Product Codes: GTIN | GTIN | Global Trade Item Code |
+| Product Codes: PartNumber | Part number | Manufacturer part number |
+| Parent ASIN | Parent ASIN | Parent product ASIN |
+| Variation ASINs | Variant ASIN list | All variant ASINs |
 
-### 13. 产品属性 (20项)
+### 13. Product attributes (20 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Type | 类型 | 产品类型 |
-| Manufacturer | 制造商 | 制造商名称 |
-| Brand | 品牌 | 品牌名称 |
-| Brand Store Name | 品牌店名称 | 品牌店铺名称 |
-| Brand Store URL Name | 品牌店URL | 品牌店URL标识 |
-| Product Group | 产品组 | 产品分组 |
-| Model | 型号 | 产品型号 |
-| Variation Attributes | 变体属性 | 变体特征列表 |
-| Color | 颜色 | 产品颜色 |
-| Size | 尺寸 | 产品尺寸 |
-| Unit Details: Unit Value | 单位值 | 计量数值 |
-| Unit Details: Unit Type | 单位类型 | 计量单位 |
-| Scent | 香味 | 气味/香味 |
-| Item Form | 形态 | 产品形态 |
-| Pattern | 图案 | 图案设计 |
-| Style | 风格 | 风格/款式 |
-| Material | 材质 | 材料成分 |
-| Item Type | 物品类型 | 产品类别 |
-| Target Audience | 目标受众 | 目标用户群 |
-| Recommended Uses | 推荐用途 | 推荐使用场景 |
+| Type | Type | product type |
+| Manufacturer | manufacturer | Manufacturer name |
+| Brand | brand | brand name |
+| Brand Store Name | Brand store name | Brand store name |
+| Brand Store URL Name | Brand store URL | Brand store URL logo |
+| Product Group | product group | Product grouping |
+| Model | Model | Product model |
+| Variation Attributes | Variant properties | Variant feature list |
+| Color | color | product color |
+| Size | Size | Product size |
+| Unit Details: Unit Value | unit value | Measurement value |
+| Unit Details: Unit Type | Unit type | unit of measurement |
+| Scent | fragrance | smell/fragrance |
+| Item Form | form | Product form |
+| Pattern | pattern | Pattern design |
+| Style | style | style/style |
+| Material | Material | Material composition |
+| Item Type | Item type | Product Category |
+| Target Audience | target audience | Target user group |
+| Recommended Uses | Recommended use | Recommended usage scenarios |
 
-### 14. 内容 (8项)
+### 14. Content (8 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Videos: Video Count | 视频数量 | 产品视频总数 |
-| Videos: Has Main Video | 是否有主视频 | 主视频存在性 |
-| Videos: Main Videos | 主视频 | 主视频信息 |
-| Videos: Additional Videos | 附加视频 | 附加视频信息 |
-| A+ Content: Has A+ Content | 是否有A+内容 | A+页面存在性 |
-| A+ Content: A+ From Manufacturer | A+来自制造商 | A+内容来源 |
-| A+ Content: A+ Content | A+内容 | A+页面详情 |
+| Videos: Video Count | Number of videos | Total number of product videos |
+| Videos: Has Main Video | Is there a main video? | Main video existence |
+| Videos: Main Videos | Main video | Main video information |
+| Videos: Additional Videos | Additional video | Video extensions |
+| A+ Content: Has A+ Content | Is there an A+content | A+Page existence |
+| A+ Content: A+ From Manufacturer | A+from manufacturer | A+Content source |
+| A+ Content: A+ Content | A+content | A+Page details |
 
-### 15. 包装规格 (11项)
+### 15. Packaging specifications (11 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Package: Dimension (cm³) | 包装体积(cm³) | 包装立方厘米 |
-| Package: Length (cm) | 包装长度(cm) | 包装长度 |
-| Package: Width (cm) | 包装宽度(cm) | 包装宽度 |
-| Package: Height (cm) | 包装高度(cm) | 包装高度 |
-| Package: Weight (g) | 包装重量(g) | 包装重量克数 |
-| Package: Quantity | 包装数量 | 每包数量 |
-| Item: Dimension (cm³) | 产品体积(cm³) | 产品立方厘米 |
-| Item: Length (cm) | 产品长度(cm) | 产品长度 |
-| Item: Width (cm) | 产品宽度(cm) | 产品宽度 |
-| Item: Height (cm) | 产品高度(cm) | 产品高度 |
-| Item: Weight (g) | 产品重量(g) | 产品重量克数 |
+| Package: Dimension (cm³) | Packing volume(cm³) | Packaging cubic centimeters |
+| Package: Length (cm) | Packing length(cm) | Packing length |
+| Package: Width (cm) | Packing width(cm) | Packing width |
+| Package: Height (cm) | Packing height(cm) | Packing height |
+| Package: Weight (g) | Packing weight(g) | Packaging weight in grams |
+| Package: Quantity | Packing quantity | Quantity per package |
+| Item: Dimension (cm³) | Product volume(cm³) | Product cubic centimeters |
+| Item: Length (cm) | Product length(cm) | Product length |
+| Item: Width (cm) | Product width(cm) | Product width |
+| Item: Height (cm) | Product height(cm) | Product height |
+| Item: Weight (g) | Product weight(g) | Product weight in grams |
 
-### 16. 其他属性 (20项)
+### 16. Other attributes (20 items)
 
-| 英文指标名 | 中文翻译 | 说明 |
+| English indicator name | Chinese translation | Description |
 |-----------|---------|------|
-| Included Components | 包含组件 | 包装内含物品 |
-| Ingredients | 成分 | 成分列表 |
-| Active Ingredients | 活性成分 | 有效成分 |
-| Special Ingredients | 特殊成分 | 特殊配方成分 |
-| Safety Warning | 安全警告 | 安全警告信息 |
-| Batteries Required | 是否需要电池 | 电池需求 |
-| Batteries Included | 是否含电池 | 电池包含情况 |
-| Hazardous Materials | 危险品 | 危险材料标识 |
-| Is HazMat | 是否危险品 | 危险品状态 |
-| Is heat sensitive | 是否热敏感 | 热敏感状态 |
-| Adult Product | 成人产品 | 成人用品标识 |
-| Is Merch on Demand | 是否按需生产 | 按需生产状态 |
-| Trade-In Eligible | 是否支持以旧换新 | 以旧换新资格 |
-| Deals: Deal Type | Deal类型 | 促销活动类型 |
-| Deals: Badge | Deal徽章 | 促销标识 |
-| One Time Coupon: Absolute | 一次性优惠券金额 | 固定金额优惠券 |
-| One Time Coupon: Percentage | 一次性优惠券比例 | 百分比优惠券 |
-| One Time Coupon: Subscribe & Save % | 订阅省优惠比例 | 订阅折扣比例 |
-| Business Discount: Percentage | 企业折扣比例 | B2B折扣比例 |
-| Freq. Bought Together | 经常一起购买 | 关联购买产品 |
+| Included Components | Contains components | Package contents |
+| Ingredients | Ingredients | Ingredient list |
+| Active Ingredients | active ingredient | active ingredient |
+| Special Ingredients | special ingredients | Special formula ingredients |
+| Safety Warning | Security warning | Security warning information |
+| Batteries Required | Do you need batteries? | battery requirements |
+| Batteries Included | Does it contain batteries? | Battery included |
+| Hazardous Materials | Dangerous goods | Hazardous Materials Labeling |
+| Is HazMat | Is it dangerous goods? | Dangerous goods status |
+| Is heat sensitive | Is it heat sensitive? | heat sensitive state |
+| Adult Product | adult products | Adult product logo |
+| Is Merch on Demand | Whether to produce on demand | On-demand production status |
+| Trade-In Eligible | Whether to support trade-in | Trade-in eligibility |
+| Deals: Deal Type | Deal type | Promotion type |
+| Deals: Badge | Deal badge | Promotional logo |
+| One Time Coupon: Absolute | One-time coupon amount | fixed amount coupon |
+| One Time Coupon: Percentage | One-time coupon ratio | percentage coupon |
+| One Time Coupon: Subscribe & Save % | Subscribe and save discount ratio | Subscription discount ratio |
+| Business Discount: Percentage | Corporate discount ratio | B2B discount ratio |
+| Freq. Bought Together | often buy together | Related purchase products |
 
 ---
 
-## 总计: 163项指标
+## total: 163 indicators
 
-- 基础信息: 18项
-- 销售表现: 8项
-- 退货与评论: 5项
-- Buy Box: 15项
-- Amazon自营价格: 16项
-- 新品价格: 13项
-- 二手价格: 4项
-- 库存: 6项
-- 费用: 6项
-- 竞争: 7项
-- 类目: 5项
-- 产品代码: 8项
-- 产品属性: 20项
-- 内容: 8项
-- 包装规格: 11项
-- 其他属性: 20项
+- Basic information: 18 items
+- sales performance: 8 items
+- Returns and Reviews: 5 items
+- Buy Box: 15 items
+- Amazon self-operated price: 16 items
+- New product price: 13 items
+- second hand price: 4 items
+- Inventory: 6 items
+- cost: 6 items
+- compete: 7 items
+- Category: 5 items
+- product code: 8 items
+- Product attributes: 20 items
+- content: 8 items
+- Packaging specifications: 11 items
+- Other properties: 20 items
 
-**合计: 163项**
+**total: 163 items**

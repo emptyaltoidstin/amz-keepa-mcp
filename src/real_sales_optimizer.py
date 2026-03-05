@@ -1,20 +1,20 @@
 """
-真实销售数据精算优化器 (Real Sales Actuarial Optimizer)
+Actuarial Optimizer for Real Sales Data (Real Sales Actuarial Optimizer)
 
-基于真实亚马逊运营数据优化精算模型，解决Keepa估算与真实数据的偏差问题。
+Optimize the actuarial model based on real Amazon operating data to solve the problem of deviation between Keepa estimation and real data.
 
-核心功能:
-1. 真实数据校准 - 用实际运营数据修正估算参数
-2. 多数据源融合 - 整合Keepa数据 + 真实销售数据
-3. 动态参数调整 - 基于历史数据趋势优化预测
-4. 真实盈利模型 - 考虑所有真实成本项
+Core functions:
+1. Real data calibration - Revise estimated parameters using actual operating data
+2. Fusion of multiple data sources - Integrate Keepa data + Real sales data
+3. Dynamic parameter adjustment - Optimize forecasting based on historical data trends
+4. Real profit model - Consider all true cost items
 
-优化维度:
-- COGS率: 从估算30% → 真实87% (关键修正!)
-- ACOS: 从估算15% → 真实26%
-- 退货率: 从估算5% → 真实18%
-- 促销成本: 新增Coupon/Deal花费
-- 自然vs广告订单: 区分流量来源利润
+Optimize dimensions:
+- COGS rate: From estimate 30% → Real 87% (Critical fix!)
+- ACOS: From estimate 15% → Real 26%
+- return rate: From estimate 5% → Real 18%
+- Promotional costs: Add Coupon/Deal cost
+- Organic vs Insertion Order: Distinguish traffic source profit
 """
 
 import pandas as pd
@@ -26,45 +26,45 @@ from datetime import datetime, timedelta
 
 @dataclass
 class RealSalesMetrics:
-    """真实销售指标数据类"""
-    # 销售基础
+    """Real sales indicator data class"""
+    # Sales Basics
     total_sales: float
     total_units: int
     avg_price: float
     avg_daily_sales: float
     
-    # 退货退款 (关键!)
+    # Returns and refunds (Key!)
     refund_rate: float
     return_rate: float
     
-    # 广告表现
+    # advertising performance
     acos: float
     roas: float
     ad_spend_ratio: float
     ad_order_ratio: float
     
-    # 真实利润 (最重要!)
+    # real profit (The most important thing!)
     gross_margin: float
     net_margin: float
     
-    # 促销成本
+    # Promotional costs
     coupon_cost_ratio: float
     deal_cost_ratio: float
     
-    # 数据质量
+    # Data quality
     data_days: int
     confidence_score: float
 
 
 class RealSalesActuarialOptimizer:
     """
-    真实销售数据精算优化器
+    Actuarial Optimizer for Real Sales Data
     
-    多Agents协同架构:
-    - DataLoader Agent: 加载真实销售Excel
-    - Calibrator Agent: 计算校准参数
-    - Fusion Agent: 融合Keepa+真实数据
-    - Optimizer Agent: 生成优化建议
+    Multi-Agents collaborative architecture:
+    - DataLoader Agent: Load real sales Excel
+    - Calibrator Agent: Calculate calibration parameters
+    - Fusion Agent: Fusion Keepa+real data
+    - Optimizer Agent: Generate optimization suggestions
     """
     
     def __init__(self):
@@ -78,24 +78,24 @@ class RealSalesActuarialOptimizer:
     
     def load_real_sales_data(self, excel_path: str) -> pd.DataFrame:
         """
-        Agent 1: DataLoader - 加载真实销售数据
+        Agent 1: DataLoader - Load real sales data
         
         Args:
-            excel_path: 销售数据Excel文件路径
+            excel_path: Sales data Excel file path
             
         Returns:
-            清洗后的DataFrame
+            Cleaned DataFrame
         """
         df = pd.read_excel(excel_path)
         
-        # 数据清洗
-        # 移除汇总行
-        df = df[df['日期'] != '汇总'].copy()
+        # Data cleaning
+        # Remove summary row
+        df = df[df['Date'] != 'Summary'].copy()
         
-        # 转换数值列
-        numeric_cols = ['销量', '销售额', '退款量', '退货量', '广告花费', 
-                       '广告销售额', '销售毛利', '销售毛利率', '销售净毛利率',
-                       'ACOS', 'ROAS', 'Coupon花费', 'Deal花费']
+        # Convert numeric column
+        numeric_cols = ['Sales volume', 'sales', 'Refund amount', 'Return volume', 'advertising spend', 
+                       'advertising sales', 'Gross profit on sales', 'gross sales profit margin', 'Sales net gross profit margin',
+                       'ACOS', 'ROAS', 'Coupon cost', 'Deal cost']
         
         for col in numeric_cols:
             if col in df.columns:
@@ -105,47 +105,47 @@ class RealSalesActuarialOptimizer:
     
     def calculate_real_metrics(self, df: pd.DataFrame) -> RealSalesMetrics:
         """
-        Agent 2: Calibrator - 计算真实运营指标
+        Agent 2: Calibrator - Calculate real operating indicators
         
         Args:
-            df: 清洗后的销售数据
+            df: Cleaned sales data
             
         Returns:
-            RealSalesMetrics真实指标对象
+            RealSalesMetrics real metric object
         """
-        # 基础销售数据
-        total_sales = df['销售额'].sum()
-        total_units = df['销量'].sum()
-        avg_price = df['平均销售价格'].mean()
+        # Basic sales data
+        total_sales = df['sales'].sum()
+        total_units = df['Sales volume'].sum()
+        avg_price = df['average sales price'].mean()
         data_days = len(df)
         avg_daily_sales = total_units / data_days if data_days > 0 else 0
         
-        # 退货退款率 (关键!)
-        refund_rate = df['退款量'].sum() / total_units if total_units > 0 else 0
-        return_rate = df['退货量'].sum() / total_units if total_units > 0 else 0
+        # Return Refund Rate (Key!)
+        refund_rate = df['Refund amount'].sum() / total_units if total_units > 0 else 0
+        return_rate = df['Return volume'].sum() / total_units if total_units > 0 else 0
         
-        # 广告指标
-        total_ad_spend = abs(df['广告花费'].sum())  # 花费是负数
-        total_ad_sales = df['广告销售额'].sum()
+        # advertising metrics
+        total_ad_spend = abs(df['advertising spend'].sum())  # cost is negative
+        total_ad_sales = df['advertising sales'].sum()
         acos = total_ad_spend / total_ad_sales if total_ad_sales > 0 else 0
         roas = total_ad_sales / total_ad_spend if total_ad_spend > 0 else 0
         ad_spend_ratio = total_ad_spend / total_sales if total_sales > 0 else 0
         
-        total_ad_orders = df['广告订单量'].sum()
-        total_orders = df['订单量'].sum()
+        total_ad_orders = df['Insertion order volume'].sum()
+        total_orders = df['Order quantity'].sum()
         ad_order_ratio = total_ad_orders / total_orders if total_orders > 0 else 0
         
-        # 真实利润率 (最重要!)
-        avg_gross_margin = df['销售毛利率'].mean()
-        avg_net_margin = df['销售净毛利率'].mean()
+        # real profit rate (The most important thing!)
+        avg_gross_margin = df['gross sales profit margin'].mean()
+        avg_net_margin = df['Sales net gross profit margin'].mean()
         
-        # 促销成本
-        total_coupon = df['Coupon花费'].sum()
-        total_deal = df['Deal花费'].sum()
+        # Promotional costs
+        total_coupon = df['Coupon cost'].sum()
+        total_deal = df['Deal cost'].sum()
         coupon_cost_ratio = total_coupon / total_sales if total_sales > 0 else 0
         deal_cost_ratio = total_deal / total_sales if total_sales > 0 else 0
         
-        # 数据质量评分
+        # Data quality score
         confidence_score = self._calculate_data_quality(df)
         
         return RealSalesMetrics(
@@ -169,21 +169,21 @@ class RealSalesActuarialOptimizer:
     
     def calibrate_actuarial_model(self, real_metrics: RealSalesMetrics) -> Dict:
         """
-        Agent 3: Calibrator - 生成校准参数
+        Agent 3: Calibrator - Generate calibration parameters
         
-        对比Keepa估算 vs 真实数据，生成校准因子
+        Compare Keepa estimates vs real data and generate calibration factors
         
         Args:
-            real_metrics: 真实运营指标
+            real_metrics: real operating indicators
             
         Returns:
-            校准参数字典
+            Calibration parameter dictionary
         """
         calibrations = {}
         
-        # 1. COGS率校准 (最关键!)
+        # 1. COGS rate calibration (The most important thing!)
         estimated_cogs = self.baseline_params['estimated_cogs_rate']
-        real_cogs = 1 - real_metrics.gross_margin  # 从毛利率反推COGS
+        real_cogs = 1 - real_metrics.gross_margin  # Deducing COGS from gross profit margin
         calibrations['cogs_rate'] = {
             'estimated': estimated_cogs,
             'real': real_cogs,
@@ -191,7 +191,7 @@ class RealSalesActuarialOptimizer:
             'impact': 'Critical' if abs(real_cogs - estimated_cogs) > 0.2 else 'Medium'
         }
         
-        # 2. ACOS校准
+        # 2. ACOS calibration
         estimated_acos = self.baseline_params['estimated_acos']
         real_acos = real_metrics.acos
         calibrations['acos'] = {
@@ -201,7 +201,7 @@ class RealSalesActuarialOptimizer:
             'impact': 'High' if real_acos > estimated_acos * 1.5 else 'Medium'
         }
         
-        # 3. 退货率校准
+        # 3. Return rate calibration
         estimated_return = self.baseline_params['estimated_return_rate']
         real_return = real_metrics.return_rate
         calibrations['return_rate'] = {
@@ -211,7 +211,7 @@ class RealSalesActuarialOptimizer:
             'impact': 'High' if real_return > estimated_return * 2 else 'Medium'
         }
         
-        # 4. 退款率校准
+        # 4. Refund rate calibration
         estimated_refund = self.baseline_params['estimated_refund_rate']
         real_refund = real_metrics.refund_rate
         calibrations['refund_rate'] = {
@@ -221,7 +221,7 @@ class RealSalesActuarialOptimizer:
             'impact': 'Medium'
         }
         
-        # 5. 广告订单占比
+        # 5. Proportion of advertising orders
         calibrations['ad_order_ratio'] = {
             'real': real_metrics.ad_order_ratio,
             'natural_order_ratio': 1 - real_metrics.ad_order_ratio,
@@ -235,67 +235,67 @@ class RealSalesActuarialOptimizer:
                                    keepa_analysis: Dict,
                                    real_metrics: RealSalesMetrics) -> Dict:
         """
-        Agent 4: Optimizer - 生成优化的盈利计算
+        Agent 4: Optimizer - Generate optimized profit calculations
         
-        融合Keepa数据 + 真实数据，生成更准确的盈利预测
+        Fusion of Keepa data + Real data to generate more accurate profit forecasts
         
         Args:
-            keepa_analysis: 基于Keepa的精算分析结果
-            real_metrics: 真实运营指标
+            keepa_analysis: Actuarial analysis results based on Keepa
+            real_metrics: real operating indicators
             
         Returns:
-            优化后的分析结果
+            Optimized analysis results
         """
-        # 获取当前价格
+        # Get current price
         current_price = keepa_analysis['profitability_analysis']['price_analysis']['current_price']
         
-        # 使用真实参数重新计算成本
-        # 注意: 真实数据是人民币，需要转换为美元(假设汇率7.2)
+        # Recalculate costs using real parameters
+        # Note: The real data is RMB and needs to be converted to US dollars.(Assume an exchange rate of 7.2)
         exchange_rate = 7.2
         price_rmb = current_price * exchange_rate
         
-        # 真实COGS (基于真实毛利率)
+        # Real COGS (Based on real gross profit margin)
         real_cogs_rate = 1 - real_metrics.gross_margin
         cogs_per_unit = price_rmb * real_cogs_rate
         
-        # 真实FBA费用 (估算)
-        fba_fee_rmb = 60  # 约$8.5
+        # True FBA fees (Estimate)
+        fba_fee_rmb = 60  # approx.$8.5
         
-        # 真实佣金 (15%)
+        # real commission (15%)
         referral_fee = price_rmb * 0.15
         
-        # 真实退货成本
-        return_cost = price_rmb * real_metrics.return_rate * 0.3  # 30%净损失
+        # true return cost
+        return_cost = price_rmb * real_metrics.return_rate * 0.3  # 30%net loss
         
-        # 真实仓储费
-        storage_cost = 1.0  # 约$0.15
+        # True storage fees
+        storage_cost = 1.0  # approx.$0.15
         
-        # 真实广告费 (基于真实ACOS)
+        # real advertising cost (Based on real ACOS)
         ad_cost = price_rmb * real_metrics.acos
         
-        # 促销成本
+        # Promotional costs
         coupon_cost = price_rmb * real_metrics.coupon_cost_ratio
         deal_cost = price_rmb * real_metrics.deal_cost_ratio
         
-        # 总成本
+        # total cost
         total_cost = (cogs_per_unit + fba_fee_rmb + referral_fee + 
                      return_cost + storage_cost + ad_cost + coupon_cost + deal_cost)
         
-        # 利润计算
+        # Profit calculation
         gross_profit = price_rmb - cogs_per_unit - fba_fee_rmb - referral_fee
         net_profit = price_rmb - total_cost
         
         gross_margin = (gross_profit / price_rmb * 100) if price_rmb > 0 else 0
         net_margin = (net_profit / price_rmb * 100) if price_rmb > 0 else 0
         
-        # 转换为美元
+        # Convert to USD
         net_profit_usd = net_profit / exchange_rate
         
-        # 月均销量预测 (基于真实数据)
+        # Average monthly sales forecast (Based on real data)
         monthly_units = real_metrics.avg_daily_sales * 30
         monthly_profit = net_profit_usd * monthly_units
         
-        # ROI计算
+        # ROI calculation
         inventory_investment = (cogs_per_unit / exchange_rate) * monthly_units * 1.5
         roi_annual = ((monthly_profit * 12) / inventory_investment * 100) if inventory_investment > 0 else 0
         
@@ -337,10 +337,10 @@ class RealSalesActuarialOptimizer:
                                     calibrations: Dict,
                                     optimized: Dict) -> Dict:
         """
-        生成完整的优化报告
+        Generate a complete optimization report
         
         Returns:
-            优化报告字典
+            Optimization report dictionary
         """
         report = {
             'data_source': {
@@ -382,21 +382,21 @@ class RealSalesActuarialOptimizer:
         return report
     
     def _calculate_data_quality(self, df: pd.DataFrame) -> float:
-        """计算数据质量评分"""
+        """Calculate data quality score"""
         score = 1.0
         
-        # 检查数据完整性
+        # Check data integrity
         missing_ratio = df.isnull().sum().sum() / (df.shape[0] * df.shape[1])
         score -= missing_ratio * 0.3
         
-        # 检查数据天数
+        # Check data days
         if len(df) < 7:
             score -= 0.3
         elif len(df) < 30:
             score -= 0.1
         
-        # 检查关键字段
-        critical_fields = ['销售额', '销量', '广告花费', '销售毛利率']
+        # Check key fields
+        critical_fields = ['sales', 'Sales volume', 'advertising spend', 'gross sales profit margin']
         for field in critical_fields:
             if field not in df.columns or df[field].isnull().all():
                 score -= 0.1
@@ -407,110 +407,110 @@ class RealSalesActuarialOptimizer:
                           real_metrics: RealSalesMetrics,
                           calibrations: Dict,
                           optimized: Dict) -> List[str]:
-        """生成关键发现"""
+        """Generate key findings"""
         findings = []
         
-        # 盈利能力发现
+        # Profitability discovery
         if real_metrics.net_margin < 0:
-            findings.append(f"🔴 严重警告: 产品正在亏损! 净利率{real_metrics.net_margin:.1%}，需立即优化成本结构")
+            findings.append(f"🔴Serious warning: The product is losing money! Net profit margin{real_metrics.net_margin:.1%}, the cost structure needs to be optimized immediately")
         elif real_metrics.net_margin < 0.05:
-            findings.append(f"🟡 警告: 净利率仅{real_metrics.net_margin:.1%}，利润空间极薄")
+            findings.append(f"🟡 WARNING: net profit margin only{real_metrics.net_margin:.1%}, extremely thin profit margins")
         
-        # 退货率发现
+        # Return rate discovery
         if real_metrics.return_rate > 0.15:
-            findings.append(f"🔴 高退货率警告: {real_metrics.return_rate:.1%}，远超行业平均，质量或描述需改进")
+            findings.append(f"🔴High return rate warning: {real_metrics.return_rate:.1%}, far exceeding the industry average, quality or description needs improvement")
         
-        # ACOS发现
+        # ACOSdiscovery
         if real_metrics.acos > 0.30:
-            findings.append(f"🟡 高ACOS警告: {real_metrics.acos:.1%}，广告效率低下，需优化广告策略")
+            findings.append(f"🟡 High ACOS warning: {real_metrics.acos:.1%}, advertising efficiency is low and advertising strategies need to be optimized.")
         
-        # 估算偏差发现
+        # Estimation bias discovery
         variance = optimized['variance_analysis']
         if variance['net_margin_variance'] < -10:
-            findings.append(f"🔴 Keepa模型高估净利率{abs(variance['net_margin_variance']):.1f}%，真实盈利远低于预期")
+            findings.append(f"🔴 Keepa model overestimates net profit margin{abs(variance['net_margin_variance']):.1f}%, the actual profit is far lower than expected")
         
-        # 广告依赖发现
+        # Advertising dependency discovery
         if real_metrics.ad_order_ratio > 0.6:
-            findings.append(f"🟡 广告依赖度过高: {real_metrics.ad_order_ratio:.1%}订单来自广告，自然流量不足")
+            findings.append(f"🟡 Too much reliance on advertising: {real_metrics.ad_order_ratio:.1%}The order comes from advertising, and there is insufficient natural traffic.")
         
         return findings
     
     def _generate_recommendations(self, 
                                  real_metrics: RealSalesMetrics,
                                  optimized: Dict) -> List[Dict]:
-        """生成优化建议"""
+        """Generate optimization suggestions"""
         recommendations = []
         
-        # 成本优化建议
+        # Cost optimization suggestions
         if real_metrics.net_margin < 0.05:
             recommendations.append({
                 'priority': 'Critical',
-                'category': '成本控制',
-                'action': '紧急降低COGS，当前毛利率过低',
-                'expected_impact': f'目标毛利率从{real_metrics.gross_margin:.1%}提升至25%',
+                'category': 'cost control',
+                'action': 'Urgently reduce COGS, the current gross profit margin is too low',
+                'expected_impact': f'The target gross profit margin is from{real_metrics.gross_margin:.1%}Increased to 25%',
             })
         
-        # 退货优化建议
+        # Return optimization suggestions
         if real_metrics.return_rate > 0.10:
             recommendations.append({
                 'priority': 'High',
-                'category': '质量控制',
-                'action': '降低退货率，优化产品描述和质量',
-                'expected_impact': f'目标退货率从{real_metrics.return_rate:.1%}降至8%',
+                'category': 'Quality control',
+                'action': 'Reduce return rates and optimize product description and quality',
+                'expected_impact': f'The target return rate is from{real_metrics.return_rate:.1%}down to 8%',
             })
         
-        # 广告优化建议
+        # Advertising optimization suggestions
         if real_metrics.acos > 0.25:
             recommendations.append({
                 'priority': 'High',
-                'category': '广告优化',
-                'action': '优化广告结构和关键词，降低ACOS',
-                'expected_impact': f'目标ACOS从{real_metrics.acos:.1%}降至20%',
+                'category': 'Advertising optimization',
+                'action': 'Optimize ad structure and keywords to reduce ACOS',
+                'expected_impact': f'Target ACOS from{real_metrics.acos:.1%}down to 20%',
             })
         
-        # 自然流量建议
+        # Organic traffic recommendations
         if real_metrics.ad_order_ratio > 0.5:
             recommendations.append({
                 'priority': 'Medium',
-                'category': '流量结构',
-                'action': '提升自然排名，降低对广告依赖',
-                'expected_impact': '自然订单占比提升至60%',
+                'category': 'traffic structure',
+                'action': 'Improve natural rankings and reduce reliance on advertising',
+                'expected_impact': 'The proportion of natural orders increased to 60%',
             })
         
         return recommendations
 
 
-# 便捷使用函数
+# Easy to use functions
 def optimize_with_real_sales(keepa_csv_path: str, 
                              real_sales_excel_path: str) -> Dict:
     """
-    便捷函数: 用真实销售数据优化Keepa精算分析
+    Convenience function: Optimize Keepa actuarial analysis with real sales data
     
     Args:
-        keepa_csv_path: Keepa数据CSV路径
-        real_sales_excel_path: 真实销售Excel路径
+        keepa_csv_path: Keepa data CSV path
+        real_sales_excel_path: Real Sales Excel Path
         
     Returns:
-        优化后的完整报告
+        Optimized full report
     """
     from src.actuarial_analyzer import AmazonActuary
     
-    # 1. 执行标准精算分析
+    # 1. Perform standard actuarial analysis
     actuary = AmazonActuary()
     keepa_analysis = actuary.analyze_from_csv(keepa_csv_path, include_cosmo=False)
     
-    # 2. 加载真实数据并优化
+    # 2. Load real data and optimize
     optimizer = RealSalesActuarialOptimizer()
     real_df = optimizer.load_real_sales_data(real_sales_excel_path)
     real_metrics = optimizer.calculate_real_metrics(real_df)
     
-    # 3. 校准模型
+    # 3. Calibrate the model
     calibrations = optimizer.calibrate_actuarial_model(real_metrics)
     
-    # 4. 优化盈利计算
+    # 4. Optimize profit calculation
     optimized = optimizer.optimize_profit_calculation(keepa_analysis, real_metrics)
     
-    # 5. 生成报告
+    # 5. Generate reports
     report = optimizer.generate_optimization_report(real_metrics, calibrations, optimized)
     
     return report
@@ -518,86 +518,86 @@ def optimize_with_real_sales(keepa_csv_path: str,
 
 def format_optimization_report(report: Dict) -> str:
     """
-    格式化优化报告为可读文本
+    Format optimization reports as readable text
     
     Args:
-        report: 优化报告字典
+        report: Optimization report dictionary
         
     Returns:
-        格式化字符串
+        Format string
     """
     lines = []
     lines.append("=" * 90)
-    lines.append("📊 真实销售数据精算优化报告")
+    lines.append("📊 Actuarial optimization report of real sales data")
     lines.append("=" * 90)
     
-    # 数据质量
+    # Data quality
     ds = report['data_source']
-    lines.append(f"\n📈 数据质量: {ds['confidence_score']:.0%} | 分析天数: {ds['data_days']}天")
+    lines.append(f"\n📈 Data quality: {ds['confidence_score']:.0%} | Analysis days: {ds['data_days']}day")
     
-    # 真实指标
+    # real indicator
     rm = report['real_metrics']
-    lines.append(f"\n💰 真实运营表现:")
-    lines.append(f"  总销售额: ¥{rm['sales_performance']['total_sales_rmb']:,.2f}")
-    lines.append(f"  总销量: {rm['sales_performance']['total_units']} 件")
-    lines.append(f"  平均售价: ¥{rm['sales_performance']['avg_price_rmb']:.2f}")
-    lines.append(f"  日均销量: {rm['sales_performance']['avg_daily_sales']:.1f} 件")
+    lines.append(f"\n💰 Real operational performance:")
+    lines.append(f"  total sales: ¥{rm['sales_performance']['total_sales_rmb']:,.2f}")
+    lines.append(f"  total sales: {rm['sales_performance']['total_units']} pieces")
+    lines.append(f"  average selling price: ¥{rm['sales_performance']['avg_price_rmb']:.2f}")
+    lines.append(f"  average daily sales: {rm['sales_performance']['avg_daily_sales']:.1f} pieces")
     
-    lines.append(f"\n  退货退款:")
-    lines.append(f"    退款率: {rm['return_refund']['refund_rate']}")
-    lines.append(f"    退货率: {rm['return_refund']['return_rate']} ({rm['return_refund']['risk_level']}风险)")
+    lines.append(f"\n Return and refund:")
+    lines.append(f"    Refund rate: {rm['return_refund']['refund_rate']}")
+    lines.append(f"    return rate: {rm['return_refund']['return_rate']} ({rm['return_refund']['risk_level']}risk)")
     
-    lines.append(f"\n  广告表现:")
+    lines.append(f"\n advertising performance:")
     lines.append(f"    ACOS: {rm['advertising']['acos']}")
     lines.append(f"    ROAS: {rm['advertising']['roas']}")
-    lines.append(f"    广告订单占比: {rm['advertising']['ad_order_ratio']}")
+    lines.append(f"    Insertion order proportion: {rm['advertising']['ad_order_ratio']}")
     
-    lines.append(f"\n  利润率 (关键!):")
-    lines.append(f"    毛利率: {rm['profitability']['gross_margin']}")
-    lines.append(f"    净利率: {rm['profitability']['net_margin']}")
-    lines.append(f"    状态: {rm['profitability']['profit_status']}")
+    lines.append(f"\n profit margin (Key!):")
+    lines.append(f"    Gross profit margin: {rm['profitability']['gross_margin']}")
+    lines.append(f"    net profit margin: {rm['profitability']['net_margin']}")
+    lines.append(f"    Status: {rm['profitability']['profit_status']}")
     
-    # 校准因子
+    # calibration factor
     lines.append(f"\n" + "─" * 90)
-    lines.append("⚠️ 模型校准: Keepa估算 vs 真实数据")
+    lines.append("⚠️ Model calibration: Keepa estimates vs real data")
     lines.append("─" * 90)
     
     for param, values in report['calibration_factors'].items():
         if 'estimated' in values:
             lines.append(f"\n  {param}:")
-            lines.append(f"    估算值: {values['estimated']:.2%} | 真实值: {values['real']:.2%}")
-            lines.append(f"    校准因子: {values['calibration_factor']:.2f}x | 影响: {values['impact']}")
+            lines.append(f"    Estimate: {values['estimated']:.2%} | true value: {values['real']:.2%}")
+            lines.append(f"    calibration factor: {values['calibration_factor']:.2f}x | influence: {values['impact']}")
     
-    # 优化结果对比
+    # Comparison of optimization results
     lines.append(f"\n" + "─" * 90)
-    lines.append("📊 盈利预测对比")
+    lines.append("📊 Profit forecast comparison")
     lines.append("─" * 90)
     
     orig = report['optimized_results']['original_keepa_estimate']
     real = report['optimized_results']['real_data_calibrated']
     var = report['optimized_results']['variance_analysis']
     
-    lines.append(f"\n  {'指标':<20} {'Keepa估算':<15} {'真实校准':<15} {'差异':<15}")
+    lines.append(f"\n  {'indicator':<20} {'Keepa estimate':<15} {'true calibration':<15} {'difference':<15}")
     lines.append(f"  {'─' * 65}")
-    lines.append(f"  {'净利率':<20} {orig['net_margin']:.1f}%{' '*10} {real['net_margin']:.1f}%{' '*10} {var['net_margin_variance']:+.1f}%")
-    lines.append(f"  {'年化ROI':<20} {orig['roi_annual']:.0f}%{' '*10} {real['roi_annual']:.0f}%{' '*10} {var['roi_variance']:+.0f}%")
-    lines.append(f"  {'月利润':<20} ${orig['monthly_profit']:.0f}{' '*10} ${real['monthly_profit']:.0f}{' '*10} ${var['profit_variance']:+.0f}")
+    lines.append(f"  {'net profit margin':<20} {orig['net_margin']:.1f}%{' '*10} {real['net_margin']:.1f}%{' '*10} {var['net_margin_variance']:+.1f}%")
+    lines.append(f"  {'Annualized ROI':<20} {orig['roi_annual']:.0f}%{' '*10} {real['roi_annual']:.0f}%{' '*10} {var['roi_variance']:+.0f}%")
+    lines.append(f"  {'monthly profit':<20} ${orig['monthly_profit']:.0f}{' '*10} ${real['monthly_profit']:.0f}{' '*10} ${var['profit_variance']:+.0f}")
     
-    # 关键发现
+    # Key findings
     lines.append(f"\n" + "─" * 90)
-    lines.append("💡 关键发现")
+    lines.append("💡 Key findings")
     lines.append("─" * 90)
     for finding in report['key_findings']:
         lines.append(f"  {finding}")
     
-    # 建议
+    # suggestion
     lines.append(f"\n" + "─" * 90)
-    lines.append("🎯 优化建议")
+    lines.append("🎯 Optimization suggestions")
     lines.append("─" * 90)
     for rec in report['action_recommendations']:
         priority_emoji = "🔴" if rec['priority'] == 'Critical' else "🟡" if rec['priority'] == 'High' else "🟢"
         lines.append(f"\n  {priority_emoji} [{rec['category']}] {rec['action']}")
-        lines.append(f"     预期影响: {rec['expected_impact']}")
+        lines.append(f"     expected impact: {rec['expected_impact']}")
     
     lines.append("\n" + "=" * 90)
     

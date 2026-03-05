@@ -1,296 +1,296 @@
-# Amz-Keepa-MCP v3.0 项目完成总结
+# Amz-Keepa-MCP v3.0 project completion summary
 
-## 🎯 项目目标
+## 🎯 Project goals
 
-实现**标准流程**: 输入ASIN → 获得完整All-in-One HTML报告
+realize**standard process**: Enter ASIN → Get complete All-in-One HTML report
 
-✅ **已完成!**
-
----
-
-## 📦 交付成果
-
-### 1. 核心模块
-
-| 文件 | 功能 | 状态 |
-|------|------|------|
-| `generate_report.py` | ⭐ 标准流程入口 | ✅ 完成 |
-| `src/keepa_fee_extractor.py` | 真实FBA费用提取 | ✅ 完成 |
-| `src/amazon_actuary_final.py` | 精算师分析引擎 | ✅ 更新 |
-| `src/keepa_metrics_collector.py` | 163指标采集 | ✅ 更新 |
-| `src/allinone_interactive_report.py` | 交互式报告 | ✅ 完成 |
-| `src/variant_auto_collector.py` | 自动变体发现 | ✅ 完成 |
-
-### 2. 配置文件
-
-| 文件 | 功能 | 状态 |
-|------|------|------|
-| `.env.example` | 环境变量模板 | ✅ 更新 |
-| `requirements.txt` | 依赖列表 | ✅ 完成 |
-| `README.md` | 项目文档 | ✅ 更新 |
-| `quickstart.sh` | 快速启动脚本 | ✅ 完成 |
-
-### 3. 测试和演示
-
-| 文件 | 功能 | 状态 |
-|------|------|------|
-| `demo_keepa_fees.py` | 费用提取演示 | ✅ 完成 |
-| `demo_complete_workflow.py` | 完整工作流演示 | ✅ 完成 |
-| `create_demo_report.py` | 交互式报告演示 | ✅ 完成 |
+✅ **Completed!**
 
 ---
 
-## 🚀 标准流程
+## 📦 Deliverables
 
-### 使用方式
+### 1. Core module
+
+| File | Function | Status |
+|------|------|------|
+| `generate_report.py` | ⭐ Standard process entrance | ✅ Complete |
+| `src/keepa_fee_extractor.py` | Real FBA fee withdrawal | ✅ Complete |
+| `src/amazon_actuary_final.py` | Actuary Analysis Engine | ✅ Update |
+| `src/keepa_metrics_collector.py` | 163 indicator collection | ✅ Update |
+| `src/allinone_interactive_report.py` | Interactive reporting | ✅ Complete |
+| `src/variant_auto_collector.py` | Automatic variant discovery | ✅ Complete |
+
+### 2. Configuration file
+
+| File | Function | Status |
+|------|------|------|
+| `.env.example` | Environment variable template | ✅ Update |
+| `requirements.txt` | dependency list | ✅ Complete |
+| `README.md` | Project documentation | ✅ Update |
+| `quickstart.sh` | quick start script | ✅ Complete |
+
+### 3. Testing and Demonstration
+
+| File | Function | Status |
+|------|------|------|
+| `demo_keepa_fees.py` | Fee withdrawal demo | ✅ Complete |
+| `demo_complete_workflow.py` | Complete workflow demo | ✅ Complete |
+| `create_demo_report.py` | Interactive report presentation | ✅ Complete |
+
+---
+
+## 🚀 Standard process
+
+### Usage
 
 ```bash
-# 方式1: 直接使用
+# Way 1: Use directly
 python generate_report.py B0F6B5R47Q
 
-# 方式2: 使用快速启动脚本
+# Way 2: Use quick start script
 ./quickstart.sh B0F6B5R47Q
 
-# 方式3: Python代码
+# Way 3: Python code
 from generate_report import generate_complete_report
 results = generate_complete_report('B0F6B5R47Q')
 ```
 
-### 流程步骤
+### Process steps
 
 ```
-输入: ASIN (如 B0F6B5R47Q)
+input: ASIN (Such as B0F6B5R47Q)
     ↓
-步骤1: 从Keepa API采集数据
-    • 产品信息
-    • 所有变体
-    • 163个指标
-    • 真实尺寸重量
+Step 1: Collect data from Keepa API
+    • Product information
+    • All variations
+    • 163 indicators
+    • True size weight
     ↓
-步骤2: 提取真实费用
-    • FBA费用 (基于2026年费率)
-    • 佣金比例 (基于类目)
-    • 体积重量计算
+Step 2: Withdraw true fees
+    • FBA fees (Based on 2026 rates)
+    • Commission ratio (Based on category)
+    • Volumetric weight calculation
     ↓
-步骤3: 生成精算师报告
-    • 完整分析
-    • 帕累托分析
-    • 风险评估
+Step 3: Generate actuary report
+    • Complete analysis
+    • Pareto analysis
+    • Risk assessment
     ↓
-步骤4: 生成交互式报告
-    • 填入1688采购价
-    • 实时利润计算
+Step 4: Generate interactive reports
+    • Fill in the 1688 purchase price
+    • Real-time profit calculation
     ↓
-输出: 两份HTML报告
+output: Two HTML reports
     • {ASIN}_ACTUARY_FINAL_v3.html
     • {ASIN}_ALLINONE_INTERACTIVE.html
 ```
 
 ---
 
-## ✨ 核心特性
+## ✨ Core Features
 
-### 基于Keepa真实数据
-
-```
-✅ FBA费用 - 基于真实尺寸重量 (2026年费率)
-✅ 佣金比例 - 基于类目 (8%-20%)
-✅ 体积重量 - 自动计算
-✅ 产品尺寸 - packageLength/Width/Height/Weight
-```
-
-### 163个完整指标
-
-- 基础信息 (18个)
-- 销售表现 (8个)
-- 价格历史 (15个)
-- 评论与退货 (5个)
-- 竞争分析 (5个)
-- 类目信息 (4个)
-- 产品代码 (8个)
-- 包装规格 (8个)
-- 费用 (6个)
-- ... 更多
-
-### TACOS广告模型
+### Based on Keepa real data
 
 ```
-TACOS = 广告总花费 / 总销售额 (默认15%)
+✅ FBA fees - Based on true size weight (2026 rates)
+✅ Commission ratio - Based on category (8%-20%)
+✅ Volume weight - Automatic calculation
+✅ Product size - packageLength/Width/Height/Weight
+```
 
-vs 传统ACOS:
-ACOS = 广告花费 / 广告销售额
+### 163 complete indicators
 
-TACOS更能反映广告对整体盈利的影响
+- Basic information (18)
+- sales performance (8)
+- price history (15)
+- Reviews and Returns (5)
+- competitive analysis (5)
+- Category information (4)
+- product code (8)
+- Packaging specifications (8)
+- cost (6)
+- ...more
+
+### TACOS advertising model
+
+```
+TACOS = total advertising spend / total sales (Default 15%)
+
+vs traditional ACOS:
+ACOS = advertising spend / advertising sales
+
+TACOS better reflects the impact of advertising on overall profitability
 ```
 
 ---
 
-## 📊 佣金比例表
+## 📊 Commission ratio table
 
-| 类目 | 佣金 | 示例 |
+| Category | Commission | Example |
 |------|------|------|
-| Electronics | 8% | 耳机、相机、手机 |
-| Clothing | 17% | T恤、鞋子、包包 |
-| Jewelry | 20% | 项链、戒指 |
-| Home | 15% | 厨具、家居 |
-| Books | 15% | 图书 |
-| Beauty | 15% | 化妆品 |
-| 其他 | 15% | 默认 |
+| Electronics | 8% | Headphones, cameras, mobile phones |
+| Clothing | 17% | T-shirts, shoes, bags |
+| Jewelry | 20% | Necklaces, rings |
+| Home | 15% | kitchenware, home furnishing |
+| Books | 15% | books |
+| Beauty | 15% | Cosmetics |
+| Others | 15% | Default |
 
 ---
 
-## 💰 财务模型
+## 💰 Financial model
 
-### 成本构成
-
-```
-总COGS (USD) = [采购价(RMB) + 头程运费] × 1.15(关税) ÷ 汇率
-
-其中:
-- 头程运费 = 重量(kg) × 12 RMB/kg
-- 汇率 = 7.2 (可配置)
-- 关税 = 15% (可配置)
-```
-
-### 利润计算
+### Cost composition
 
 ```
-利润 = 售价
+Total COGS (USD) = [purchase price(RMB) + First leg freight] × 1.15(tariff) ÷ exchange rate
+
+in:
+- First leg freight = weight(kg) × 12 RMB/kg
+- exchange rate = 7.2 (Configurable)
+- tariff = 15% (Configurable)
+```
+
+### Profit calculation
+
+```
+profit = selling price
      - COGS
-     - FBA费用
-     - 佣金
-     - 退货成本
-     - 仓储费
-     - TACOS广告费
+     - FBA fees
+     - Commission
+     - return cost
+     - Storage fee
+     - TACOS advertising fee
 ```
 
 ---
 
-## 📁 生成的报告
+## 📁 Generated reports
 
-### 1. 精算师报告 (`{ASIN}_ACTUARY_FINAL_v3.html`)
+### 1. Actuary’s report (`{ASIN}_ACTUARY_FINAL_v3.html`)
 
-- 执行摘要与投资建议
-- 163指标完整展示
-- 帕累托分析 (80/20)
-- 风险评估
-- 变体详细对比
-- 行动计划
+- Executive summary and investment recommendations
+- Complete display of 163 indicators
+- Pareto analysis (80/20)
+- risk assessment
+- Detailed comparison of variants
+- action plan
 
-### 2. 交互式报告 (`{ASIN}_ALLINONE_INTERACTIVE.html`) ⭐
+### 2. Interactive reporting (`{ASIN}_ALLINONE_INTERACTIVE.html`) ⭐
 
-- 成本计算器
-- 实时利润分析
-- 可调整参数
-- 填入1688采购价即可
+- cost calculator
+- Real-time profit analysis
+- Adjustable parameters
+- Just fill in the purchase price of 1688
 
 ---
 
-## 🔧 技术栈
+## 🔧 Technology stack
 
 - **Python**: 3.11+
-- **Keepa API**: 产品数据源
-- **Pandas/NumPy**: 数据处理
-- **MCP**: AI对话集成
-- **HTML/CSS/JS**: 交互式报告
+- **Keepa API**: Product data source
+- **Pandas/NumPy**: Data processing
+- **MCP**: AI conversation integration
+- **HTML/CSS/JS**: Interactive reporting
 
 ---
 
-## 📖 使用示例
+## 📖 Usage examples
 
-### 完整工作流
+### Complete workflow
 
 ```bash
-# 1. 生成报告
+# 1. Generate reports
 $ python generate_report.py B0F6B5R47Q
 
-🚀 Amz-Keepa-MCP v3.0 - All-in-One 报告生成器
+🚀 Amz-Keepa-MCP v3.0 - All-in-One report generator
 ================================================================================
 
 📦 ASIN: B0F6B5R47Q
-🎯 目标MOQ: 100
+🎯 Target MOQ: 100
 
-步骤 1/4: 从Keepa API采集产品数据...
+Step 1/4: Collect product data from Keepa API...
 --------------------------------------------------------------------------------
-   ✅ 采集完成
-   • 父ASIN: B0F6B5R47Q
-   • 变体数量: 9
-   • 品牌: DemoBrand
-   • 类目: Electronics
+   ✅ Collection completed
+   • Parent ASIN: B0F6B5R47Q
+   • Number of variants: 9
+   • Brand: DemoBrand
+   • Category: Electronics
 
-步骤 2/4: 提取真实FBA费用和佣金...
+Step 2/4: Withdraw real FBA fees and commissions...
 --------------------------------------------------------------------------------
-   B0F6B5R47Q: FBA $3.86 + 佣金 8%
-   B0F6B5R47R: FBA $3.86 + 佣金 8%
-   B0F6B5R47W: FBA $3.86 + 佣金 8%
-   ✅ 费用提取完成
+   B0F6B5R47Q: FBA $3.86 + Commission 8%
+   B0F6B5R47R: FBA $3.86 + Commission 8%
+   B0F6B5R47W: FBA $3.86 + Commission 8%
+   ✅ Fee withdrawal completed
 
-步骤 3/4: 生成精算师分析报告...
+Step 3/4: Generate actuarial analysis report...
 --------------------------------------------------------------------------------
-   ✅ 主报告生成完成
-   • 路径: cache/reports/B0F6B5R47Q_ACTUARY_FINAL_v3.html
-   • 整体决策: PROCEED
-   • 置信度: 85%
+   ✅ Main report generation completed
+   • path: cache/reports/B0F6B5R47Q_ACTUARY_FINAL_v3.html
+   • Overall decision-making: PROCEED
+   • Confidence: 85%
 
-步骤 4/4: 生成交互式All-in-One报告...
+Step 4/4: Generate interactive All-in-One report...
 --------------------------------------------------------------------------------
-   ✅ 交互式报告生成完成
-   • 路径: cache/reports/B0F6B5R47Q_ALLINONE_INTERACTIVE.html
+   ✅ Interactive report generation completed
+   • path: cache/reports/B0F6B5R47Q_ALLINONE_INTERACTIVE.html
 
 ================================================================================
-✅ 报告生成完成!
+✅ Report generation completed!
 ================================================================================
 
-📊 分析摘要:
-   • 父ASIN: B0F6B5R47Q
-   • 变体数量: 9
-   • 整体决策: PROCEED
-   • 置信度: 85%
-   • 预期月利润: $12,450.00
+📊 Analysis summary:
+   • Parent ASIN: B0F6B5R47Q
+   • Number of variants: 9
+   • Overall decision-making: PROCEED
+   • Confidence: 85%
+   • Expected monthly profit: $12,450.00
 
-📁 生成的报告:
-   1. 主报告: cache/reports/B0F6B5R47Q_ACTUARY_FINAL_v3.html
-   2. 交互式报告: cache/reports/B0F6B5R47Q_ALLINONE_INTERACTIVE.html
+📁 Generated reports:
+   1. Main report: cache/reports/B0F6B5R47Q_ACTUARY_FINAL_v3.html
+   2. Interactive reporting: cache/reports/B0F6B5R47Q_ALLINONE_INTERACTIVE.html
 
-📝 使用说明:
-   1. 打开交互式报告
-   2. 在'采购成本'输入框填入从1688找到的采购价
-   3. 系统自动计算完整利润分析
+📝 Instructions for use:
+   1. Open an interactive report
+   2. in'Procurement cost'Fill in the input box with the purchase price found from 1688
+   3. The system automatically calculates complete profit analysis
 ```
 
 ---
 
-## ✅ 验证清单
+## ✅ Verification Checklist
 
-- [x] 标准流程脚本 (`generate_report.py`)
-- [x] 真实FBA费用提取 (`keepa_fee_extractor.py`)
-- [x] 类目佣金比例表
-- [x] 体积重量自动计算
-- [x] 2026年FBA费率
-- [x] 交互式HTML报告
-- [x] 163指标采集
-- [x] 自动变体发现
-- [x] TACOS广告模型
-- [x] 帕累托分析
-- [x] 风险评估
-- [x] README文档
-- [x] 快速启动脚本
+- [x] Standard process script (`generate_report.py`)
+- [x] Real FBA fee withdrawal (`keepa_fee_extractor.py`)
+- [x] Category commission ratio table
+- [x] Volumetric weight automatic calculation
+- [x] FBA rates in 2026
+- [x] Interactive HTML reports
+- [x] 163 indicator collection
+- [x] Automatic variant discovery
+- [x] TACOS advertising model
+- [x] Pareto analysis
+- [x] risk assessment
+- [x] README document
+- [x] quick start script
 
 ---
 
-## 🎉 结论
+## 🎉 Conclusion
 
-**项目状态**: ✅ 完成
+**Project status**: ✅ Complete
 
-**标准流程已就绪**:
+**Standard procedures are in place**:
 ```bash
 python generate_report.py <ASIN>
 ```
 
-输入ASIN，获得完整All-in-One HTML报告！
+Enter ASIN and get the complete All-in-One HTML report!
 
 ---
 
-**最后更新**: 2026-02-16  
-**版本**: v3.0  
-**状态**: 生产就绪
+**last updated**: 2026-02-16  
+**version**: v3.0  
+**Status**: production ready

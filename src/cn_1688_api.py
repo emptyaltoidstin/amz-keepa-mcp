@@ -1,12 +1,12 @@
 """
-1688 API 集成模块
+1688 API integration module
 ================
-支持以图搜图获取采购价格
+Supports image search to obtain purchase price
 
-方案选择：
-1. TMAPI (第三方) - 简单快速，需要apiToken
-2. 1688官方API - 免费，需要企业资质申请
-3. 爬虫方案 - 不稳定，不推荐
+Plan options:
+1. TMAPI (third party) - Simple and fast, requires apiToken
+2. 1688 official API - Free, enterprise qualification application required
+3. Crawler solution - Unstable, not recommended
 """
 
 import os
@@ -22,11 +22,11 @@ from urllib.parse import urlencode
 
 @dataclass
 class CNSupplierOffer:
-    """1688供应商报价"""
+    """1688 supplier quotation"""
     offer_id: str
     title: str
-    price: float  # 人民币
-    moq: int  # 最小起订量
+    price: float  # RMB
+    moq: int  # MOQ
     unit: str
     image_url: str
     supplier_name: str
@@ -34,18 +34,18 @@ class CNSupplierOffer:
     is_verified: bool
     rating: float
     sales_count: int
-    match_score: float  # 图片匹配度 0-1
+    match_score: float  # Image matching degree 0-1
     product_url: str
     
 
 class TMAPI1688Client:
     """
-    TMAPI 1688 API 客户端
-    官网: https://tmapi.top
-    特点：简单、快速，需要付费订阅
+    TMAPI 1688 API client
+    Official website: https://tmapi.top
+    Features: Simple, fast, requires paid subscription
     """
     
-    BASE_URL = "http://api.tmapi.top"  # TMAPI使用HTTP协议
+    BASE_URL = "http://api.tmapi.top"  # TMAPI uses HTTP protocol
     
     def __init__(self, api_token: str):
         self.api_token = api_token
@@ -54,18 +54,18 @@ class TMAPI1688Client:
                        sort: str = "default", price_start: float = None,
                        price_end: float = None) -> Dict:
         """
-        以图搜图
+        Search pictures by pictures
         
         Args:
-            image_url: 图片URL（必须是阿里系平台的图片，或先转换）
-            page: 页码
-            page_size: 每页数量 (最大20)
-            sort: 排序方式 (default/sales/price_up/price_down)
-            price_start: 最低价格
-            price_end: 最高价格
+            image_url: Image URL (must be an image from the Alibaba platform, or convert it first)
+            page: Page number
+            page_size: Quantity per page (Max 20)
+            sort: sort by (default/sales/price_up/price_down)
+            price_start: lowest price
+            price_end: highest price
             
         Returns:
-            API响应结果
+            API response result
         """
         endpoint = f"{self.BASE_URL}/platforms/1688/search/items_by_image"
         
@@ -91,13 +91,13 @@ class TMAPI1688Client:
     
     def get_product_detail(self, product_id: str) -> Dict:
         """
-        获取商品详情
+        Get product details
         
         Args:
-            product_id: 1688商品ID
+            product_id: 1688 Product ID
             
         Returns:
-            商品详情
+            Product details
         """
         endpoint = f"{self.BASE_URL}/platforms/1688/product/detail"
         
@@ -114,7 +114,7 @@ class TMAPI1688Client:
             return {"error": str(e), "status": "error"}
     
     def parse_offers(self, response: Dict) -> List[CNSupplierOffer]:
-        """解析API响应为报价列表"""
+        """Parse API response into list of quotes"""
         offers = []
         
         if response.get("status") != "success":
@@ -130,7 +130,7 @@ class TMAPI1688Client:
                     title=item.get("title", ""),
                     price=float(item.get("price", 0)),
                     moq=int(item.get("min_order_quantity", 1)),
-                    unit=item.get("unit", "件"),
+                    unit=item.get("unit", "pieces"),
                     image_url=item.get("image_url", ""),
                     supplier_name=item.get("supplier_name", ""),
                     supplier_years=int(item.get("supplier_years", 0)),
@@ -149,9 +149,9 @@ class TMAPI1688Client:
 
 class Alibaba1688Client:
     """
-    1688 官方开放平台 API 客户端
-    官网: https://open.1688.com
-    特点：免费，需要企业资质申请
+    1688 official open platform API client
+    Official website: https://open.1688.com
+    Features: Free, enterprise qualification application required
     """
     
     GATEWAY_URL = "https://gw.open.1688.com/openapi"
@@ -161,26 +161,26 @@ class Alibaba1688Client:
         self.app_secret = app_secret
         
     def _generate_sign(self, params: Dict) -> str:
-        """生成API签名"""
-        # 按参数名排序
+        """Generate API signature"""
+        # Sort by parameter name
         sorted_params = sorted(params.items(), key=lambda x: x[0])
         
-        # 拼接字符串
+        # Concatenate strings
         sign_str = ""
         for key, value in sorted_params:
             sign_str += f"{key}{value}"
         
-        # 添加secret
+        # Add secret
         sign_str = self.app_secret + sign_str + self.app_secret
         
-        # MD5加密
+        # MD5 encryption
         return hashlib.md5(sign_str.encode('utf-8')).hexdigest().upper()
     
     def search_by_image(self, image_url: str, page: int = 1, page_size: int = 20) -> Dict:
         """
-        以图搜图 (alibaba.product.image.similar.offer.search)
+        Search pictures by pictures (alibaba.product.image.similar.offer.search)
         
-        注意：需要先申请API权限
+        Note: You need to apply for API permission first
         """
         api_namespace = "com.alibaba.product"
         api_name = "alibaba.product.image.similar.offer.search"
@@ -210,8 +210,8 @@ class Alibaba1688Client:
 
 class CNProcurementFinder:
     """
-    采购价格查找器
-    整合多种方式获取1688采购价格
+    Purchase price finder
+    Integrate multiple methods to obtain 1688 purchase price
     """
     
     def __init__(self, 
@@ -219,12 +219,12 @@ class CNProcurementFinder:
                  alibaba_app_key: Optional[str] = None,
                  alibaba_app_secret: Optional[str] = None):
         """
-        初始化
+        initialization
         
         Args:
-            tmapi_token: TMAPI的apiToken（推荐，最简单）
-            alibaba_app_key: 1688开放平台App Key
-            alibaba_app_secret: 1688开放平台App Secret
+            tmapi_token: TMAPI’s apiToken (recommended, the simplest)
+            alibaba_app_key: 1688 Open Platform App Key
+            alibaba_app_secret: 1688 Open Platform App Secret
         """
         self.tmapi_client = None
         self.alibaba_client = None
@@ -237,7 +237,7 @@ class CNProcurementFinder:
     
     @classmethod
     def from_env(cls) -> "CNProcurementFinder":
-        """从环境变量创建实例"""
+        """Create instance from environment variables"""
         return cls(
             tmapi_token=os.getenv("TMAPI_TOKEN"),
             alibaba_app_key=os.getenv("ALIBABA_APP_KEY"),
@@ -247,24 +247,24 @@ class CNProcurementFinder:
     def search_best_price(self, image_url: str, target_moq: int = 1,
                           max_results: int = 10) -> Optional[CNSupplierOffer]:
         """
-        搜索最优价格
+        Search for the best price
         
         Args:
-            image_url: 产品图片URL
-            target_moq: 目标起订量
-            max_results: 最大结果数
+            image_url: Product image URL
+            target_moq: Target minimum order quantity
+            max_results: Maximum number of results
             
         Returns:
-            最优报价，或None
+            Best offer, or None
         """
         if not self.tmapi_client:
-            raise ValueError("需要提供TMAPI_TOKEN或使用其他方式")
+            raise ValueError("TMAPI is required_TOKEN or use other methods")
         
-        # 调用TMAPI搜索
+        # Call TMAPI search
         response = self.tmapi_client.search_by_image(
             image_url=image_url,
             page_size=min(max_results, 20),
-            sort="price_up"  # 按价格升序
+            sort="price_up"  # Sort by price ascending
         )
         
         if response.get("status") != "success":
@@ -275,22 +275,22 @@ class CNProcurementFinder:
         if not offers:
             return None
         
-        # 筛选符合起订量的报价，并按价格排序
+        # Filter quotes that meet the minimum order quantity and sort by price
         suitable_offers = [
             o for o in offers 
-            if o.moq <= target_moq * 2  # 允许MOQ稍高一些
+            if o.moq <= target_moq * 2  # Allow MOQ to be slightly higher
         ]
         
         if not suitable_offers:
             suitable_offers = offers
         
-        # 综合评分排序（价格权重0.6，匹配度权重0.2，销量权重0.2）
+        # Comprehensive score ranking (price weight 0.6, matching weight 0.2, sales weight 0.2)
         def score_offer(o: CNSupplierOffer) -> float:
-            price_score = 1 / (o.price + 1)  # 价格越低分越高
+            price_score = 1 / (o.price + 1)  # The lower the price, the higher the score
             match_score = o.match_score
-            sales_score = min(o.sales_count / 1000, 1)  # 销量归一化
+            sales_score = min(o.sales_count / 1000, 1)  # Sales volume normalized
             
-            # 认证商家加分
+            # Bonus points for certified merchants
             verified_bonus = 0.2 if o.is_verified else 0
             
             return price_score * 0.6 + match_score * 0.2 + sales_score * 0.1 + verified_bonus
@@ -302,17 +302,17 @@ class CNProcurementFinder:
     def search_multiple_prices(self, image_url: str, 
                                count: int = 5) -> List[CNSupplierOffer]:
         """
-        搜索多个报价供选择
+        Search multiple quotes to choose from
         
         Args:
-            image_url: 产品图片URL
-            count: 返回数量
+            image_url: Product image URL
+            count: Return quantity
             
         Returns:
-            报价列表
+            Quotation list
         """
         if not self.tmapi_client:
-            raise ValueError("需要提供TMAPI_TOKEN")
+            raise ValueError("TMAPI is required_TOKEN")
         
         response = self.tmapi_client.search_by_image(
             image_url=image_url,
@@ -324,26 +324,26 @@ class CNProcurementFinder:
 
 def get_product_main_image(keepa_product: Dict) -> Optional[str]:
     """
-    从Keepa产品数据中获取主图URL
+    Get main image URL from Keepa product data
     
     Args:
-        keepa_product: Keepa API返回的产品数据
+        keepa_product: Product data returned by Keepa API
         
     Returns:
-        图片URL或None
+        Image URL or None
     """
-    # 尝试获取图片
+    # Try to get the picture
     images = keepa_product.get("imagesCSV", "")
     if images:
-        # Keepa的图片格式是逗号分隔的图片ID
+        # Keepa’s image format is comma-separated image IDs
         image_ids = images.split(",")
         if image_ids:
-            # 构造图片URL
-            # 注意：Keepa的图片可能需要特殊处理才能用于1688搜索
+            # Construct image URL
+            # Note: Keepa’s images may require special processing to be used in 1688 searches
             image_id = image_ids[0]
             return f"https://images-na.ssl-images-amazon.com/images/I/{image_id}"
     
-    # 尝试从data中获取
+    # Try to get from data
     data = keepa_product.get("data", {})
     if data:
         image_list = data.get("images", [])
@@ -356,14 +356,14 @@ def get_product_main_image(keepa_product: Dict) -> Optional[str]:
 def find_procurement_price(keepa_product: Dict, 
                            tmapi_token: Optional[str] = None) -> Dict:
     """
-    为Keepa产品查找采购价格
+    Find purchase prices for Keepa products
     
     Args:
-        keepa_product: Keepa产品数据
+        keepa_product: Keepa product data
         tmapi_token: TMAPI token
         
     Returns:
-        包含采购信息的字典
+        Dictionary containing purchasing information
     """
     result = {
         "found": False,
@@ -375,18 +375,18 @@ def find_procurement_price(keepa_product: Dict,
         "offers": []
     }
     
-    # 获取产品图片
+    # Get product pictures
     image_url = get_product_main_image(keepa_product)
     
     if not image_url:
-        result["error"] = "无法获取产品图片"
+        result["error"] = "Unable to get product image"
         return result
     
-    # 创建finder
+    # Create finder
     finder = CNProcurementFinder(tmapi_token=tmapi_token)
     
     try:
-        # 搜索多个报价
+        # Search multiple quotes
         offers = finder.search_multiple_prices(image_url, count=5)
         
         if offers:
@@ -413,16 +413,16 @@ def find_procurement_price(keepa_product: Dict,
     return result
 
 
-# 便捷函数
+# Convenience function
 def quick_find_price(asin: str, keepa_api_key: str, tmapi_token: str) -> Dict:
     """
-    快速查找ASIN的采购价格
+    Quickly find the purchase price of an ASIN
     
-    这个函数整合Keepa和1688 API
+    This function integrates Keepa and 1688 API
     """
     import keepa
     
-    # 获取Keepa数据
+    # Get Keepa data
     api = keepa.Keepa(keepa_api_key)
     products = api.product_finder({
         'asin': [asin],
@@ -430,18 +430,18 @@ def quick_find_price(asin: str, keepa_api_key: str, tmapi_token: str) -> Dict:
     })
     
     if not products:
-        return {"error": "Keepa未找到产品"}
+        return {"error": "Keepa product not found"}
     
-    # 查找采购价格
+    # Find purchase price
     return find_procurement_price(products[0], tmapi_token)
 
 
 if __name__ == "__main__":
-    # 测试代码
-    print("1688 API模块已加载")
-    print("\n使用方法:")
-    print("1. 设置环境变量 TMAPI_TOKEN=your_token")
-    print("2. 使用 CNProcurementFinder.from_env()")
-    print("3. 调用 search_best_price(image_url)")
-    print("\n获取TMAPI Token:")
-    print("  访问 https://tmapi.top 注册并获取")
+    # test code
+    print("1688 API module loaded")
+    print("\nHow to use:")
+    print("1. Set the environment variable TMAPI_TOKEN=your_token")
+    print("2. Use CNProcurementFinder.from_env()")
+    print("3. Call search_best_price(image_url)")
+    print("\nGet TMAPI Token:")
+    print("  access https://tmapi.top register and get")

@@ -1,9 +1,9 @@
 """
-中文精算师报告生成器
+Chinese Actuary Report Generator
 ==================
-- 163个指标完整展示
-- 指标名称简体中文
-- Premium Design 风格
+- 163 indicators fully displayed
+- Indicator name Simplified Chinese
+- Premium Design style
 """
 
 import json
@@ -13,207 +13,207 @@ from typing import Dict, List, Tuple
 from collections import defaultdict
 
 
-# 163个指标中文映射
+# 163 indicators Chinese mapping
 METRICS_CHINESE = {
-    # 基础信息
-    'Locale': '站点',
-    'Image': '主图',
-    'Image Count': '图片数量',
-    'Title': '标题',
-    'Parent Title': '父标题',
-    'Description & Features: Description': '产品描述',
-    'Description & Features: Short Description': '简短描述',
-    'Description & Features: Feature 1': '卖点1',
-    'Description & Features: Feature 2': '卖点2',
-    'Description & Features: Feature 3': '卖点3',
-    'Description & Features: Feature 4': '卖点4',
-    'Description & Features: Feature 5': '卖点5',
+    # Basic information
+    'Locale': 'site',
+    'Image': 'Main picture',
+    'Image Count': 'Number of pictures',
+    'Title': 'title',
+    'Parent Title': 'parent title',
+    'Description & Features: Description': 'product description',
+    'Description & Features: Short Description': 'short description',
+    'Description & Features: Feature 1': 'Selling point 1',
+    'Description & Features: Feature 2': 'Selling point 2',
+    'Description & Features: Feature 3': 'Selling point 3',
+    'Description & Features: Feature 4': 'Selling point 4',
+    'Description & Features: Feature 5': 'Selling point 5',
     
-    # 销售表现
-    'Sales Rank: Current': '当前销售排名',
-    'Sales Rank: 90 days avg.': '90天平均排名',
-    'Sales Rank: Drops last 90 days': '90天排名下降次数',
-    'Sales Rank: Reference': '排名参考类目',
-    'Sales Rank: Display Group': '展示分组',
-    'Sales Rank: Subcategory Sales Ranks': '子类目排名',
-    'Bought in past month': '过去30天销量',
-    '90 days change % monthly sold': '90天销量变化率',
+    # sales performance
+    'Sales Rank: Current': 'Current sales ranking',
+    'Sales Rank: 90 days avg.': '90-day average ranking',
+    'Sales Rank: Drops last 90 days': 'Number of ranking drops in 90 days',
+    'Sales Rank: Reference': 'Ranking reference category',
+    'Sales Rank: Display Group': 'Display grouping',
+    'Sales Rank: Subcategory Sales Ranks': 'Subcategory ranking',
+    'Bought in past month': 'Sales volume in the past 30 days',
+    '90 days change % monthly sold': '90-day sales change rate',
     
-    # 退货与评论
-    'Return Rate': '退货率',
-    'Reviews: Rating': '评分',
-    'Reviews: Rating Count': '评分数量',
-    'Reviews: Review Count - Format Specific': '评论数量',
-    'Last Price Change': '最后价格变动',
+    # Returns and Reviews
+    'Return Rate': 'return rate',
+    'Reviews: Rating': 'score',
+    'Reviews: Rating Count': 'Number of ratings',
+    'Reviews: Review Count - Format Specific': 'Number of comments',
+    'Last Price Change': 'last price change',
     
     # Buy Box
-    'Buy Box: Buy Box Seller': 'Buy Box卖家',
-    'Buy Box: Shipping Country': '发货国家',
-    'Buy Box: Strikethrough Price': '划线价',
-    'Buy Box: % Amazon 90 days': '90天Amazon自营占比',
-    'Buy Box: % Top Seller 90 days': '90天头部卖家占比',
-    'Buy Box: Winner Count 90 days': '90天Buy Box卖家数',
-    'Buy Box: Standard Deviation 90 days': '90天价格标准差',
-    'Buy Box: Flipability 90 days': '90天Buy Box轮换度',
-    'Buy Box: Is FBA': '是否FBA',
-    'Buy Box: Unqualified': '是否不合格',
-    'Buy Box: Prime Eligible': '是否Prime',
-    'Buy Box: Subscribe & Save': '是否订阅省',
-    'Suggested Lower Price': '建议更低价格',
-    'Lightning Deals: Current': '当前秒杀',
-    'Warehouse Deals: Current': '当前仓库 deals',
+    'Buy Box: Buy Box Seller': 'Buy Box seller',
+    'Buy Box: Shipping Country': 'Shipping country',
+    'Buy Box: Strikethrough Price': 'crossed price',
+    'Buy Box: % Amazon 90 days': '90-day Amazon self-operated ratio',
+    'Buy Box: % Top Seller 90 days': 'Proportion of top sellers in 90 days',
+    'Buy Box: Winner Count 90 days': 'Number of Buy Box sellers in 90 days',
+    'Buy Box: Standard Deviation 90 days': '90-day price standard deviation',
+    'Buy Box: Flipability 90 days': '90-day Buy Box rotation',
+    'Buy Box: Is FBA': 'Whether FBA',
+    'Buy Box: Unqualified': 'Is it unqualified?',
+    'Buy Box: Prime Eligible': 'Prime or not',
+    'Buy Box: Subscribe & Save': 'Whether to subscribe to save',
+    'Suggested Lower Price': 'Suggest a lower price',
+    'Lightning Deals: Current': 'Current flash sale',
+    'Warehouse Deals: Current': 'Current warehouse deals',
     
-    # Amazon自营价格
-    'Amazon: Current': 'Amazon自营当前价',
-    'Amazon: 30 days avg.': 'Amazon自营30天均价',
-    'Amazon: 90 days avg.': 'Amazon自营90天均价',
-    'Amazon: 180 days avg.': 'Amazon自营180天均价',
-    'Amazon: 365 days avg.': 'Amazon自营365天均价',
-    'Amazon: 1 day drop %': '1天降价幅度',
-    'Amazon: 7 days drop %': '7天降价幅度',
-    'Amazon: 30 days drop %': '30天降价幅度',
-    'Amazon: 90 days drop %': '90天降价幅度',
-    'Amazon: Drop since last visit': '上次访问以来降价',
-    'Amazon: Drop % since last visit': '上次访问以来降价幅度',
-    'Amazon: Last visit': '上次访问时间',
-    'Amazon: Is Lowest': '是否最低价',
-    'Amazon: Is Lowest 90 days': '是否90天最低',
-    'Amazon: Lowest': '历史最低价',
-    'Amazon: Highest': '历史最高价',
+    # Amazon self-operated price
+    'Amazon: Current': 'Amazon self-operated current price',
+    'Amazon: 30 days avg.': 'Amazon self-operated 30-day average price',
+    'Amazon: 90 days avg.': 'Amazon self-operated 90-day average price',
+    'Amazon: 180 days avg.': 'Amazon self-operated 180-day average price',
+    'Amazon: 365 days avg.': 'Amazon self-operated 365-day average price',
+    'Amazon: 1 day drop %': '1 day price reduction',
+    'Amazon: 7 days drop %': 'Price reduction within 7 days',
+    'Amazon: 30 days drop %': 'Price reduction within 30 days',
+    'Amazon: 90 days drop %': 'Price reduction within 90 days',
+    'Amazon: Drop since last visit': 'Price reduced since last visit',
+    'Amazon: Drop % since last visit': 'Price reduction since last visit',
+    'Amazon: Last visit': 'last access time',
+    'Amazon: Is Lowest': 'Is it the lowest price?',
+    'Amazon: Is Lowest 90 days': 'Is the 90-day minimum',
+    'Amazon: Lowest': 'historical low price',
+    'Amazon: Highest': 'historical high price',
     
-    # 新品价格
-    'New: Current': '新品当前价',
-    'New: 30 days avg.': '新品30天均价',
-    'New: 90 days avg.': '新品90天均价',
-    'New: 180 days avg.': '新品180天均价',
-    'New: 365 days avg.': '新品365天均价',
-    'New: 1 day drop %': '新品1天降价幅度',
-    'New: 7 days drop %': '新品7天降价幅度',
-    'New: 30 days drop %': '新品30天降价幅度',
-    'New: 90 days drop %': '新品90天降价幅度',
-    'New: Drop since last visit': '新品上次访问以来降价',
-    'New: Drop % since last visit': '新品上次访问以来降价幅度',
-    'New: Lowest': '新品历史最低价',
-    'New: Highest': '新品历史最高价',
+    # New product price
+    'New: Current': 'New product current price',
+    'New: 30 days avg.': '30-day average price of new products',
+    'New: 90 days avg.': '90-day average price of new products',
+    'New: 180 days avg.': '180-day average price of new products',
+    'New: 365 days avg.': '365-day average price of new products',
+    'New: 1 day drop %': 'One-day price reduction for new products',
+    'New: 7 days drop %': '7-day price reduction for new products',
+    'New: 30 days drop %': 'New product 30-day price reduction',
+    'New: 90 days drop %': '90-day price reduction for new products',
+    'New: Drop since last visit': 'New product price reduced since last visit',
+    'New: Drop % since last visit': 'New product price reduction since last visit',
+    'New: Lowest': 'New product lowest price in history',
+    'New: Highest': 'New product’s highest price in history',
     
-    # 二手价格
-    'Used: Current': '二手当前价',
-    'Used: 90 days avg.': '二手90天均价',
-    'Used: Lowest': '二手最低价',
-    'Used: Highest': '二手最高价',
+    # second hand price
+    'Used: Current': 'Second-hand current price',
+    'Used: 90 days avg.': 'Second-hand 90-day average price',
+    'Used: Lowest': 'Second hand lowest price',
+    'Used: Highest': 'Second-hand highest price',
     
-    # 库存
-    'Amazon: Stock': 'Amazon自营库存',
-    'Amazon: 90 days OOS': '90天缺货率',
-    'Amazon: OOS Count 30 days': '30天缺货次数',
-    'Amazon: OOS Count 90 days': '90天缺货次数',
-    'Amazon: Availability of the Amazon offer': 'Amazon自营 availability',
-    'Amazon: Amazon offer shipping delay': 'Amazon自营发货延迟',
+    # Inventory
+    'Amazon: Stock': 'Amazon self-operated inventory',
+    'Amazon: 90 days OOS': '90-day out-of-stock rate',
+    'Amazon: OOS Count 30 days': 'Number of out-of-stocks in 30 days',
+    'Amazon: OOS Count 90 days': 'Number of out-of-stocks in 90 days',
+    'Amazon: Availability of the Amazon offer': 'Amazon self-operated availability',
+    'Amazon: Amazon offer shipping delay': 'Amazon self-operated shipment delayed',
     
-    # 费用
-    'FBA Pick&Pack Fee': 'FBA取件包装费',
-    'Referral Fee %': '佣金比例',
-    'Referral Fee based on current Buy Box price': '当前佣金金额',
-    'List Price: Current': '标价当前',
-    'List Price: 30 days avg.': '标价30天均价',
-    'List Price: 90 days avg.': '标价90天均价',
+    # cost
+    'FBA Pick&Pack Fee': 'FBA pickup and packaging fee',
+    'Referral Fee %': 'Commission ratio',
+    'Referral Fee based on current Buy Box price': 'Current commission amount',
+    'List Price: Current': 'List price current',
+    'List Price: 30 days avg.': 'List price 30 days average price',
+    'List Price: 90 days avg.': 'List price 90-day average price',
     
-    # 竞争
-    'Total Offer Count': '总卖家数',
-    'New Offer Count: Current': '新品卖家数',
-    'Used Offer Count: Current': '二手卖家数',
-    'Count of retrieved live offers: New, FBA': 'FBA新品卖家数',
-    'Count of retrieved live offers: New, FBM': 'FBM新品卖家数',
-    'Tracking since': '开始追踪日期',
-    'Listed since': '上架日期',
+    # compete
+    'Total Offer Count': 'Total number of sellers',
+    'New Offer Count: Current': 'Number of new product sellers',
+    'Used Offer Count: Current': 'Number of second-hand sellers',
+    'Count of retrieved live offers: New, FBA': 'Number of FBA new product sellers',
+    'Count of retrieved live offers: New, FBM': 'Number of FBM new product sellers',
+    'Tracking since': 'Start tracking date',
+    'Listed since': 'Release date',
     
-    # 类目
-    'URL: Amazon': '亚马逊链接',
-    'Categories: Root': '根类目',
-    'Categories: Sub': '子类目',
-    'Categories: Tree': '类目路径',
-    'Website Display Group: Name': '网站展示组',
+    # Category
+    'URL: Amazon': 'Amazon link',
+    'Categories: Root': 'root category',
+    'Categories: Sub': 'subcategory',
+    'Categories: Tree': 'Category path',
+    'Website Display Group: Name': 'Website display group',
     
-    # 产品代码
+    # product code
     'ASIN': 'ASIN',
-    'Imported by Code': '进口代码',
+    'Imported by Code': 'import code',
     'Product Codes: UPC': 'UPC',
     'Product Codes: EAN': 'EAN',
     'Product Codes: GTIN': 'GTIN',
-    'Product Codes: PartNumber': '零件号',
-    'Parent ASIN': '父ASIN',
-    'Variation ASINs': '变体ASIN列表',
+    'Product Codes: PartNumber': 'Part number',
+    'Parent ASIN': 'Parent ASIN',
+    'Variation ASINs': 'Variant ASIN list',
     
-    # 产品属性
-    'Type': '类型',
-    'Manufacturer': '制造商',
-    'Brand': '品牌',
-    'Brand Store Name': '品牌店名称',
-    'Brand Store URL Name': '品牌店URL',
-    'Product Group': '产品组',
-    'Model': '型号',
-    'Variation Attributes': '变体属性',
-    'Color': '颜色',
-    'Size': '尺寸',
-    'Unit Details: Unit Value': '单位值',
-    'Unit Details: Unit Type': '单位类型',
-    'Scent': '香味',
-    'Item Form': '形态',
-    'Pattern': '图案',
-    'Style': '风格',
-    'Material': '材质',
-    'Item Type': '物品类型',
-    'Target Audience': '目标受众',
-    'Recommended Uses': '推荐用途',
+    # Product attributes
+    'Type': 'Type',
+    'Manufacturer': 'manufacturer',
+    'Brand': 'brand',
+    'Brand Store Name': 'Brand store name',
+    'Brand Store URL Name': 'Brand store URL',
+    'Product Group': 'product group',
+    'Model': 'Model',
+    'Variation Attributes': 'Variant properties',
+    'Color': 'color',
+    'Size': 'Size',
+    'Unit Details: Unit Value': 'unit value',
+    'Unit Details: Unit Type': 'Unit type',
+    'Scent': 'fragrance',
+    'Item Form': 'form',
+    'Pattern': 'pattern',
+    'Style': 'style',
+    'Material': 'Material',
+    'Item Type': 'Item type',
+    'Target Audience': 'target audience',
+    'Recommended Uses': 'Recommended use',
     
-    # 内容
-    'Videos: Video Count': '视频数量',
-    'Videos: Has Main Video': '是否有主视频',
-    'Videos: Main Videos': '主视频',
-    'Videos: Additional Videos': '附加视频',
-    'A+ Content: Has A+ Content': '是否有A+内容',
-    'A+ Content: A+ From Manufacturer': 'A+来自制造商',
-    'A+ Content: A+ Content': 'A+内容',
+    # content
+    'Videos: Video Count': 'Number of videos',
+    'Videos: Has Main Video': 'Is there a main video?',
+    'Videos: Main Videos': 'Main video',
+    'Videos: Additional Videos': 'Additional video',
+    'A+ Content: Has A+ Content': 'Is there an A+content',
+    'A+ Content: A+ From Manufacturer': 'A+from manufacturer',
+    'A+ Content: A+ Content': 'A+content',
     
-    # 包装规格
-    'Package: Dimension (cm³)': '包装体积(cm³)',
-    'Package: Length (cm)': '包装长度(cm)',
-    'Package: Width (cm)': '包装宽度(cm)',
-    'Package: Height (cm)': '包装高度(cm)',
-    'Package: Weight (g)': '包装重量(g)',
-    'Package: Quantity': '包装数量',
-    'Item: Dimension (cm³)': '产品体积(cm³)',
-    'Item: Length (cm)': '产品长度(cm)',
-    'Item: Width (cm)': '产品宽度(cm)',
-    'Item: Height (cm)': '产品高度(cm)',
-    'Item: Weight (g)': '产品重量(g)',
+    # Packaging specifications
+    'Package: Dimension (cm³)': 'Packing volume(cm³)',
+    'Package: Length (cm)': 'Packing length(cm)',
+    'Package: Width (cm)': 'Packing width(cm)',
+    'Package: Height (cm)': 'Packing height(cm)',
+    'Package: Weight (g)': 'Packing weight(g)',
+    'Package: Quantity': 'Packing quantity',
+    'Item: Dimension (cm³)': 'Product volume(cm³)',
+    'Item: Length (cm)': 'Product length(cm)',
+    'Item: Width (cm)': 'Product width(cm)',
+    'Item: Height (cm)': 'Product height(cm)',
+    'Item: Weight (g)': 'Product weight(g)',
     
-    # 其他
-    'Included Components': '包含组件',
-    'Ingredients': '成分',
-    'Active Ingredients': '活性成分',
-    'Special Ingredients': '特殊成分',
-    'Safety Warning': '安全警告',
-    'Batteries Required': '是否需要电池',
-    'Batteries Included': '是否含电池',
-    'Hazardous Materials': '危险品',
-    'Is HazMat': '是否危险品',
-    'Is heat sensitive': '是否热敏感',
-    'Adult Product': '成人产品',
-    'Is Merch on Demand': '是否按需生产',
-    'Trade-In Eligible': '是否支持以旧换新',
-    'Deals: Deal Type': 'Deal类型',
-    'Deals: Badge': 'Deal徽章',
-    'One Time Coupon: Absolute': '一次性优惠券金额',
-    'One Time Coupon: Percentage': '一次性优惠券比例',
-    'One Time Coupon: Subscribe & Save %': '订阅省优惠比例',
-    'Business Discount: Percentage': '企业折扣比例',
-    'Freq. Bought Together': '经常一起购买',
+    # Others
+    'Included Components': 'Contains components',
+    'Ingredients': 'Ingredients',
+    'Active Ingredients': 'active ingredient',
+    'Special Ingredients': 'special ingredients',
+    'Safety Warning': 'Security warning',
+    'Batteries Required': 'Do you need batteries?',
+    'Batteries Included': 'Does it contain batteries?',
+    'Hazardous Materials': 'Dangerous goods',
+    'Is HazMat': 'Is it dangerous goods?',
+    'Is heat sensitive': 'Is it heat sensitive?',
+    'Adult Product': 'adult products',
+    'Is Merch on Demand': 'Whether to produce on demand',
+    'Trade-In Eligible': 'Whether to support trade-in',
+    'Deals: Deal Type': 'Deal type',
+    'Deals: Badge': 'Deal badge',
+    'One Time Coupon: Absolute': 'One-time coupon amount',
+    'One Time Coupon: Percentage': 'One-time coupon ratio',
+    'One Time Coupon: Subscribe & Save %': 'Subscribe and save discount ratio',
+    'Business Discount: Percentage': 'Corporate discount ratio',
+    'Freq. Bought Together': 'often buy together',
 }
 
 
 class ChineseActuaryReport:
-    """中文精算师报告生成器"""
+    """Chinese Actuary Report Generator"""
     
     def __init__(self):
         self.colors = {
@@ -231,21 +231,21 @@ class ChineseActuaryReport:
         }
     
     def generate_full_report(self, asin: str, api_key: str = None) -> str:
-        """生成完整报告"""
+        """Generate full report"""
         from src.variant_auto_collector import VariantAutoCollector
         from src.amazon_actuary_final import LinkPortfolioAnalyzer, VariantFinancials
         
-        # 1. 采集变体数据
+        # 1. Collect variant data
         collector = VariantAutoCollector(api_key)
         products, parent_info = collector.collect_variants(asin)
         
-        # 2. 准备财务数据（示例）
+        # 2. Preparing financial data (example)
         financials = {}
         for p in products:
             asin_code = p.get('asin', '')
             attrs = collector.get_variation_attributes(p)
             color = attrs.get('color', '')
-            # 根据颜色估算COGS
+            # Estimating COGS based on color
             base_cogs = 8.5
             if color in ['Green', 'Brown']:
                 base_cogs += 0.3
@@ -259,7 +259,7 @@ class ChineseActuaryReport:
                 ad_order_pct=0.35 if color == 'Black' else 0.40
             )
         
-        # 3. 分析
+        # 3. Analysis
         analyzer = LinkPortfolioAnalyzer()
         analysis = analyzer.analyze_portfolio(
             parent_asin=parent_info['parent_asin'],
@@ -267,7 +267,7 @@ class ChineseActuaryReport:
             financials_map=financials
         )
         
-        # 4. 生成HTML
+        # 4. Generate HTML
         html = self._build_html(analysis, products, parent_info)
         
         output_path = f'cache/reports/{asin}_CHINESE_FULL_REPORT.html'
@@ -277,9 +277,9 @@ class ChineseActuaryReport:
         return output_path
     
     def _build_html(self, analysis, products, parent_info) -> str:
-        """构建完整HTML"""
+        """Build complete HTML"""
         
-        # 分类163指标
+        # Category 163 indicators
         metrics_by_category = self._categorize_metrics(products[0] if products else {})
         
         html = f'''<!DOCTYPE html>
@@ -287,7 +287,7 @@ class ChineseActuaryReport:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>精算师深度分析报告 | {parent_info['parent_asin']}</title>
+    <title>Actuary in-depth analysis report | {parent_info['parent_asin']}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -441,9 +441,9 @@ class ChineseActuaryReport:
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>精算师深度分析报告</h1>
+            <h1>Actuary in-depth analysis report</h1>
             <div class="subtitle">{parent_info['brand']} · {parent_info['category']}</div>
-            <div class="subtitle" style="margin-top: 10px;">父ASIN: {parent_info['parent_asin']}</div>
+            <div class="subtitle" style="margin-top: 10px;">Parent ASIN: {parent_info['parent_asin']}</div>
         </header>
         
         <!-- Verdict -->
@@ -452,7 +452,7 @@ class ChineseActuaryReport:
                 {self._get_decision_cn(analysis.overall_decision.decision)}
             </div>
             <div style="color: {self.colors['text_secondary']}; letter-spacing: 2px;">
-                置信度 {analysis.overall_decision.confidence:.0f}%
+                Confidence {analysis.overall_decision.confidence:.0f}%
             </div>
         </div>
         
@@ -460,35 +460,35 @@ class ChineseActuaryReport:
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-value {"positive" if analysis.total_monthly_profit > 0 else "negative"}">${analysis.total_monthly_profit:,.0f}</div>
-                <div class="metric-label">月度净利润</div>
+                <div class="metric-label">monthly net profit</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value {"positive" if analysis.blended_portfolio_margin_pct > 15 else "negative"}">{analysis.blended_portfolio_margin_pct:.1f}%</div>
-                <div class="metric-label">混合利润率</div>
+                <div class="metric-label">mixed profit margin</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value positive">{analysis.total_monthly_sales:,}</div>
-                <div class="metric-label">月度总销量</div>
+                <div class="metric-label">Total monthly sales</div>
             </div>
             <div class="metric-card">
                 <div class="metric-value positive">{len(analysis.variants)}</div>
-                <div class="metric-label">变体数量</div>
+                <div class="metric-label">Number of variants</div>
             </div>
         </div>
         
         <!-- Variant Analysis -->
         <div class="section">
-            <div class="section-title">变体分析</div>
+            <div class="section-title">Variant analysis</div>
             <table class="variant-table">
                 <thead>
                     <tr>
                         <th>ASIN</th>
-                        <th>颜色</th>
-                        <th>尺寸</th>
-                        <th>价格</th>
-                        <th>月销量</th>
-                        <th>月利润</th>
-                        <th>利润率</th>
+                        <th>color</th>
+                        <th>Size</th>
+                        <th>price</th>
+                        <th>monthly sales</th>
+                        <th>monthly profit</th>
+                        <th>profit margin</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -499,7 +499,7 @@ class ChineseActuaryReport:
         
         <!-- 163 Metrics -->
         <div class="section">
-            <div class="section-title">163项指标详情</div>
+            <div class="section-title">Details of 163 indicators</div>
             {self._render_163_metrics(metrics_by_category)}
         </div>
         
@@ -509,11 +509,11 @@ class ChineseActuaryReport:
         return html
     
     def _get_decision_cn(self, decision: str) -> str:
-        """决策中文"""
-        return {'proceed': '建议投资', 'caution': '谨慎考虑', 'avoid': '建议避免'}.get(decision, '未知')
+        """Decision-making in Chinese"""
+        return {'proceed': 'Recommended investment', 'caution': 'Consider carefully', 'avoid': 'Recommended to avoid'}.get(decision, 'unknown')
     
     def _render_variant_rows(self, analysis) -> str:
-        """渲染变体行"""
+        """Render variant row"""
         rows = []
         for v in analysis.variants:
             color = v.metrics.color or '-'
@@ -534,15 +534,15 @@ class ChineseActuaryReport:
         return ''.join(rows)
     
     def _categorize_metrics(self, product: Dict) -> Dict[str, List[Tuple[str, str]]]:
-        """将163指标分类"""
+        """Classify 163 indicators"""
         categories = {
-            '基础信息': ['ASIN', 'Title', 'Brand', 'Color', 'Size'],
-            '销售表现': ['Sales Rank: Current', 'Bought in past month', '90 days change % monthly sold'],
-            '价格数据': ['New: Current', 'New: 30 days avg.', 'New: Lowest', 'New: Highest'],
-            '评论退货': ['Reviews: Rating', 'Reviews: Rating Count', 'Return Rate'],
-            '竞争情况': ['Total Offer Count', 'Buy Box: Buy Box Seller', 'Buy Box: % Amazon 90 days'],
-            '费用': ['FBA Pick&Pack Fee', 'Referral Fee %'],
-            '库存': ['Amazon: Stock', 'Amazon: 90 days OOS'],
+            'Basic information': ['ASIN', 'Title', 'Brand', 'Color', 'Size'],
+            'sales performance': ['Sales Rank: Current', 'Bought in past month', '90 days change % monthly sold'],
+            'price data': ['New: Current', 'New: 30 days avg.', 'New: Lowest', 'New: Highest'],
+            'Review returns': ['Reviews: Rating', 'Reviews: Rating Count', 'Return Rate'],
+            'Competition': ['Total Offer Count', 'Buy Box: Buy Box Seller', 'Buy Box: % Amazon 90 days'],
+            'cost': ['FBA Pick&Pack Fee', 'Referral Fee %'],
+            'Inventory': ['Amazon: Stock', 'Amazon: 90 days OOS'],
         }
         
         result = {}
@@ -556,15 +556,15 @@ class ChineseActuaryReport:
         return result
     
     def _extract_metric_value(self, product: Dict, key: str) -> str:
-        """提取指标值"""
-        # 简化示例
+        """Extract indicator values"""
+        # Simplified example
         value = product.get(key, '-')
         if isinstance(value, (int, float)):
             return f'{value}'
         return str(value) if value else '-'
     
     def _render_163_metrics(self, metrics_by_category: Dict) -> str:
-        """渲染163指标"""
+        """Render 163 indicator"""
         sections = []
         for cat_name, metrics in metrics_by_category.items():
             items = []
@@ -588,8 +588,8 @@ class ChineseActuaryReport:
         return ''.join(sections)
 
 
-# 便捷函数
+# Convenience function
 def generate_chinese_report(asin: str, api_key: str = None) -> str:
-    """生成中文完整报告"""
+    """Generate complete report in Chinese"""
     generator = ChineseActuaryReport()
     return generator.generate_full_report(asin, api_key)

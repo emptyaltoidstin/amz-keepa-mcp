@@ -1,7 +1,7 @@
 """
-亚马逊运营精算师 - 终极综合报告
+Amazon Operations Actuary - Ultimate Integrated Reporting
 ==================================
-整合所有变体数据、真实COGS、订单来源分析的完整报表
+A complete report that integrates all variant data, real COGS, and order source analysis
 """
 
 import json
@@ -16,8 +16,8 @@ from collections import defaultdict
 
 @dataclass
 class VariantDetail:
-    """变体详细指标"""
-    # 基础信息
+    """Variant detailed metrics"""
+    # Basic information
     asin: str
     parent_asin: str
     title: str
@@ -25,44 +25,44 @@ class VariantDetail:
     size: str
     image_url: str
     
-    # 价格数据
+    # price data
     current_price: float
     avg_30d_price: float
     lowest_price: float
     highest_price: float
     
-    # 销量数据
+    # sales data
     sales_rank: int
     estimated_monthly_sales: int
     sales_trend: str  # up/down/stable
     bought_in_past_month: int
     
-    # 评价数据
+    # Evaluation data
     rating: float
     review_count: int
-    review_velocity: int  # 月新增评价
+    review_velocity: int  # New reviews per month
     
-    # 成本结构 (用户填入的真实数据)
-    cogs: float  # 真实采购成本
+    # cost structure (Real data entered by the user)
+    cogs: float  # true purchase cost
     fba_fee: float
     referral_fee_rate: float
     return_rate: float
     storage_fee: float
     
-    # 订单来源 (从广告后台获取的真实数据)
+    # Order source (Real data obtained from the advertising backend)
     organic_order_pct: float
     ad_order_pct: float
     
-    # 竞争数据
+    # Competitive data
     offer_count: int
     amazon_present: bool
     buy_box_seller: str
     
-    # 库存数据
+    # Inventory data
     stock_status: str
     inventory_level: int
     
-    # 计算字段
+    # Calculated field
     @property
     def referral_fee(self) -> float:
         return self.current_price * self.referral_fee_rate
@@ -72,19 +72,19 @@ class VariantDetail:
         return self.current_price * self.return_rate * 0.30
     
     def calculate_ad_cost_per_unit(self, tacos_rate: float = 0.15) -> float:
-        """计算单位广告成本 (基于TACOS)
+        """Calculate unit advertising costs (Based on TACOS)
         
-        TACOS (Total ACOS) = 广告总花费 / 总销售额
+        TACOS (Total ACOS) = total advertising spend / total sales
         
-        正确的计算方式:
-        - 变体月广告预算 = 变体月销售额 × TACOS
-        - 单位广告成本 = 变体月广告预算 / 月广告订单数
+        Correct way to calculate:
+        - Variation Monthly Advertising Budget = Variant Monthly Sales × TACOS
+        - unit advertising cost = Variation Monthly Advertising Budget / Monthly advertising orders
         
         Args:
-            tacos_rate: TACOS目标 (默认15%)
+            tacos_rate: TACOS target (Default 15%)
         
         Returns:
-            每个广告订单的广告成本
+            Advertising cost per insertion order
         """
         monthly_revenue = self.monthly_revenue
         monthly_ad_budget = monthly_revenue * tacos_rate
@@ -97,22 +97,22 @@ class VariantDetail:
     
     @property
     def total_operating_cost(self) -> float:
-        """总运营成本 (不含COGS和广告)"""
+        """total operating costs (Free of COGS and ads)"""
         return self.fba_fee + self.referral_fee + self.return_cost + self.storage_fee
     
     @property
     def contribution_margin_organic(self) -> float:
-        """自然订单贡献毛利"""
+        """Natural orders contribute to gross profit"""
         return self.current_price - self.cogs - self.total_operating_cost
     
     @property
     def contribution_margin_ad(self) -> float:
-        """广告订单贡献毛利 (扣除TACOS广告费)"""
+        """Insertion order contribution margin (Deduct TACOS advertising fees)"""
         return self.contribution_margin_organic - self.calculate_ad_cost_per_unit()
     
     @property
     def blended_margin(self) -> float:
-        """混合利润率"""
+        """mixed profit margin"""
         organic_profit = self.contribution_margin_organic * self.organic_order_pct
         ad_profit = self.contribution_margin_ad * self.ad_order_pct
         total_profit = organic_profit + ad_profit
@@ -138,7 +138,7 @@ class VariantDetail:
     
     @property
     def profit_health(self) -> str:
-        """利润健康度"""
+        """profit health"""
         if self.blended_margin > 20:
             return "excellent"
         elif self.blended_margin > 10:
@@ -151,41 +151,41 @@ class VariantDetail:
 
 @dataclass
 class LinkSummary:
-    """链接汇总数据"""
+    """Linked summary data"""
     parent_asin: str
     total_variants: int
     active_variants: int
     
-    # 销量汇总
+    # Sales summary
     total_monthly_sales: int
     total_monthly_revenue: float
     total_monthly_profit: float
     
-    # 订单来源
+    # Order source
     organic_sales_pct: float
     ad_sales_pct: float
     organic_profit: float
     ad_profit: float
     
-    # 利润率
+    # profit margin
     blended_margin: float
     organic_margin: float
     ad_margin: float
     
-    # 帕累托分析
-    pareto_variants: List[str]  # 贡献80%销量的变体
+    # Pareto analysis
+    pareto_variants: List[str]  # Contribute 80%sales volume variations
     top_3_variants: List[str]
     
-    # 风险提示
+    # Risk warning
     loss_variants: List[str]
-    high_ad_dependency: List[str]  # 广告依赖度>60%的变体
+    high_ad_dependency: List[str]  # advertising dependence>60%Variants of
     
-    # 机会点
-    growth_opportunities: List[str]  # 有增长潜力的变体
+    # opportunity
+    growth_opportunities: List[str]  # Variants with growth potential
 
 
 class ComprehensiveActuaryReport:
-    """综合精算师报告生成器"""
+    """Comprehensive Actuarial Report Generator"""
     
     def __init__(self):
         self.storage_rate = 0.87  # $/cu.ft/month
@@ -194,12 +194,12 @@ class ComprehensiveActuaryReport:
                        parent_asin: str,
                        variants: List[VariantDetail],
                        output_path: str):
-        """生成综合报告"""
+        """Generate comprehensive reports"""
         
-        # 计算链接汇总
+        # Calculate link summary
         summary = self._calculate_summary(parent_asin, variants)
         
-        # 生成HTML
+        # Generate HTML
         html = self._render_html(parent_asin, variants, summary)
         
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -208,7 +208,7 @@ class ComprehensiveActuaryReport:
         return output_path, summary
     
     def _calculate_summary(self, parent_asin: str, variants: List[VariantDetail]) -> LinkSummary:
-        """计算链接汇总数据"""
+        """Calculate linked summary data"""
         if not variants:
             return LinkSummary(
                 parent_asin=parent_asin,
@@ -221,13 +221,13 @@ class ComprehensiveActuaryReport:
                 loss_variants=[], high_ad_dependency=[], growth_opportunities=[]
             )
         
-        # 按销量排序
+        # Sort by sales
         sorted_variants = sorted(variants, key=lambda x: x.estimated_monthly_sales, reverse=True)
         
         total_sales = sum(v.estimated_monthly_sales for v in variants)
         total_revenue = sum(v.monthly_revenue for v in variants)
         
-        # 帕累托分析
+        # Pareto analysis
         sales_accumulated = 0
         pareto_threshold = total_sales * 0.80
         pareto_variants = []
@@ -239,7 +239,7 @@ class ComprehensiveActuaryReport:
         
         top_3 = [v.asin for v in sorted_variants[:3]]
         
-        # 汇总自然/广告
+        # summary natural/advertise
         total_organic_profit = sum(v.monthly_profit_organic for v in variants)
         total_ad_profit = sum(v.monthly_profit_ad for v in variants)
         total_profit = total_organic_profit + total_ad_profit
@@ -247,16 +247,16 @@ class ComprehensiveActuaryReport:
         organic_revenue = sum(v.monthly_revenue * v.organic_order_pct for v in variants)
         ad_revenue = sum(v.monthly_revenue * v.ad_order_pct for v in variants)
         
-        # 利润率
+        # profit margin
         organic_margin = (total_organic_profit / organic_revenue * 100) if organic_revenue > 0 else 0
         ad_margin = (total_ad_profit / ad_revenue * 100) if ad_revenue > 0 else 0
         blended_margin = (total_profit / total_revenue * 100) if total_revenue > 0 else 0
         
-        # 风险识别
+        # Risk identification
         loss_variants = [v.asin for v in variants if v.blended_margin <= 0]
         high_ad_dependency = [v.asin for v in variants if v.ad_order_pct > 0.60]
         
-        # 增长机会 (销量中等但评价好)
+        # growth opportunities (Average sales but good reviews)
         growth_opportunities = [
             v.asin for v in variants 
             if 50 < v.estimated_monthly_sales < 500 and v.rating >= 4.3
@@ -284,30 +284,30 @@ class ComprehensiveActuaryReport:
         )
     
     def _render_html(self, parent_asin: str, variants: List[VariantDetail], summary: LinkSummary) -> str:
-        """渲染HTML报告"""
+        """Render HTML report"""
         
         current_date = datetime.now().strftime('%Y-%m-%d')
         
-        # 决策建议
+        # Decision suggestions
         if summary.blended_margin > 20 and summary.organic_sales_pct > 60:
-            verdict = "🟢 强烈推荐"
+            verdict = "🟢 Highly recommended"
             verdict_color = "#4ade80"
-            verdict_detail = "利润率高且自然流量占比健康"
+            verdict_detail = "High profit margins and a healthy proportion of organic traffic"
         elif summary.blended_margin > 10:
-            verdict = "🟡 谨慎考虑"
+            verdict = "🟡 Consider carefully"
             verdict_color = "#fbbf24"
-            verdict_detail = "利润率尚可，需关注广告依赖度"
+            verdict_detail = "The profit margin is acceptable, but we need to pay attention to advertising dependence"
         else:
-            verdict = "🔴 建议放弃"
+            verdict = "🔴 It is recommended to give up"
             verdict_color = "#f87171"
-            verdict_detail = "利润率过低或亏损风险高"
+            verdict_detail = "Profit rate is too low or risk of loss is high"
         
         html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亚马逊链接精算师分析报告 - {parent_asin}</title>
+    <title>Amazon Link Actuary Analysis Report - {parent_asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -577,119 +577,119 @@ class ComprehensiveActuaryReport:
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                 <div>
-                    <span class="header-badge">🏆 精算师级分析</span>
-                    <span class="header-badge">📊 全变体覆盖</span>
-                    <span class="header-badge">✅ 真实COGS</span>
+                    <span class="header-badge">🏆 Actuary-level analysis</span>
+                    <span class="header-badge">📊 Full variant coverage</span>
+                    <span class="header-badge">✅ Real COGS</span>
                 </div>
                 <span style="opacity: 0.8; font-size: 0.95em;">{current_date}</span>
             </div>
-            <h1>亚马逊链接运营精算师报告</h1>
+            <h1>Amazon Link Operations Actuary Report</h1>
             <div style="font-size: 1.2em; opacity: 0.95;">
-                父ASIN: <strong>{parent_asin}</strong> | 
-                变体数: <strong>{summary.total_variants}</strong> | 
-                分析日期: {current_date}
+                Parent ASIN: <strong>{parent_asin}</strong> | 
+                number of variants: <strong>{summary.total_variants}</strong> | 
+                Analysis date: {current_date}
             </div>
         </div>
         
         <!-- Executive Summary -->
         <div class="exec-summary">
-            <h2 style="font-size: 1.8em; margin-bottom: 10px;">💼 执行摘要与投资决策</h2>
+            <h2 style="font-size: 1.8em; margin-bottom: 10px;">💼 Executive Summary and Investment Decisions</h2>
             <div class="verdict">{verdict}</div>
             <p style="font-size: 1.2em; margin-bottom: 40px;">{verdict_detail}</p>
             
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-value" style="color: #60a5fa;">{summary.total_monthly_sales:,}</div>
-                    <div class="metric-label">预估月总销量</div>
-                    <div class="metric-sublabel">全变体合计</div>
+                    <div class="metric-label">Estimated total monthly sales</div>
+                    <div class="metric-sublabel">Total of all variants</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #a78bfa;">${summary.total_monthly_revenue:,.0f}</div>
-                    <div class="metric-label">预估月销售额</div>
+                    <div class="metric-label">Estimated monthly sales</div>
                     <div class="metric-sublabel">Gross Revenue</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #4ade80;">${summary.total_monthly_profit:,.0f}</div>
-                    <div class="metric-label">预估月净利润</div>
-                    <div class="metric-sublabel">扣除所有成本</div>
+                    <div class="metric-label">Estimated monthly net profit</div>
+                    <div class="metric-sublabel">deduct all costs</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: {'#4ade80' if summary.blended_margin > 20 else '#fbbf24' if summary.blended_margin > 10 else '#f87171'};">
                         {summary.blended_margin:.1f}%
                     </div>
-                    <div class="metric-label">混合净利率</div>
-                    <div class="metric-sublabel">自然+广告加权</div>
+                    <div class="metric-label">Mixed net profit margin</div>
+                    <div class="metric-sublabel">nature+ad weighting</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #22c55e;">{summary.organic_sales_pct:.0f}%</div>
-                    <div class="metric-label">自然订单占比</div>
-                    <div class="metric-sublabel">无需广告费</div>
+                    <div class="metric-label">Proportion of natural orders</div>
+                    <div class="metric-sublabel">No advertising fee</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #f59e0b;">{len(summary.pareto_variants)}</div>
-                    <div class="metric-label">核心变体数</div>
-                    <div class="metric-sublabel">贡献80%销量</div>
+                    <div class="metric-label">Number of core variants</div>
+                    <div class="metric-sublabel">Contribute 80%Sales volume</div>
                 </div>
             </div>
         </div>
         
         <!-- Organic vs Ad Analysis -->
         <div class="card">
-            <h2 class="card-title">🌿🎯 自然订单 vs 广告订单深度对比</h2>
+            <h2 class="card-title">🌿🎯 In-depth comparison of natural orders vs advertising orders</h2>
             
             <div class="comparison-grid">
                 <div class="comp-card comp-organic">
-                    <h3 style="font-size: 1.4em; color: #4ade80; margin-bottom: 25px;">🌿 自然订单分析</h3>
+                    <h3 style="font-size: 1.4em; color: #4ade80; margin-bottom: 25px;">🌿 Natural order analysis</h3>
                     <div style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>收入占比</span>
+                            <span>Revenue proportion</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">{summary.organic_sales_pct:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>月利润贡献</span>
+                            <span>Monthly profit contribution</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">${summary.organic_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>平均利润率</span>
+                            <span>average profit margin</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">{summary.organic_margin:.1f}%</span>
                         </div>
                     </div>
                     <p style="opacity: 0.9; line-height: 1.8;">
-                        自然订单无需支付广告费，利润率显著高于广告订单。
-                        当前自然占比{summary.organic_sales_pct:.0f}%属于{"优秀" if summary.organic_sales_pct > 60 else "良好" if summary.organic_sales_pct > 50 else "需提升"}水平。
+                        There is no need to pay advertising fees for organic orders, and the profit margin is significantly higher than that of advertising orders.
+                        Current natural proportion{summary.organic_sales_pct:.0f}%Belong to{"Excellent" if summary.organic_sales_pct > 60 else "good" if summary.organic_sales_pct > 50 else "Need to improve"}level.
                     </p>
                 </div>
                 
                 <div class="comp-card comp-ad">
-                    <h3 style="font-size: 1.4em; color: #fbbf24; margin-bottom: 25px;">🎯 广告订单分析</h3>
+                    <h3 style="font-size: 1.4em; color: #fbbf24; margin-bottom: 25px;">🎯 Insertion order analysis</h3>
                     <div style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>收入占比</span>
+                            <span>Revenue proportion</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #fbbf24;">{summary.ad_sales_pct:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>月利润贡献</span>
+                            <span>Monthly profit contribution</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #fbbf24;">${summary.ad_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>平均利润率</span>
+                            <span>average profit margin</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #fbbf24;">{summary.ad_margin:.1f}%</span>
                         </div>
                     </div>
                     <p style="opacity: 0.9; line-height: 1.8;">
-                        广告订单需要分摊广告费(TACOS 15%)，利润率较低。
-                        {"广告依赖度适中" if summary.ad_sales_pct < 40 else "⚠️ 广告依赖度较高，需关注TACOS优化" if summary.ad_sales_pct < 60 else "🔴 广告依赖度过高，存在风险"}。
+                        Insertion orders need to allocate advertising costs(TACOS 15%), the profit margin is lower.
+                        {"Moderate reliance on advertising" if summary.ad_sales_pct < 40 else "⚠️ High reliance on advertising, need to pay attention to TACOS optimization" if summary.ad_sales_pct < 60 else "🔴 Reliance on advertising is too high and there are risks"}。
                     </p>
                 </div>
             </div>
             
             <div class="insight-box">
-                <h4>💡 订单来源洞察</h4>
+                <h4>💡 Order source insights</h4>
                 <p>
-                    自然订单利润率 ({summary.organic_margin:.1f}%) 
-                    比广告订单 ({summary.ad_margin:.1f}%) 高 
-                    <strong>{summary.organic_margin - summary.ad_margin:.1f}个百分点</strong>。
-                    每提升1%的自然订单占比，月利润可增加约 
+                    Natural order profit margin ({summary.organic_margin:.1f}%) 
+                    Than insertion order ({summary.ad_margin:.1f}%) high 
+                    <strong>{summary.organic_margin - summary.ad_margin:.1f}percentage points</strong>。
+                    Every increase of 1%proportion of natural orders, the monthly profit can be increased by approximately 
                     <strong>${(summary.organic_profit/summary.organic_sales_pct - summary.ad_profit/summary.ad_sales_pct) * summary.total_monthly_sales / 100:.0f}</strong>。
                 </p>
             </div>
@@ -697,68 +697,68 @@ class ComprehensiveActuaryReport:
         
         <!-- Pareto Analysis -->
         <div class="card">
-            <h2 class="card-title">📈 帕累托分析 (80/20法则)</h2>
+            <h2 class="card-title">📈 Pareto analysis (80/Rule of 20)</h2>
             
             <div class="metrics-grid" style="margin-bottom: 25px;">
                 <div class="metric-card" style="background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.3);">
                     <div class="metric-value" style="color: #60a5fa;">{len(summary.pareto_variants)}</div>
-                    <div class="metric-label">核心变体</div>
-                    <div class="metric-sublabel">贡献80%销量</div>
+                    <div class="metric-label">core variant</div>
+                    <div class="metric-sublabel">Contribute 80%Sales volume</div>
                 </div>
                 <div class="metric-card" style="background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.3);">
                     <div class="metric-value" style="color: #fbbf24;">{len(summary.high_ad_dependency)}</div>
-                    <div class="metric-label">高广告依赖</div>
-                    <div class="metric-sublabel">广告占比&gt;60%</div>
+                    <div class="metric-label">High advertising dependence</div>
+                    <div class="metric-sublabel">Advertising proportion&gt;60%</div>
                 </div>
                 <div class="metric-card" style="background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.3);">
                     <div class="metric-value" style="color: #f87171;">{len(summary.loss_variants)}</div>
-                    <div class="metric-label">亏损变体</div>
-                    <div class="metric-sublabel">需立即处理</div>
+                    <div class="metric-label">loss variant</div>
+                    <div class="metric-sublabel">Need immediate attention</div>
                 </div>
                 <div class="metric-card" style="background: rgba(34, 197, 94, 0.15); border: 2px solid rgba(34, 197, 94, 0.3);">
                     <div class="metric-value" style="color: #4ade80;">{len(summary.growth_opportunities)}</div>
-                    <div class="metric-label">增长机会</div>
-                    <div class="metric-sublabel">有潜力变体</div>
+                    <div class="metric-label">growth opportunities</div>
+                    <div class="metric-sublabel">Potential variants</div>
                 </div>
             </div>
             
             <p style="opacity: 0.9; line-height: 1.8;">
-                <strong>核心发现:</strong> 前{len(summary.pareto_variants)}个变体贡献了链接80%的销量。
-                应优先保证这些变体的库存充足，并持续优化其自然排名。
-                {"同时关注" if len(summary.high_ad_dependency) > 0 else ""} 
-                {len(summary.high_ad_dependency)}个高广告依赖变体，考虑通过站外或优化listing提升自然占比。
+                <strong>Core findings:</strong> before{len(summary.pareto_variants)}variants contributed links 80%of sales.
+                Priority should be given to keeping these variants fully stocked and continually optimizing their organic rankings.
+                {"Follow at the same time" if len(summary.high_ad_dependency) > 0 else ""} 
+                {len(summary.high_ad_dependency)}If you have a high advertising dependency variation, consider increasing the organic proportion through off-site or optimized listings.
             </p>
         </div>
         
         <!-- Variant Details Table -->
         <div class="card">
-            <h2 class="card-title">📋 全变体详细指标表</h2>
+            <h2 class="card-title">📋 Full variant detailed indicator table</h2>
             
             <div class="legend">
-                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>🔥 Top 3 变体</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>📊 帕累托变体(贡献80%)</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div>⚠️ 高广告依赖(&gt;60%)</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>🔴 亏损变体</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>🔥Top 3 Variations</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>📊 Pareto variant(Contribute 80%)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div>⚠️ High advertising dependence(&gt;60%)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>🔴 Loss variant</div>
             </div>
             
             <div class="variant-section">
                 <table class="variant-table">
                     <thead>
                         <tr>
-                            <th>排名</th>
+                            <th>Ranking</th>
                             <th>ASIN</th>
-                            <th>颜色/尺寸</th>
-                            <th>价格</th>
-                            <th>月销量</th>
-                            <th>销售额</th>
-                            <th>订单来源</th>
+                            <th>color/Size</th>
+                            <th>price</th>
+                            <th>monthly sales</th>
+                            <th>sales</th>
+                            <th>Order source</th>
                             <th>COGS</th>
-                            <th>贡献毛利</th>
-                            <th>自然利润</th>
-                            <th>广告利润</th>
-                            <th>利润率</th>
-                            <th>月净利润</th>
-                            <th>健康度</th>
+                            <th>Contribute gross profit</th>
+                            <th>natural profit</th>
+                            <th>advertising profit</th>
+                            <th>profit margin</th>
+                            <th>monthly net profit</th>
+                            <th>health</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -770,43 +770,43 @@ class ComprehensiveActuaryReport:
         
         <!-- Risk Assessment -->
         <div class="card">
-            <h2 class="card-title">⚠️ 风险评估与缓解措施</h2>
+            <h2 class="card-title">⚠️Risk assessment and mitigation measures</h2>
             
             {self._render_risk_assessment(summary, variants)}
         </div>
         
         <!-- Action Plan -->
         <div class="card">
-            <h2 class="card-title">🎯 30-60-90天行动计划</h2>
+            <h2 class="card-title">🎯 30-60-90 day action plan</h2>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
                 <div style="background: rgba(239, 68, 68, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                    <h4 style="color: #f87171; margin-bottom: 20px; font-size: 1.2em;">🚨 立即行动 (0-30天)</h4>
+                    <h4 style="color: #f87171; margin-bottom: 20px; font-size: 1.2em;">🚨 Act now (0-30 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        {f'<li>• 核查{len(summary.loss_variants)}个亏损变体的COGS是否准确</li>' if len(summary.loss_variants) > 0 else ''}
-                        <li>• 确保{len(summary.pareto_variants)}个核心变体库存充足(60天+)</li>
-                        <li>• 优化高销量变体的主图和标题，提升自然转化</li>
-                        <li>• 检查{len(summary.high_ad_dependency)}个高广告依赖变体的TACOS</li>
+                        {f'<li>• Verification{len(summary.loss_variants)}Are the COGS of loss-making variants accurate?</li>' if len(summary.loss_variants) > 0 else ''}
+                        <li>• Ensure{len(summary.pareto_variants)}Full inventory of core variants(60 days+)</li>
+                        <li>• Optimize the main image and title of high-selling variants to increase natural conversions</li>
+                        <li>• Check{len(summary.high_ad_dependency)}TACOS for high ad-dependent variants</li>
                     </ul>
                 </div>
                 
                 <div style="background: rgba(245, 158, 11, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(245, 158, 11, 0.3);">
-                    <h4 style="color: #fbbf24; margin-bottom: 20px; font-size: 1.2em;">📈 短期优化 (30-60天)</h4>
+                    <h4 style="color: #fbbf24; margin-bottom: 20px; font-size: 1.2em;">📈 Short-term optimization (30-60 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>• 针对高广告依赖变体，开展站外推广降低TACOS</li>
-                        <li>• 测试{len(summary.growth_opportunities)}个潜力变体的价格弹性</li>
-                        <li>• 收集并分析退货原因，降低退货率</li>
-                        <li>• 优化广告投放策略，加大高利润变体预算</li>
+                        <li>• Carry out off-site promotion to reduce TACOS for highly advertising-dependent variants</li>
+                        <li>• Test{len(summary.growth_opportunities)}price elasticity of potential variants</li>
+                        <li>• Collect and analyze reasons for returns to reduce return rates</li>
+                        <li>• Optimize advertising strategy and increase budget for high-profit variants</li>
                     </ul>
                 </div>
                 
                 <div style="background: rgba(34, 197, 94, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                    <h4 style="color: #4ade80; margin-bottom: 20px; font-size: 1.2em;">🚀 长期策略 (60-90天)</h4>
+                    <h4 style="color: #4ade80; margin-bottom: 20px; font-size: 1.2em;">🚀 Long-term strategy (60-90 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>• 开发新颜色/尺寸变体，复制成功模式</li>
-                        <li>• 建立供应链议价能力，降低COGS 5-10%</li>
-                        <li>• 构建品牌护城河，提升自然流量占比至70%+</li>
-                        <li>• 建立月度利润监控体系，及时发现问题变体</li>
+                        <li>• Develop new colors/Size variations, copy success patterns</li>
+                        <li>• Build supply chain bargaining power and reduce COGS 5-10%</li>
+                        <li>• Build a brand moat and increase the proportion of natural traffic to 70%+</li>
+                        <li>• Establish a monthly profit monitoring system to detect problem variants in a timely manner</li>
                     </ul>
                 </div>
             </div>
@@ -814,24 +814,24 @@ class ComprehensiveActuaryReport:
         
         <!-- Data Source Note -->
         <div class="card" style="background: rgba(251, 191, 36, 0.05); border: 2px solid rgba(251, 191, 36, 0.3);">
-            <h2 class="card-title" style="color: #fbbf24;">📊 数据来源说明</h2>
+            <h2 class="card-title" style="color: #fbbf24;">📊 Data source description</h2>
             <div style="line-height: 2;">
-                <p><strong>销量数据:</strong> 基于Keepa销售排名估算，参考过去30天平均排名</p>
-                <p><strong>价格数据:</strong> 当前Buy Box价格或New价格，取平均值</p>
-                <p><strong>COGS数据:</strong> <span style="color: #fbbf24; font-weight: 600;">用户提供真实数据</span>，包含采购价、头程运费、关税</p>
-                <p><strong>订单来源:</strong> <span style="color: #fbbf24; font-weight: 600;">用户提供真实数据</span>，来自亚马逊广告后台报表</p>
-                <p><strong>FBA费用:</strong> 从Keepa API获取或基于重量/尺寸计算</p>
-                <p><strong>退货率:</strong> 从Keepa API获取该产品历史退货率</p>
-                <p><strong>广告费率:</strong> 假设TACOS (Total ACOS) 15%，即广告总花费占整体销售额的15%。实际费用请根据后台广告报表调整。</p>
+                <p><strong>sales data:</strong> Based on Keepa sales ranking estimation, refer to the average ranking in the past 30 days</p>
+                <p><strong>price data:</strong> Current Buy Box price or New price, average</p>
+                <p><strong>COGS data:</strong> <span style="color: #fbbf24; font-weight: 600;">Users provide real data</span>, including purchase price, first-way freight and tariffs</p>
+                <p><strong>Order source:</strong> <span style="color: #fbbf24; font-weight: 600;">Users provide real data</span>, from Amazon Advertising backend report</p>
+                <p><strong>FBA fees:</strong> Get from Keepa API or based on weight/Size calculation</p>
+                <p><strong>return rate:</strong> Get the historical return rate of this product from Keepa API</p>
+                <p><strong>advertising rate:</strong> Assuming TACOS (Total ACOS) 15%, that is, the total advertising expenditure accounts for 15% of the overall sales%. Please adjust the actual cost according to the background advertising report.</p>
             </div>
         </div>
         
         <!-- Footer -->
         <div class="footer">
-            <p style="font-size: 1.1em; margin-bottom: 15px;">本报告基于真实COGS和订单来源数据生成 | 数据驱动决策</p>
+            <p style="font-size: 1.1em; margin-bottom: 15px;">This report is generated based on real COGS and order source data | data driven decision making</p>
             <p style="opacity: 0.7;">
-                © 2026 亚马逊运营精算师系统 | 所有成本数据需用户核实确认<br>
-                报告仅供参考，实际盈利受市场波动、竞争变化等因素影响
+                © 2026 Amazon Operations Actuary System | All cost data needs to be verified and confirmed by the user<br>
+                The report is for reference only. Actual profits are affected by market fluctuations, competition changes and other factors.
             </p>
         </div>
     </div>
@@ -841,12 +841,12 @@ class ComprehensiveActuaryReport:
         return html
     
     def _render_variant_rows(self, variants: List[VariantDetail], summary: LinkSummary) -> str:
-        """渲染变体表格行"""
+        """Render variant table rows"""
         html = ''
         sorted_variants = sorted(variants, key=lambda x: x.estimated_monthly_sales, reverse=True)
         
         for i, v in enumerate(sorted_variants, 1):
-            # 确定行样式
+            # Determine row style
             row_classes = []
             if i <= 3:
                 row_classes.append('row-top')
@@ -859,16 +859,16 @@ class ComprehensiveActuaryReport:
             
             row_class = ' '.join(row_classes)
             
-            # 利润健康度样式
+            # Profit Health Style
             profit_class = f'profit-{v.profit_health}'
             
-            # 健康度标签
+            # health label
             health_label = {
-                'excellent': '✅ 优秀',
-                'good': '🟢 良好',
-                'marginal': '🟡 一般',
-                'loss': '🔴 亏损'
-            }.get(v.profit_health, '❓ 未知')
+                'excellent': '✅ Excellent',
+                'good': '🟢 Good',
+                'marginal': '🟡 Average',
+                'loss': '🔴 Loss'
+            }.get(v.profit_health, '❓ unknown')
             
             html += f'''
                 <tr class="{row_class}">
@@ -901,53 +901,53 @@ class ComprehensiveActuaryReport:
         return html
     
     def _render_risk_assessment(self, summary: LinkSummary, variants: List[VariantDetail]) -> str:
-        """渲染风险评估"""
+        """Rendering risk assessment"""
         html = ''
         
-        # 风险1: 亏损变体
+        # Risk 1: loss variant
         if len(summary.loss_variants) > 0:
             html += f'''
                 <div class="alert-box">
-                    <h4>🔴 亏损变体风险 ({len(summary.loss_variants)}个)</h4>
-                    <p>以下变体在当前成本结构下可能亏损，请立即核查COGS是否准确，或考虑提价/下架：</p>
+                    <h4>🔴 Loss variant risk ({len(summary.loss_variants)}a)</h4>
+                    <p>The following variants may be loss-making under the current cost structure, please immediately check whether the COGS is accurate, or consider raising the price/Removal:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(summary.loss_variants)}</p>
                 </div>
             '''
         
-        # 风险2: 高广告依赖
+        # Risk 2: High advertising dependence
         if len(summary.high_ad_dependency) > 0:
             html += f'''
                 <div class="insight-box">
-                    <h4>⚠️ 高广告依赖风险 ({len(summary.high_ad_dependency)}个)</h4>
-                    <p>以下变体广告订单占比超过60%，一旦广告成本上升或竞争加剧，利润将显著下滑：</p>
+                    <h4>⚠️ High risk of advertising dependence ({len(summary.high_ad_dependency)}a)</h4>
+                    <p>The following variant insertion orders account for more than 60%, once advertising costs rise or competition intensifies, profits will decline significantly:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(summary.high_ad_dependency)}</p>
-                    <p style="margin-top: 10px;"><strong>缓解措施:</strong> 通过站外推广、社交媒体种草等方式提升自然流量占比。</p>
+                    <p style="margin-top: 10px;"><strong>Mitigation measures:</strong> Increase the proportion of natural traffic through off-site promotion, social media planting, etc.</p>
                 </div>
             '''
         
-        # 风险3: 销量集中
+        # Risk 3: Concentrated sales
         if len(summary.pareto_variants) <= 2 and summary.total_variants >= 5:
             html += f'''
                 <div class="insight-box">
-                    <h4>⚠️ 销量过度集中风险</h4>
-                    <p>仅{len(summary.pareto_variants)}个变体贡献了80%的销量，链接抗风险能力较弱。一旦核心变体出现问题(断货、差评、跟卖)，整体销售将受到严重冲击。</p>
-                    <p style="margin-top: 10px;"><strong>缓解措施:</strong> 平衡推广资源，培育第二梯队变体；确保核心变体库存充足且多仓分布。</p>
+                    <h4>⚠️Risk of excessive sales concentration</h4>
+                    <p>only{len(summary.pareto_variants)}variants contributed 80%sales volume, the link's ability to resist risks is weak. Once something goes wrong with the core variant(Out of stock, bad reviews, follow-up sales), overall sales will be severely impacted.</p>
+                    <p style="margin-top: 10px;"><strong>Mitigation measures:</strong> Balance promotion resources and cultivate second-tier variants; ensure sufficient inventory of core variants and distribution in multiple warehouses.</p>
                 </div>
             '''
         
-        # 机会点
+        # opportunity
         if len(summary.growth_opportunities) > 0:
             html += f'''
                 <div class="success-box">
-                    <h4>🌟 增长机会 ({len(summary.growth_opportunities)}个)</h4>
-                    <p>以下变体评价较好但销量中等，有潜力成为新的增长点：</p>
+                    <h4>🌟 Growth opportunities ({len(summary.growth_opportunities)}a)</h4>
+                    <p>The following variants have good reviews but moderate sales, and have the potential to become new growth points:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(summary.growth_opportunities)}</p>
-                    <p style="margin-top: 10px;"><strong>建议:</strong> 增加广告投放测试、优化listing图片和关键词、考虑参加Deal活动。</p>
+                    <p style="margin-top: 10px;"><strong>suggestion:</strong> Increase advertising testing, optimize listing images and keywords, and consider participating in deal activities.</p>
                 </div>
             '''
         
         if not html:
-            html = '<p style="color: #4ade80; font-size: 1.1em;">✅ 未发现明显风险，当前运营状态良好</p>'
+            html = '<p style="color: #4ade80; font-size: 1.1em;">✅ No obvious risks have been found, and the current operating status is good</p>'
         
         return html
 
@@ -955,6 +955,6 @@ class ComprehensiveActuaryReport:
 def generate_comprehensive_report(parent_asin: str,
                                  variants: List[VariantDetail],
                                  output_path: str) -> Tuple[str, LinkSummary]:
-    """便捷函数：生成综合报告"""
+    """Convenience functions: Generate comprehensive reports"""
     generator = ComprehensiveActuaryReport()
     return generator.generate_report(parent_asin, variants, output_path)

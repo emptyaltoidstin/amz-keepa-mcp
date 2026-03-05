@@ -1,15 +1,15 @@
-# Amz-Keepa-MCP 架构图
+# Amz-Keepa-MCP architecture diagram
 
-## 系统架构
+## System architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                               用户层                                         │
+│ User Layer │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                  │
-│  │   MCP工具    │    │  Python API  │    │  命令行CLI   │                  │
-│  │   Claude集成 │    │  程序化调用  │    │  脚本执行    │                  │
+│ │ MCP Tools │ │ Python API │ │ Command Line CLI │ │
+│ │ Claude integration │ │ Programmatic call │ │ Script execution │ │
 │  └──────┬───────┘    └──────┬───────┘    └──────┬───────┘                  │
 │         │                   │                   │                           │
 └─────────┼───────────────────┼───────────────────┼───────────────────────────┘
@@ -18,212 +18,212 @@
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              数据采集层                                      │
+│ Data collection layer │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌──────────────────────┐    ┌──────────────────────┐                      │
-│  │  变体自动采集器       │    │   163指标采集器      │                      │
+│ │ Variant automatic collector │ │ 163 indicator collector │ │
 │  │  VariantAutoCollector│    │   Metrics163Collector│                      │
 │  │                      │    │                      │                      │
-│  │  • 利用variations    │    │  • 基础信息(18项)    │                      │
-│  │    字段发现变体      │    │  • 销售表现(8项)     │                      │
-│  │  • 批量API查询       │    │  • 价格数据(33项)    │                      │
-│  │  • 智能数据合并      │    │  • 评论退货(5项)     │                      │
-│  │                      │    │  • ...共163项       │                      │
+│ │ • Utilizing variations │ │ • Basic information(18 items)    │                      │
+│ │ Field Discovery Variants │ │ • Sales Performance(8 items)     │                      │
+│ │ • Batch API query │ │ • Price data(33 items)    │                      │
+│ │ • Smart data merging │ │ • Review returns(5 items)     │                      │
+│ │ │ │ • ...163 items in total │ │
 │  └──────────┬───────────┘    └──────────┬───────────┘                      │
 │             │                           │                                   │
 │             └─────────────┬─────────────┘                                   │
 │                           │                                                 │
 │                           ▼                                                 │
 │  ┌─────────────────────────────────────────────────────────┐               │
-│  │                 智能销量分配器                           │               │
+│ │Smart sales allocator │ │
 │  │              SalesAllocationEngine                       │               │
 │  │                                                          │               │
-│  │   输入: boughtInPastMonth (可能是共享数据)               │               │
+│ │ Enter: boughtInPastMonth (May be shared data)               │               │
 │  │       ↓                                                  │               │
-│  │   检测: 是否所有变体数值相同?                            │               │
+│ │ Detection: Are all variants numerically the same??                            │               │
 │  │       ↓                                                  │               │
-│  │   是 → 按BSR比例分配                                     │               │
+│ │ Yes → Distributed according to BSR ratio │ │
 │  │       weight = 1 / BSR^0.5                               │               │
 │  │       ratio = weight / total_weights                     │               │
 │  │       allocated = total_sales × ratio                    │               │
 │  │       ↓                                                  │               │
-│  │   输出: 每个变体的独立销量                               │               │
+│ │ Output: Independent Sales of Each Variant │ │
 │  └─────────────────────────────────────────────────────────┘               │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              分析引擎层                                      │
+│ Analysis engine layer │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
-│  │                     TACOS计算器                              │           │
+│ │ TACOS Calculator │ │
 │  │                  TacosCalculator                            │           │
 │  │                                                              │           │
-│  │   输入: 月销售额, 月广告订单数, TACOS比例(默认15%)           │           │
+│ │ Enter: monthly sales, Monthly advertising orders, TACOS ratio(Default 15%)           │           │
 │  │       ↓                                                      │           │
-│  │   计算: 单位广告成本 = (月销售额 × TACOS) / 月广告订单数     │           │
+│ │ Calculate: unit advertising cost = (Monthly Sales × TACOS) / Number of advertising orders per month │ │
 │  │       ↓                                                      │           │
-│  │   输出: 每个广告订单的广告成本                               │           │
+│ │ Output: Advertising cost per insertion order │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
-│  │                    利润分析器                                │           │
+│ │ Profit Analyzer │ │
 │  │                 ProfitAnalyzer                              │           │
 │  │                                                              │           │
-│  │   输入: 价格, COGS, 运营费用, 广告成本, 订单来源比例         │           │
+│ │ Enter: price, COGS, operating expenses, advertising cost, Order source ratio │ │
 │  │       ↓                                                      │           │
-│  │   计算:                                                      │           │
-│  │     自然利润 = 价格 - COGS - 运营费用                        │           │
-│  │     广告利润 = 价格 - COGS - 运营费用 - 广告成本             │           │
-│  │     混合利润 = 自然利润×自然占比 + 广告利润×广告占比         │           │
+│ │ Calculate:                                                      │           │
+│ │ Natural profit = price - COGS - Operating expenses │ │
+│ │ Advertising profit = price - COGS - operating expenses - Advertising Cost │ │
+│ │ Mixed Profit = Natural profit × natural proportion + Advertising profit × advertising proportion │ │
 │  │       ↓                                                      │           │
-│  │   输出: 各变体利润结构                                       │           │
+│ │ Output: Profit structure of each variant │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
-│  │                    帕累托分析器                              │           │
+│ │ Pareto Analyzer │ │
 │  │                  ParetoAnalyzer                             │           │
 │  │                                                              │           │
-│  │   输入: 各变体销量数据                                       │           │
+│ │ Enter: Sales data of each variant │ │
 │  │       ↓                                                      │           │
-│  │   计算: 按销量排序, 累计80%销量的变体 = 核心变体             │           │
+│ │ Calculate: Sort by sales, Total 80%sales volume variations = Core variant │ │
 │  │       ↓                                                      │           │
-│  │   输出: 核心变体列表, 长尾变体列表                           │           │
+│ │ Output: Core variant list, Long tail variant list │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
-│  │                    决策引擎                                  │           │
+│ │ Decision Engine │ │
 │  │                   DecisionEngine                            │           │
 │  │                                                              │           │
-│  │   输入: 利润率, 广告依赖度, 退货率, 评分, 竞争度, 趋势       │           │
+│ │ Enter: profit margin, advertising dependence, return rate, score, Competition, Trend │ │
 │  │       ↓                                                      │           │
-│  │   评估:                                                      │           │
-│  │     利润率 > 15% AND 风险因素 < 3 → PROCEED (建议投资)       │           │
-│  │     利润率 5-15% OR 风险因素 ≥ 3 → CAUTION (谨慎考虑)        │           │
-│  │     利润率 < 5% OR 亏损 → AVOID (建议避免)                   │           │
+│ │ Assessment:                                                      │           │
+│ │ Profit rate > 15% AND risk factors < 3 → PROCEED (Recommended investment)       │           │
+│ │ Profit margin 5-15% OR risk factor ≥ 3 → CAUTION (Consider carefully)        │           │
+│ │ Profit rate < 5% OR loss → AVOID (Recommended to avoid)                   │           │
 │  │       ↓                                                      │           │
-│  │   输出: 决策 + 置信度 + 风险/机会因素                        │           │
+│ │ Output: decision making + Confidence + risk/Chance factors │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              报告生成层                                      │
+│ Report generation layer │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────┐  ┌─────────────────────────────┐          │
-│  │      中文报告生成器         │  │     Premium报告生成器       │          │
+│ │ Chinese Report Generator │ │ Premium Report Generator │ │
 │  │    ChineseActuaryReport    │  │   PremiumActuaryReport      │          │
 │  │                            │  │                             │          │
-│  │  • 暗黑极简风格             │  │  • Luxury美学设计           │          │
-│  │  • 163指标完整汉化          │  │  • 微精度细节               │          │
-│  │  • 数据完全透明             │  │  • 优雅动画                 │          │
-│  │  • 计算逻辑可视化           │  │  • 响应式布局               │          │
+│ │ • Dark minimalist style │ │ • Luxury aesthetic design │ │
+│ │ • Complete Chinese version of 163 indicators │ │ • Micro-precision details │ │
+│ │ • Complete data transparency │ │ • Elegant animation │ │
+│ │ • Visualization of computing logic │ │ • Responsive layout │ │
 │  │                            │  │                             │          │
-│  │  输出: HTML报告             │  │  输出: HTML报告             │          │
+│ │ Output: HTML Report │ │ Output: HTML report │ │
 │  └─────────────────────────────┘  └─────────────────────────────┘          │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
-│  │                      CSV数据导出                            │
+│ │ CSV data export │
 │  │                   CSVExporter                               │
 │  │                                                             │           │
-│  │  输出: 163指标原始数据CSV文件                               │           │
+│ │ Output: 163 indicator raw data CSV file │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              外部依赖                                        │
+│External dependencies │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────┐           │
 │  │                      Keepa API                              │           │
 │  │                                                             │           │
-│  │  • 163指标数据源                                            │           │
-│  │  • 价格/排名历史数据                                        │           │
-│  │  • boughtInPastMonth真实销量                                │           │
-│  │  • variations变体关系                                       │           │
+│ │ • 163 indicator data sources │ │
+│ │ • Price/Ranking history data │ │
+│ │ • boughtInPastMonth real sales │ │
+│ │ • variations variation relationship │ │
 │  └─────────────────────────────────────────────────────────────┘           │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 
-## 数据流图
+## data flow diagram
 
 ```
-用户输入ASIN
+User enters ASIN
     │
     ▼
 ┌─────────────────┐
-│ 变体自动采集器  │ ──→ 发现所有变体ASIN
+│ Variant automatic collector │ ──→ Discover all variant ASINs
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 批量API查询     │ ──→ 获取每个变体的Keepa数据
+│ Batch API query │ ──→ Get Keepa data for each variant
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 163指标采集器   │ ──→ 提取163个指标
+│ 163 indicator collector │ ──→ Extract 163 indicators
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 智能销量分配器  │ ──→ 处理共享数据/分配销量
+│ Intelligent sales allocator │ ──→ Process shared data/Allocate sales volume
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 利润分析器      │ ──→ 计算各变体利润
-│ (TACOS模型)     │
+│ Profit Analyzer │ ──→ Calculate the profit of each variant
+│ (TACOS model)     │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 决策引擎        │ ──→ 生成投资建议
+│ Decision engine │ ──→ Generate investment recommendations
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ 报告生成器      │ ──→ 生成HTML报告
+│ Report Generator │ ──→ Generate HTML report
 └─────────────────┘
 ```
 
 
-## 核心算法
+## Core algorithm
 
-### 1. 智能销量分配算法
+### 1. Intelligent sales volume allocation algorithm
 
 ```python
 def allocate_sales(variants, total_sales):
     """
-    按BSR比例分配父ASIN总销量
+    Allocate parent ASIN total sales in proportion to BSR
     """
-    # 计算权重 (BSR越低，权重越高)
+    # Calculate weight (The lower the BSR, the higher the weight)
     weights = [1 / (v.bsr ** 0.5) for v in variants]
     total_weight = sum(weights)
     
     for v in variants:
-        # 计算占比
+        # Calculate proportion
         ratio = (1 / v.bsr ** 0.5) / total_weight
-        # 分配销量
+        # Allocate sales volume
         v.allocated_sales = total_sales * ratio
     
     return variants
 ```
 
-### 2. TACOS广告成本计算
+### 2. TACOS advertising cost calculation
 
 ```python
 def calculate_ad_cost(price, monthly_sales, ad_order_pct, tacos_rate=0.15):
     """
-    计算单位广告成本
+    Calculate unit advertising costs
     """
     monthly_revenue = price * monthly_sales
     monthly_ad_budget = monthly_revenue * tacos_rate
@@ -234,25 +234,25 @@ def calculate_ad_cost(price, monthly_sales, ad_order_pct, tacos_rate=0.15):
     return ad_cost_per_unit
 ```
 
-### 3. 决策算法
+### 3. Decision Algorithm
 
 ```python
 def make_decision(margin, ad_dependency, return_rate, rating, competition):
     """
-    生成投资决策
+    generate investment decisions
     """
     risk_factors = []
     
     if margin < 0:
-        risk_factors.append("亏损")
+        risk_factors.append("Loss")
     if ad_dependency > 0.6:
-        risk_factors.append("高广告依赖")
+        risk_factors.append("High advertising dependence")
     if return_rate > 0.12:
-        risk_factors.append("高退货率")
+        risk_factors.append("High return rate")
     if rating < 4.0:
-        risk_factors.append("低评分")
+        risk_factors.append("low rating")
     if competition > 10:
-        risk_factors.append("竞争激烈")
+        risk_factors.append("Competition is fierce")
     
     if margin < 0:
         return "AVOID", 90, risk_factors
@@ -263,71 +263,71 @@ def make_decision(margin, ad_dependency, return_rate, rating, competition):
 ```
 
 
-## 文件依赖关系
+## file dependencies
 
 ```
 server.py
     ├── src/__init__.py
-    │       └── 导出: auto_analyze, generate_final_report, ...
+    │ └── Export: auto_analyze, generate_final_report, ...
     │
-    ├── src/amazon_actuary_final.py (核心分析引擎)
-    │       ├── KeepaMetrics163 (数据模型)
-    │       ├── VariantFinancials (财务模型)
-    │       ├── Metrics163Collector (指标采集)
-    │       ├── TacosCalculator (TACOS计算)
-    │       ├── VariantProfitAnalyzer (利润分析)
-    │       ├── LinkPortfolioAnalyzer (组合分析)
-    │       └── generate_final_report (主入口)
+    ├── src/amazon_actuary_final.py (core analysis engine)
+    │       ├── KeepaMetrics163 (data model)
+    │       ├── VariantFinancials (financial model)
+    │       ├── Metrics163Collector (Indicator collection)
+    │       ├── TacosCalculator (TACOS calculation)
+    │       ├── VariantProfitAnalyzer (profit analysis)
+    │       ├── LinkPortfolioAnalyzer (Portfolio analysis)
+    │       └── generate_final_report (main entrance)
     │
     ├── src/variant_auto_collector.py
-    │       └── VariantAutoCollector (变体采集)
+    │       └── VariantAutoCollector (variant collection)
     │
     ├── src/keepa_metrics_collector.py
-    │       └── KeepaMetricsCollector (163指标)
+    │       └── KeepaMetricsCollector (163 indicators)
     │
     ├── src/chinese_actuary_report.py
-    │       └── ChineseActuaryReport (中文报告)
+    │       └── ChineseActuaryReport (Chinese report)
     │
     └── src/premium_actuary_report.py
-            └── PremiumReportGenerator (Premium报告)
+            └── PremiumReportGenerator (Premium reporting)
 ```
 
 
-## 性能优化
+## Performance optimization
 
-### API调用优化
-- 批量查询: 每次最多10个ASIN
-- 自动延迟: 批次间0.5秒延迟
-- 缓存机制: 避免重复查询
+### API call optimization
+- Batch query: Maximum of 10 ASINs at a time
+- automatic delay: 0.5 second delay between batches
+- caching mechanism: Avoid duplicate queries
 
-### 计算优化
-- 向量化计算: 使用numpy处理大量数据
-- 并行处理: 多线程处理独立变体
-- 内存优化: 及时释放大数据对象
+### Computational optimization
+- vectorized computation: Use numpy to process large amounts of data
+- parallel processing: Multi-threading independent variant
+- Memory optimization: Timely release of big data objects
 
 
-## 扩展性设计
+## Extensible design
 
-### 新增数据源
+### Add new data source
 ```python
 class NewDataSource:
     def fetch_data(self, asin):
-        # 实现新的数据获取逻辑
+        # Implement new data acquisition logic
         pass
 ```
 
-### 新增分析维度
+### Add new analysis dimension
 ```python
 class NewAnalyzer:
     def analyze(self, data):
-        # 实现新的分析逻辑
+        # Implement new analysis logic
         pass
 ```
 
-### 新增报告格式
+### New report format
 ```python
 class NewReportGenerator:
     def generate(self, analysis):
-        # 实现新的报告生成逻辑
+        # Implement new report generation logic
         pass
 ```

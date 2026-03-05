@@ -1,15 +1,15 @@
 """
-深度因子挖掘系统 - 从163指标中挖掘运营和选品洞察
+Deep factor mining system - Mining operational and product selection insights from 163 indicators
 
-不再追求虚假盈利预测，而是挖掘指标间的关联模式、异常信号、运营健康度等深层因子
+No longer pursue false profit forecasts, but explore deep factors such as correlation patterns between indicators, abnormal signals, and operational health.
 
-挖掘角度:
-1. 运营健康度因子 (Operational Health Factors)
-2. 选品质量因子 (Product Quality Factors)  
-3. 竞争态势因子 (Competitive Position Factors)
-4. 风险预警因子 (Risk Signal Factors)
-5. 增长潜力因子 (Growth Potential Factors)
-6. 运营效率因子 (Operational Efficiency Factors)
+Digging angle:
+1. Operational health factor (Operational Health Factors)
+2. Product selection quality factor (Product Quality Factors)  
+3. Competitive situation factors (Competitive Position Factors)
+4. Risk warning factors (Risk Signal Factors)
+5. Growth potential factor (Growth Potential Factors)
+6. Operational efficiency factors (Operational Efficiency Factors)
 """
 
 import pandas as pd
@@ -23,22 +23,22 @@ warnings.filterwarnings('ignore')
 
 @dataclass
 class DeepFactor:
-    """深度因子数据类"""
-    name: str  # 因子名称
-    category: str  # 因子类别
-    score: float  # 因子得分 (0-100)
-    weight: float  # 权重
-    signals: List[str]  # 信号列表
-    insights: List[str]  # 洞察列表
-    actions: List[str]  # 行动建议
-    confidence: float  # 置信度
+    """Depth factor data class"""
+    name: str  # factor name
+    category: str  # factor category
+    score: float  # factor score (0-100)
+    weight: float  # weight
+    signals: List[str]  # Signal list
+    insights: List[str]  # Insight list
+    actions: List[str]  # Suggestions for action
+    confidence: float  # Confidence
 
 
 class DeepFactorMiner:
     """
-    深度因子挖掘器
+    Deep factor miner
     
-    从163个Keepa指标中挖掘深层运营和选品洞察
+    Mining deep operational and product selection insights from 163 Keepa indicators
     """
     
     def __init__(self):
@@ -47,45 +47,45 @@ class DeepFactorMiner:
     
     def mine_all_factors(self, product_data: Dict) -> Dict[str, DeepFactor]:
         """
-        挖掘所有深度因子
+        Explore all depth factors
         
         Args:
-            product_data: 163指标数据
+            product_data: 163 indicator data
             
         Returns:
-            因子字典
+            factor dictionary
         """
         self.raw_data = product_data
         
-        # 1. 运营健康度因子
+        # 1. Operational health factor
         self.factors['operational_health'] = self._mine_operational_health()
         
-        # 2. 选品质量因子
+        # 2. Product selection quality factor
         self.factors['product_quality'] = self._mine_product_quality()
         
-        # 3. 竞争态势因子
+        # 3. Competitive situation factors
         self.factors['competitive_position'] = self._mine_competitive_position()
         
-        # 4. 风险预警因子
+        # 4. Risk warning factors
         self.factors['risk_signals'] = self._mine_risk_signals()
         
-        # 5. 增长潜力因子
+        # 5. Growth potential factor
         self.factors['growth_potential'] = self._mine_growth_potential()
         
-        # 6. 运营效率因子
+        # 6. Operational efficiency factors
         self.factors['operational_efficiency'] = self._mine_operational_efficiency()
         
         return self.factors
     
-    # ========== 1. 运营健康度因子 ==========
+    # ========== 1. Operational health factor ==========
     def _mine_operational_health(self) -> DeepFactor:
         """
-        运营健康度因子
+        operational health factors
         
-        评估维度:
-        - 价格健康度: 价格波动、价格竞争力
-        - 库存健康度: 断货频率、库存周转
-        - 评价健康度: 评分稳定性、Review增长质量
+        Assessment Dimensions:
+        - price health: Price fluctuations, price competitiveness
+        - Inventory health: Out-of-stock frequency, inventory turnover
+        - Evaluate health: Rating stability, Review growth quality
         """
         signals = []
         insights = []
@@ -93,46 +93,46 @@ class DeepFactorMiner:
         score = 50
         confidence = 0.7
         
-        # 价格健康度分析
+        # Price health analysis
         price_drops = self._safe_float(self.raw_data.get('Buy Box: Drops last 90 days', 0))
         price_trend = self._analyze_price_trend()
         
         if price_drops > 20:
-            signals.append(f"价格频繁下调({price_drops}次/90天)")
-            insights.append("产品可能面临价格压力或竞争加剧")
-            actions.append("监控竞争对手价格策略，考虑差异化定位")
+            signals.append(f"Frequent price cuts({price_drops}Second-rate/90 days)")
+            insights.append("Products may face pricing pressure or increased competition")
+            actions.append("Monitor competitor pricing strategies and consider differentiated positioning")
             score -= 15
         elif price_drops < 5:
-            signals.append("价格稳定，定价权较好")
-            insights.append("产品具有价格稳定性，可能有一定定价权")
+            signals.append("Stable prices and good pricing power")
+            insights.append("The product has price stability and may have certain pricing power")
             score += 10
         
-        # 库存健康度
+        # Inventory health
         oos_rate = self._safe_float(self.raw_data.get('Amazon: 90 days OOS', 0))
         if oos_rate > 30:
-            signals.append(f"高断货率({oos_rate:.0f}%)")
-            insights.append("供应链不稳定，频繁断货影响排名和销量")
-            actions.append("优化库存管理，增加安全库存，寻找备用供应商")
+            signals.append(f"High stockout rate({oos_rate:.0f}%)")
+            insights.append("The supply chain is unstable and frequent out-of-stocks affect rankings and sales.")
+            actions.append("Optimize inventory management, increase safety stock, and find backup suppliers")
             score -= 20
         elif oos_rate < 5:
-            signals.append("库存管理良好，极少断货")
+            signals.append("Inventory is well managed and few out of stock items")
             score += 10
         
-        # 评价健康度
+        # Evaluate health
         rating = self._safe_float(self.raw_data.get('Reviews: Rating', 0))
         review_growth = self._analyze_review_growth()
         
         if rating >= 4.5:
-            signals.append(f"高评分({rating:.1f}★)")
+            signals.append(f"high rating({rating:.1f}★)")
             score += 15
         elif rating < 4.0:
-            signals.append(f"低评分({rating:.1f}★)")
-            insights.append("产品质量或客户体验存在问题")
-            actions.append("分析差评原因，改进产品或优化Listing描述")
+            signals.append(f"low rating({rating:.1f}★)")
+            insights.append("There are issues with product quality or customer experience")
+            actions.append("Analyze the reasons for negative reviews, improve products or optimize listing descriptions")
             score -= 15
         
         return DeepFactor(
-            name="运营健康度",
+            name="operational health",
             category="operational",
             score=max(0, min(100, score)),
             weight=0.20,
@@ -142,15 +142,15 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 2. 选品质量因子 ==========
+    # ========== 2. Product selection quality factor ==========
     def _mine_product_quality(self) -> DeepFactor:
         """
-        选品质量因子
+        Selection quality factor
         
-        评估维度:
-        - 市场需求验证: 销量持续性、排名稳定性
-        - 差异化潜力: 品牌集中度、评论差异化
-        - 生命周期位置: 导入期/成长期/成熟期/衰退期
+        Assessment Dimensions:
+        - Market demand verification: Sales continuity and ranking stability
+        - Differentiation potential: Brand concentration and review differentiation
+        - life cycle position: Introduction period/growth period/mature stage/recession period
         """
         signals = []
         insights = []
@@ -158,47 +158,47 @@ class DeepFactorMiner:
         score = 50
         confidence = 0.6
         
-        # 市场需求验证
+        # Market demand verification
         sales_rank = self._safe_float(self.raw_data.get('Sales Rank: Current', 999999))
         rank_consistency = self._analyze_rank_consistency()
         
         if sales_rank < 10000:
-            signals.append(f"销量排名靠前(#{sales_rank:,.0f})")
-            insights.append("产品已验证有稳定市场需求")
+            signals.append(f"Top sales ranking(#{sales_rank:,.0f})")
+            insights.append("The product has been proven to have stable market demand")
             score += 20
         elif sales_rank > 100000:
-            signals.append(f"销量排名靠后(#{sales_rank:,.0f})")
-            insights.append("市场需求有限或竞争激烈")
+            signals.append(f"Sales volume ranks low(#{sales_rank:,.0f})")
+            insights.append("Market demand is limited or competition is fierce")
             score -= 15
         
-        # 生命周期判断
+        # life cycle judgment
         lifecycle = self._determine_lifecycle()
         if lifecycle == 'Growth':
-            signals.append("产品处于成长期")
-            insights.append("市场正在扩大，是进入的好时机")
+            signals.append("The product is in the growth stage")
+            insights.append("The market is expanding and it’s a good time to enter")
             score += 15
         elif lifecycle == 'Maturity':
-            signals.append("产品处于成熟期")
-            insights.append("市场稳定，需要差异化竞争")
+            signals.append("The product is in the mature stage")
+            insights.append("The market is stable and requires differentiated competition")
             score += 5
         elif lifecycle == 'Decline':
-            signals.append("产品可能处于衰退期")
-            insights.append("需求下降，谨慎进入")
+            signals.append("Product may be in decline")
+            insights.append("Demand drops, enter with caution")
             score -= 15
         
-        # 差异化潜力
+        # Differentiation potential
         brand_concentration = self._analyze_brand_concentration()
         if brand_concentration > 0.7:
-            signals.append("头部品牌集中度高")
-            insights.append("市场被大品牌主导，新进入者难以突破")
-            actions.append("寻找细分差异化定位，或选择其他类目")
+            signals.append("High concentration of top brands")
+            insights.append("The market is dominated by big brands, making it difficult for new entrants to break through")
+            actions.append("Find segmented and differentiated positioning, or choose other categories")
             score -= 10
         else:
-            signals.append("品牌分散，有机会进入")
+            signals.append("Brands are dispersed and there is an opportunity to enter")
             score += 10
         
         return DeepFactor(
-            name="选品质量",
+            name="Selection quality",
             category="product_selection",
             score=max(0, min(100, score)),
             weight=0.20,
@@ -208,15 +208,15 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 3. 竞争态势因子 ==========
+    # ========== 3. Competitive situation factors ==========
     def _mine_competitive_position(self) -> DeepFactor:
         """
-        竞争态势因子
+        competitive situation factors
         
-        评估维度:
-        - 卖家结构: FBA/FBM比例、新卖家进入难度
-        - Buy Box竞争: 集中度、Amazon自营威胁
-        - 价格竞争强度: 价格离散度、促销频率
+        Assessment Dimensions:
+        - Seller structure: FBA/FBM ratio, difficulty for new sellers to enter
+        - Buy Box competition: Concentration, Amazon’s self-operated threats
+        - intensity of price competition: Price dispersion, promotion frequency
         """
         signals = []
         insights = []
@@ -224,50 +224,50 @@ class DeepFactorMiner:
         score = 50
         confidence = 0.75
         
-        # 卖家结构分析
+        # Seller structure analysis
         total_offers = self._safe_float(self.raw_data.get('Total Offer Count', 0))
         fba_offers = self._safe_float(self.raw_data.get('Count of retrieved live offers: New, FBA', 0))
         
         if total_offers > 0:
             fba_ratio = fba_offers / total_offers
             if fba_ratio > 0.8:
-                signals.append("FBA卖家占比高")
-                insights.append("市场专业化程度高，FBM难以竞争")
+                signals.append("FBA sellers account for a high proportion")
+                insights.append("The market is highly specialized and it is difficult for FBM to compete")
             
             if total_offers < 10:
-                signals.append(f"卖家数量少({total_offers}个)")
-                insights.append("竞争相对温和，有机会进入")
+                signals.append(f"Few sellers({total_offers}a)")
+                insights.append("Competition is relatively mild and there is a chance to enter")
                 score += 15
             elif total_offers > 30:
-                signals.append(f"卖家数量多({total_offers}个)")
-                insights.append("竞争激烈，需要强差异化")
+                signals.append(f"Many sellers({total_offers}a)")
+                insights.append("Competition is fierce and differentiation is needed")
                 score -= 10
         
-        # Amazon自营威胁
+        # Amazon self-operated threats
         amazon_share = self._safe_float(self.raw_data.get('Buy Box: % Amazon 90 days', '0%').replace('%', ''))
         if amazon_share > 50:
-            signals.append(f"Amazon自营占比高({amazon_share:.0f}%)")
-            insights.append("Amazon自营主导，难以获取Buy Box")
-            actions.append("考虑避开Amazon自营强的产品")
+            signals.append(f"Amazon has a high proportion of self-operated products({amazon_share:.0f}%)")
+            insights.append("Amazon is self-operated and it is difficult to obtain the Buy Box")
+            actions.append("Consider avoiding Amazon’s self-operated products")
             score -= 25
         elif amazon_share < 10:
-            signals.append("Amazon自营占比低")
-            insights.append("第三方卖家有机会")
+            signals.append("Amazon’s self-operated share is low")
+            insights.append("Opportunities for third-party sellers")
             score += 10
         
-        # Buy Box集中度
+        # Buy Box Concentration
         bb_winners = self._safe_float(self.raw_data.get('Buy Box: Winner Count 90 days', 0))
         if bb_winners == 1:
-            signals.append("Buy Box垄断")
-            insights.append("单一卖家控制Buy Box，进入难度大")
+            signals.append("Buy BoxMonopoly")
+            insights.append("A single seller controls the Buy Box, making it difficult to enter")
             score -= 15
         elif bb_winners > 5:
-            signals.append("Buy Box轮换频繁")
-            insights.append("Buy Box竞争激烈，有机会通过优化获得")
+            signals.append("Buy Box rotates frequently")
+            insights.append("Buy Box competition is fierce, there are opportunities to obtain through optimization")
             score += 5
         
         return DeepFactor(
-            name="竞争态势",
+            name="competitive situation",
             category="competition",
             score=max(0, min(100, score)),
             weight=0.15,
@@ -277,63 +277,63 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 4. 风险预警因子 ==========
+    # ========== 4. Risk warning factors ==========
     def _mine_risk_signals(self) -> DeepFactor:
         """
-        风险预警因子
+        risk warning factors
         
-        识别维度:
-        - 需求下滑信号: 排名下降、销量萎缩
-        - 价格崩盘信号: 持续降价、价格战
-        - 质量危机信号: 差评激增、退货上升
-        - 政策风险: 评论异常、合规问题
+        Identify dimensions:
+        - Signal of declining demand: Ranking decline, sales shrinking
+        - Price crash signal: Continuous price cuts and price wars
+        - quality crisis signal: Negative reviews surge, returns rise
+        - policy risk: Comment anomalies and compliance issues
         """
         signals = []
         insights = []
         actions = []
-        risk_level = 0  # 0-100, 越高风险越大
+        risk_level = 0  # 0-100, The higher the risk, the greater the risk
         confidence = 0.65
         
-        # 需求下滑信号
+        # Signal of declining demand
         rank_drops = self._safe_float(self.raw_data.get('Sales Rank: Drops last 90 days', 0))
         if rank_drops > 60:
-            signals.append(f"🚨 需求快速下滑信号(排名下降{rank_drops}次)")
-            insights.append("产品需求可能正在快速萎缩，可能是季节性结束或趋势变化")
-            actions.append("立即分析原因，考虑清库存或转型")
+            signals.append(f"🚨 Signal of rapid decline in demand(Ranking dropped{rank_drops}Second-rate)")
+            insights.append("Product demand may be shrinking rapidly, possibly due to the end of seasonality or a change in trends")
+            actions.append("Immediately analyze the reasons and consider inventory clearance or transformation")
             risk_level += 30
         elif rank_drops > 30:
-            signals.append(f"⚠️ 需求下滑迹象(排名下降{rank_drops}次)")
+            signals.append(f"⚠️ Signs of declining demand(Ranking dropped{rank_drops}Second-rate)")
             risk_level += 15
         
-        # 价格崩盘信号
+        # Price crash signal
         price_trend_90d = self._calculate_price_change(days=90)
-        if price_trend_90d < -0.2:  # 90天降价超过20%
-            signals.append(f"🚨 价格持续下跌({price_trend_90d:.1%})")
-            insights.append("市场价格战激烈或需求下降")
-            actions.append("评估是否跟进降价或寻找差异化")
+        if price_trend_90d < -0.2:  # More than 20 price reductions in 90 days%
+            signals.append(f"🚨 Prices continue to fall({price_trend_90d:.1%})")
+            insights.append("Intense price war or declining demand in the market")
+            actions.append("Evaluate whether to follow up with price cuts or look for differentiation")
             risk_level += 25
         
-        # 质量危机信号
+        # quality crisis signal
         return_rate = self._estimate_return_rate()
         if return_rate > 0.15:
-            signals.append(f"🚨 高退货率({return_rate:.1%})")
-            insights.append("产品质量或描述存在严重问题")
-            actions.append("立即改进产品或优化Listing")
+            signals.append(f"🚨High return rate({return_rate:.1%})")
+            insights.append("There are serious problems with product quality or description")
+            actions.append("Improve products or optimize listings immediately")
             risk_level += 25
         
-        # 卖家退出信号
+        # Seller exit signal
         if rank_drops > 40 and self._safe_float(self.raw_data.get('New Offer Count: Current', 0)) < 3:
-            signals.append("⚠️ 卖家退出迹象")
-            insights.append("需求下滑同时新卖家减少，市场可能正在萎缩")
+            signals.append("⚠️ Signs of seller exit")
+            insights.append("With falling demand and fewer new sellers, the market may be shrinking")
             risk_level += 15
         
-        # 计算风险评分 (100 - risk_level)
+        # Calculate risk score (100 - risk_level)
         score = max(0, 100 - risk_level)
         
         return DeepFactor(
-            name="风险预警",
+            name="Risk warning",
             category="risk",
-            score=score,  # 高分表示低风险
+            score=score,  # High scores indicate low risk
             weight=0.15,
             signals=signals,
             insights=insights,
@@ -341,16 +341,16 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 5. 增长潜力因子 ==========
+    # ========== 5. Growth potential factor ==========
     def _mine_growth_potential(self) -> DeepFactor:
         """
-        增长潜力因子
+        growth potential factor
         
-        识别维度:
-        - 需求增长信号: 排名上升、新需求进入
-        - 市场扩容信号: 新卖家增加、品类扩张
-        - 季节性机会: 即将进入旺季、历史季节性
-        - 价格提升空间: 当前定价偏低、价值未充分挖掘
+        Identify dimensions:
+        - Demand growth signals: Ranking rises and new demands enter
+        - market expansion signal: New sellers increase and categories expand
+        - seasonal opportunities: About to enter peak season, historical seasonality
+        - Room for price improvement: The current pricing is low and the value is not fully exploited.
         """
         signals = []
         insights = []
@@ -358,38 +358,38 @@ class DeepFactorMiner:
         score = 50
         confidence = 0.55
         
-        # 需求增长信号
+        # Demand growth signals
         rank_changes = self._safe_float(self.raw_data.get('90 days change % Sales Rank', '0%').replace('%', ''))
-        if rank_changes < -30:  # 排名数字变小(变好)超过30%
-            signals.append(f"📈 需求快速增长(排名提升{abs(rank_changes):.0f}%)")
-            insights.append("产品需求正在快速增长，可能是趋势产品")
-            actions.append("考虑增加库存，抓住机会")
+        if rank_changes < -30:  # Ranking numbers become smaller(get better)more than 30%
+            signals.append(f"📈 Demand is growing rapidly(Ranking improvement{abs(rank_changes):.0f}%)")
+            insights.append("Product demand is growing rapidly and may be a trending product")
+            actions.append("Consider increasing inventory and seize opportunities")
             score += 25
         
-        # 新卖家进入
+        # New seller enters
         new_offers = self._safe_float(self.raw_data.get('New Offer Count: Current', 0))
         if new_offers > 5:
-            signals.append(f"新卖家持续进入({new_offers}个)")
-            insights.append("市场吸引力高，新卖家愿意进入")
+            signals.append(f"New sellers continue to enter({new_offers}a)")
+            insights.append("The market is highly attractive and new sellers are willing to enter")
             score += 10
         
-        # 价格提升空间
+        # Room for price improvement
         price_position = self._analyze_price_position()
         if price_position == 'low':
-            signals.append("价格定位偏低")
-            insights.append("当前定价低于市场平均，有提价空间")
-            actions.append("测试小幅提价，观察销量反应")
+            signals.append("Price positioning is low")
+            insights.append("The current pricing is lower than the market average, and there is room for price increase")
+            actions.append("Test a small price increase and observe the sales response")
             score += 10
         
-        # Review增长质量
+        # ReviewGrowthQuality
         review_velocity = self._calculate_review_velocity()
-        if review_velocity > 10:  # 每月超过10个新评论
-            signals.append(f"评论增长快速({review_velocity:.0f}个/月)")
-            insights.append("销量增长带动评论增加，产品正在获得市场认可")
+        if review_velocity > 10:  # More than 10 new comments per month
+            signals.append(f"Comments are growing rapidly({review_velocity:.0f}a/month)")
+            insights.append("Sales growth has led to an increase in reviews, and the product is gaining market recognition.")
             score += 15
         
         return DeepFactor(
-            name="增长潜力",
+            name="growth potential",
             category="growth",
             score=max(0, min(100, score)),
             weight=0.15,
@@ -399,15 +399,15 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 6. 运营效率因子 ==========
+    # ========== 6. Operational efficiency factors ==========
     def _mine_operational_efficiency(self) -> DeepFactor:
         """
-        运营效率因子
+        operational efficiency factor
         
-        评估维度:
-        - 转化效率: 流量转化、购物车获取率
-        - 库存周转: 销售速度、库存天数
-        - 客户满意度: 好评率、复购信号
+        Assessment Dimensions:
+        - conversion efficiency: Traffic conversion, shopping cart acquisition rate
+        - Inventory turns: Sales speed, inventory days
+        - customer satisfaction: Positive rating, repurchase signal
         """
         signals = []
         insights = []
@@ -415,43 +415,43 @@ class DeepFactorMiner:
         score = 50
         confidence = 0.6
         
-        # 转化效率 (通过Review/销量比估算)
+        # conversion efficiency (byReview/sales ratio estimate)
         review_ratio = self._estimate_review_ratio()
-        if review_ratio > 0.05:  # Review率高于5%
-            signals.append("Review转化率较高")
-            insights.append("客户满意度高，愿意留评")
+        if review_ratio > 0.05:  # Review rate is higher than 5%
+            signals.append("Review conversion rate is higher")
+            insights.append("Customer satisfaction is high and willing to leave reviews")
             score += 10
         
-        # Buy Box获取能力
+        # Buy Box acquisition ability
         bb_is_fba = str(self.raw_data.get('Buy Box: Is FBA', '')).lower()
         if 'yes' in bb_is_fba or 'true' in bb_is_fba:
-            signals.append("当前Buy Box为FBA")
-            insights.append("FBA配送有利于获取Buy Box")
+            signals.append("The current Buy Box is FBA")
+            insights.append("FBA delivery is conducive to obtaining the Buy Box")
             score += 10
         
-        # 评论质量
+        # Review quality
         rating = self._safe_float(self.raw_data.get('Reviews: Rating', 0))
         review_count = self._safe_float(self.raw_data.get('Reviews: Review Count', 0))
         
         if rating >= 4.5 and review_count > 50:
-            signals.append("高评分且评论充足")
-            insights.append("产品已建立良好口碑，运营基础扎实")
+            signals.append("Highly rated and well reviewed")
+            insights.append("The product has established a good reputation and has a solid operating foundation.")
             score += 15
         elif rating < 4.0:
-            signals.append("评分偏低")
-            insights.append("客户满意度不足，影响转化和复购")
-            actions.append("分析差评，改进产品或服务")
+            signals.append("Low rating")
+            insights.append("Insufficient customer satisfaction affects conversion and repurchase")
+            actions.append("Analyze negative reviews and improve products or services")
             score -= 15
         
-        # 变体丰富度 (如有)
+        # variant richness (If any)
         variation_count = self._count_variations()
         if variation_count > 5:
-            signals.append(f"变体丰富({variation_count}个)")
-            insights.append("多变体覆盖更多需求，但库存管理复杂")
+            signals.append(f"Rich variants({variation_count}a)")
+            insights.append("Multiple variants cover more needs, but inventory management is complex")
             score += 5
         
         return DeepFactor(
-            name="运营效率",
+            name="operational efficiency",
             category="efficiency",
             score=max(0, min(100, score)),
             weight=0.15,
@@ -461,9 +461,9 @@ class DeepFactorMiner:
             confidence=confidence
         )
     
-    # ========== 辅助方法 ==========
+    # ========== Helper method ==========
     def _safe_float(self, value, default=0.0):
-        """安全转换为float"""
+        """safe conversion to float"""
         if isinstance(value, (int, float)):
             return float(value)
         if isinstance(value, str):
@@ -474,8 +474,8 @@ class DeepFactorMiner:
         return default
     
     def _analyze_price_trend(self) -> str:
-        """分析价格趋势"""
-        # 简化实现
+        """Analyze price trends"""
+        # Simplify implementation
         drops = self._safe_float(self.raw_data.get('Buy Box: Drops last 90 days', 0))
         if drops > 15:
             return 'declining'
@@ -484,13 +484,13 @@ class DeepFactorMiner:
         return 'volatile'
     
     def _analyze_review_growth(self) -> str:
-        """分析评论增长"""
-        # 简化实现
+        """Analyze review growth"""
+        # Simplify implementation
         return 'steady'
     
     def _determine_lifecycle(self) -> str:
-        """判断生命周期阶段"""
-        tracking_days = 365  # 假设
+        """Determine life cycle stage"""
+        tracking_days = 365  # hypothesis
         review_count = self._safe_float(self.raw_data.get('Reviews: Review Count', 0))
         
         if tracking_days < 180 and review_count < 50:
@@ -502,17 +502,17 @@ class DeepFactorMiner:
         return 'Unknown'
     
     def _analyze_brand_concentration(self) -> float:
-        """分析品牌集中度"""
-        # 简化实现，实际需要更多数据
+        """Analyze brand concentration"""
+        # Simplified implementation, actually requires more data
         return 0.5
     
     def _analyze_rank_consistency(self) -> float:
-        """分析排名稳定性"""
-        # 简化实现
+        """Analyze ranking stability"""
+        # Simplify implementation
         return 0.7
     
     def _calculate_price_change(self, days: int = 90) -> float:
-        """计算价格变化率"""
+        """Calculate price change rate"""
         current = self._safe_float(self.raw_data.get('Buy Box: Current', 0))
         historical = self._safe_float(self.raw_data.get(f'Buy Box: {days} days avg.', 0))
         if historical > 0:
@@ -520,7 +520,7 @@ class DeepFactorMiner:
         return 0.0
     
     def _analyze_price_position(self) -> str:
-        """分析价格定位"""
+        """Analyze price positioning"""
         current = self._safe_float(self.raw_data.get('Buy Box: Current', 0))
         avg = self._safe_float(self.raw_data.get('Buy Box: 90 days avg.', current))
         
@@ -531,12 +531,12 @@ class DeepFactorMiner:
         return 'medium'
     
     def _calculate_review_velocity(self) -> float:
-        """计算评论增长速度"""
-        # 简化实现
+        """Calculate review growth rate"""
+        # Simplify implementation
         return 5.0
     
     def _estimate_return_rate(self) -> float:
-        """估算退货率"""
+        """Estimated return rate"""
         val = self.raw_data.get('Return Rate', '')
         if isinstance(val, str):
             if 'High' in val:
@@ -546,12 +546,12 @@ class DeepFactorMiner:
         return 0.05
     
     def _estimate_review_ratio(self) -> float:
-        """估算评论率"""
-        # 简化实现
+        """Estimated review rate"""
+        # Simplify implementation
         return 0.03
     
     def _count_variations(self) -> int:
-        """统计变体数量"""
+        """Number of statistical variants"""
         variations = str(self.raw_data.get('Variation ASINs', ''))
         if variations:
             return len(variations.split(';'))
@@ -559,14 +559,14 @@ class DeepFactorMiner:
 
 
 def format_factor_report(factors: Dict[str, DeepFactor]) -> str:
-    """格式化因子报告"""
+    """Format Factor Report"""
     lines = []
     
     lines.append("=" * 90)
-    lines.append("🔍 深度因子挖掘报告 - 运营与选品洞察")
+    lines.append("🔍 Deep factor mining report - Operation and product selection insights")
     lines.append("=" * 90)
     
-    # 计算综合评分
+    # Calculate overall score
     total_score = 0
     total_weight = 0
     for factor in factors.values():
@@ -574,16 +574,16 @@ def format_factor_report(factors: Dict[str, DeepFactor]) -> str:
         total_weight += factor.weight
     overall_score = total_score / total_weight if total_weight > 0 else 0
     
-    lines.append(f"\n📊 综合健康度评分: {overall_score:.0f}/100")
+    lines.append(f"\n📊 Comprehensive health score: {overall_score:.0f}/100")
     
-    # 按类别分组
+    # Group by category
     categories = {
-        'operational': '📈 运营维度',
-        'product_selection': '🎯 选品维度',
-        'competition': '⚔️ 竞争维度',
-        'risk': '⚠️ 风险维度',
-        'growth': '🚀 增长维度',
-        'efficiency': '⚡ 效率维度',
+        'operational': '📈 Operational dimension',
+        'product_selection': '🎯 Product selection dimensions',
+        'competition': '⚔️Competition Dimension',
+        'risk': '⚠️Risk Dimensions',
+        'growth': '🚀 Growth dimension',
+        'efficiency': '⚡ Efficiency Dimension',
     }
     
     for factor in factors.values():
@@ -591,21 +591,21 @@ def format_factor_report(factors: Dict[str, DeepFactor]) -> str:
         status = "🟢" if factor.score >= 70 else "🟡" if factor.score >= 50 else "🔴"
         
         lines.append(f"\n{'─' * 90}")
-        lines.append(f"{status} {factor.name} (权重{factor.weight:.0%}) - {factor.score:.0f}/100 [置信度: {factor.confidence:.0%}]")
+        lines.append(f"{status} {factor.name} (weight{factor.weight:.0%}) - {factor.score:.0f}/100 [Confidence: {factor.confidence:.0%}]")
         lines.append(f"{'─' * 90}")
         
         if factor.signals:
-            lines.append(f"\n  📡 关键信号:")
+            lines.append(f"\n 📡 Key Signals:")
             for signal in factor.signals:
                 lines.append(f"    • {signal}")
         
         if factor.insights:
-            lines.append(f"\n  💡 深层洞察:")
+            lines.append(f"\n 💡 Deep Insight:")
             for insight in factor.insights:
                 lines.append(f"    • {insight}")
         
         if factor.actions:
-            lines.append(f"\n  🎯 行动建议:")
+            lines.append(f"\n 🎯 Action suggestions:")
             for action in factor.actions:
                 lines.append(f"    • {action}")
     

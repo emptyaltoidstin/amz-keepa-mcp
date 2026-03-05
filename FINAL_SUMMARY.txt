@@ -1,259 +1,259 @@
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                               ║
-║                    Amz-Keepa-MCP v3.0 - 项目完成总结                          ║
-║                    亚马逊运营精算师系统                                        ║
+║                    Amz-Keepa-MCP v3.0 - Project completion summary ║
+║ Amazon Operations Actuary System ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
-📅 项目周期: 2026-02-15 至 2026-02-16
-🎯 项目目标: 构建数据驱动的FBA选品决策系统
-✅ 完成状态: 100% - 所有核心功能已实现
+📅Project cycle: 2026-02-15 to 2026-02-16
+🎯 Project goals: Build a data-driven FBA product selection decision-making system
+✅ Completed status: 100% - All core functions have been implemented
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                              🎯 核心功能清单
+                              🎯 Core feature list
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[✅] 自动变体采集系统
-     └── 输入1个ASIN → 自动发现所有变体 → 批量采集数据
+[✅] Automatic variant collection system
+     └── Enter 1 ASIN → Automatically discover all variants → Collect data in batches
 
-[✅] 163指标完整采集
-     └── Keepa Product Viewer CSV格式全部163个指标
+[✅] Complete collection of 163 indicators
+     └── Keepa Product Viewer CSV format all 163 indicators
 
-[✅] 智能销量分配算法
-     └── 检测共享数据 → 按BSR比例分配 → 避免重复计算
+[✅] Intelligent sales distribution algorithm
+     └── Detect shared data → distribute according to BSR ratio → avoid double counting
 
-[✅] TACOS广告成本模型
-     └── Total ACOS = 广告总花费/总销售额 (比ACOS更准确)
+[✅] TACOS Advertising Cost Model
+     └── Total ACOS = total advertising spend/total sales (More accurate than ACOS)
 
-[✅] 精算师分析引擎
-     └── 真实COGS输入 + 运营成本计算 + 利润分析
+[✅] Actuary Analysis Engine
+     └── Real COGS input + Operating cost calculation + profit analysis
 
-[✅] 数据驱动决策系统
-     └── 多维度评估 → 自动生成投资建议 + 置信度评分
+[✅] Data-driven decision-making system
+     └── Multi-dimensional assessment → Automatically generate investment recommendations + confidence score
 
-[✅] 帕累托分析 (80/20法则)
-     └── 识别核心变体 → 长尾变体分析
+[✅] Pareto analysis (80/Rule of 20)
+     └── Identify core variants → Long-tail variant analysis
 
-[✅] 高级报告生成器
-     ├── 中文精算师报告 (暗黑极简风格 + 163指标汉化)
-     └── Premium报告 (Luxury美学设计)
-
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            📊 关键技术指标
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-核心算法:
-  • 销量分配算法: weight = 1 / BSR^0.5
-  • TACOS计算: ad_cost = (revenue × 15%) / ad_orders
-  • 混合利润率: blended = organic×pct + ad×pct
-  • BSR-销量映射: 分段幂律函数
-
-数据处理能力:
-  • 单次分析变体数: 无限制 (自动分批)
-  • 指标采集完整度: 163/163 (100%)
-  • 报告生成时间: < 10秒
-  • API调用优化: 批量查询 + 自动延迟
-
-准确性:
-  • boughtInPastMonth数据: 90%+
-  • BSR估算: 60-80%
-  • 利润计算: ±5% (基于真实COGS)
+[✅] Advanced report generator
+     ├── Chinese Actuary Report (Dark minimalist style + 163 indicators Chinese version)
+     └── Premium Report (Luxury aesthetic design)
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                            📁 项目文件结构
+                            📊 Key technical indicators
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-核心源码 (src/):
-  ✅ amazon_actuary_final.py       (18KB) - 主分析引擎
-  ✅ variant_auto_collector.py     (12KB) - 自动变体采集
-  ✅ chinese_actuary_report.py     (22KB) - 中文报告生成
-  ✅ premium_actuary_report.py     (24KB) - Premium报告
-  ✅ keepa_metrics_collector.py    (31KB) - 163指标采集
-  ✅ variant_profit_analyzer.py    (25KB) - 利润分析
-  └── ... 其他模块
+Core algorithm:
+  • Sales volume allocation algorithm: weight = 1 / BSR^0.5
+  • TACOS calculation: ad_cost = (revenue × 15%) / ad_orders
+  • Mixed profit margins: blended = organic×pct + ad×pct
+  • BSR-sales mapping: Piecewise power law function
 
-文档 (docs/):
-  ✅ PROJECT_SUMMARY.md            (19KB) - 完整项目总结
-  ✅ QUICK_REFERENCE.md            (6KB)  - 快速参考卡片
-  ✅ ARCHITECTURE.md               (完整) - 系统架构图
-  ✅ METRICS_DICTIONARY.md         (完整) - 163指标中文词典
-  ✅ SALES_ESTIMATION_GUIDE.md     (完整) - 销量估算指南
-  ✅ SMART_SALES_ALLOCATION.md     (完整) - 智能分配算法
-  ✅ USAGE_GUIDE.md                (12KB) - 详细使用指南
-  ✅ README.md                     (12KB) - 项目说明
+Data processing capabilities:
+  • Number of variants analyzed in a single run: Unlimited (Automatic batching)
+  • Completeness of indicator collection: 163/163 (100%)
+  • Report generation time: < 10 seconds
+  • API call optimization: Batch query + automatic delay
 
-输出目录:
-  📁 cache/reports/                - HTML报告
-  📁 cache/charts/                 - 可视化图表
-  📁 archive/old_src/              - 归档旧代码
-  📁 archive/old_reports/          - 归档旧报告
+Accuracy:
+  • boughtInPastMonth data: 90%+
+  • BSR estimation: 60-80%
+  • Profit calculation: ±5% (Based on real COGS)
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          🚀 快速开始 (3分钟)
+                            📁 Project file structure
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. 环境准备:
+Core source code (src/):
+  ✅ amazon_actuary_final.py       (18KB) - Main analysis engine
+  ✅ variant_auto_collector.py     (12KB) - Automatic variant collection
+  ✅ chinese_actuary_report.py     (22KB) - Chinese report generation
+  ✅ premium_actuary_report.py     (24KB) - Premium reporting
+  ✅ keepa_metrics_collector.py    (31KB) - 163 indicator collection
+  ✅ variant_profit_analyzer.py    (25KB) - profit analysis
+  └── ... other modules
+
+document (docs/):
+  ✅ PROJECT_SUMMARY.md            (19KB) - Full project summary
+  ✅ QUICK_REFERENCE.md            (6KB)  - quick reference card
+  ✅ ARCHITECTURE.md               (complete) - System architecture diagram
+  ✅ METRICS_DICTIONARY.md         (complete) - 163 indicators Chinese dictionary
+  ✅ SALES_ESTIMATION_GUIDE.md     (complete) - Sales Estimation Guide
+  ✅ SMART_SALES_ALLOCATION.md     (complete) - Intelligent allocation algorithm
+  ✅ USAGE_GUIDE.md                (12KB) - Detailed user guide
+  ✅ README.md                     (12KB) - Project description
+
+Output directory:
+  📁 cache/reports/                - HTML report
+  📁 cache/charts/                 - Visual charts
+  📁 archive/old_src/              - Archive old code
+  📁 archive/old_reports/          - Archive old reports
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          🚀 Quick start (3 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Environment preparation:
    $ cd /Users/blobeats/Downloads/amz-keepa-mcp
    $ source venv/bin/activate
    $ export KEEPA_KEY="your_api_key"
 
-2. 一键分析:
+2. One-click analysis:
    >>> from src import auto_analyze
    >>> report, analysis, info = auto_analyze('B0BW93MP74')
 
-3. 查看报告:
-   打开: cache/reports/B0BW93MP74_CHINESE_FULL_REPORT.html
+3. View reports:
+   Open: cache/reports/B0BW93MP74_CHINESE_FULL_REPORT.html
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          💡 核心使用场景
+                          💡 Core usage scenarios
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-场景1: 新产品选品决策
-  └── 输入竞品ASIN → 自动采集变体 → 分析利润 → 生成投资建议
+Scene 1: New product selection decisions
+  └── Enter the ASIN of competing products → automatically collect variants → analyze profits → generate investment recommendations
 
-场景2: 现有产品优化
-  └── 分析所有变体 → 识别核心变体 → 优化库存配比
+Scene 2: Existing product optimization
+  └── Analyze all variants → Identify core variants → Optimize inventory ratio
 
-场景3: 竞品深度分析
-  └── 采集竞品163指标 → 对比分析 → 发现市场机会
+Scene 3: In-depth analysis of competitive products
+  └── Collect 163 indicators of competing products → Comparative analysis → Discover market opportunities
 
-场景4: 投资决策支持
-  └── 多维度风险评估 → ROI计算 → 数据驱动决策
-
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          📈 成功案例演示
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-案例: WONDAY Tote Bag (B0BW93MP74)
-
-输入: B0BW93MP74 (任意一个变体ASIN)
-输出:
-  • 发现变体: 9个 (5色 × 2尺寸)
-  • 总月销量: 5,544单
-  • 总月利润: $30,266
-  • 混合利润率: 18.7%
-  • 投资决策: ✅ 建议投资 (置信度78%)
-
-核心发现:
-  • 明星变体: Black X-Large (月利润$4,358)
-  • 无亏损变体: 所有9个变体均盈利
-  • 广告效率: 自然流量占比高，TACOS可控
-
-行动建议:
-  1. 重点备货Black X-Large (60天+库存)
-  2. 按利润占比分配库存
-  3. 关注Green Large的低利润率问题
+Scene 4: Investment decision support
+  └── Multi-dimensional risk assessment → ROI calculation → data-driven decision-making
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          ⚠️ 重要注意事项
+                          📈 Success case presentation
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-数据质量:
-  • 永远不要估算COGS - 使用真实供应商报价
-  • 订单来源比例从广告后台获取
-  • 新品(上架<30天)可能没有完整数据
+Case: WONDAY Tote Bag (B0BW93MP74)
 
-计算精度:
-  • boughtInPastMonth: 90%+ 准确
-  • BSR估算: 60-80% 准确
-  • 建议用自己的产品校准模型
+input: B0BW93MP74 (Any variant ASIN)
+output:
+  • Discover variants: 9 (5 colors × 2 sizes)
+  • Total monthly sales: 5,544 orders
+  • Total monthly profit: $30,266
+  • Mixed profit margins: 18.7%
+  • Investment decisions: ✅ Recommended investment (Confidence 78%)
 
-API限制:
-  • Keepa API有速率限制
-  • 大量变体会自动分批查询
-  • 耐心等待API响应
+Core findings:
+  • Star variant: Black X-Large (monthly profit$4,358)
+  • No loss variant: All 9 variants are profitable
+  • Advertising efficiency: Natural traffic accounts for a high proportion and is controllable by TACOS
 
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          🔮 未来规划
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-短期 (1-3个月):
-  [ ] 支持更多站点 (CN, JP, DE, UK)
-  [ ] 缓存优化，避免重复API调用
-  [ ] 批量ASIN分析工具
-
-中期 (3-6个月):
-  [ ] 季节性趋势预测
-  [ ] 竞品对比分析
-  [ ] 价格弹性分析
-
-长期 (6-12个月):
-  [ ] AI智能推荐系统
-  [ ] 自动预警系统
-  [ ] 多店铺数据整合
+Suggestions for action:
+  1. Focus on stocking Black X-Large (60 days+Inventory)
+  2. Allocate inventory according to profit ratio
+  3. Pay attention to Green Large’s low profit margins
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          📞 技术支持
+                          ⚠️ IMPORTANT NOTES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-常见问题:
-  Q: API限流怎么办?
-  A: 正常现象，系统会自动等待，请耐心等待
+Data quality:
+  • Never estimate COGS - Use real supplier quotes
+  • The order source ratio is obtained from the advertising backend
+  • New products(On the shelves<30 days)May not have complete data
 
-  Q: 销量估算偏差大?
-  A: 用自己的产品校准模型，调整BSR-销量映射参数
+Calculation accuracy:
+  • boughtInPastMonth: 90%+ precise
+  • BSR estimation: 60-80% precise
+  • It is recommended to calibrate the model with your own product
 
-  Q: 如何获取COGS?
-  A: 向供应商询价：产品价 + 头程 + 关税
-
-  Q: 订单来源比例?
-  A: Seller Central → 广告 → 测量和分析
-
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          📝 项目统计
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-代码统计:
-  • Python源文件: 20个
-  • 总代码行数: ~8,000行
-  • 核心模块: 5个
-  • 文档文件: 8个
-
-功能统计:
-  • 采集指标: 163个
-  • 分析维度: 8个
-  • 报告类型: 2种
-  • 决策类型: 3种
-
-测试案例:
-  • 成功分析ASIN: B0BW93MP74 (9变体)
-  • 成功分析ASIN: B0F6B5R47Q (6变体)
-  • 报告生成成功率: 100%
+API restrictions:
+  • Keepa API has rate limits
+  • Large numbers of variants are queried automatically in batches
+  • Wait patiently for API response
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                          🎉 项目完成总结
+                          🔮 Future plans
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ 所有核心功能已实现
-✅ 所有文档已编写
-✅ 测试案例通过
-✅ 代码已优化
-✅ 架构已完善
+short term (1-3 months):
+  [ ] Support more sites (CN, JP, DE, UK)
+  [ ] Cache optimization to avoid repeated API calls
+  [ ] Batch ASIN Analysis Tool
 
-项目状态: 🟢 生产就绪 (Production Ready)
+medium term (3-6 months):
+  [ ] Seasonal Trend Forecast
+  [ ] Comparative analysis of competing products
+  [ ] price elasticity analysis
 
-核心原则:
-  能用真实数据就不用估算
-  必须估算时要知晓误差范围
-  所有决策必须基于数据支撑
+long (6-12 months):
+  [ ] AI intelligent recommendation system
+  [ ] Automatic early warning system
+  [ ] Multi-store data integration
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          📞Technical support
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FAQ:
+  Q: What to do about API current limit?
+  A: It is normal. The system will wait automatically. Please wait patiently.
+
+  Q: Sales estimates have large deviations?
+  A: Calibrate the model and adjust the BSR with your own product-Sales volume mapping parameters
+
+  Q: How to get COGS?
+  A: Request price from supplier: product price + first leg + tariff
+
+  Q: Order source ratio?
+  A: Seller Central → Advertising → Measurement & Analytics
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          📝 Project Statistics
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Code statistics:
+  • Python source files: 20
+  • Total lines of code: ~8,000 lines
+  • Core modules: 5
+  • Documentation files: 8
+
+Function statistics:
+  • Collect metrics: 163
+  • Dimensions of analysis: 8
+  • Report type: 2 types
+  • Type of decision: 3 types
+
+test case:
+  • Successful analysis of ASINs: B0BW93MP74 (9 variants)
+  • Successful analysis of ASINs: B0F6B5R47Q (6 variations)
+  • Report generation success rate: 100%
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          🎉Project completion summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ All core functions have been implemented
+✅ All documentation has been written
+✅ Test case passed
+✅ Code has been optimized
+✅The structure has been improved
+
+Project status: 🟢 Production ready (Production Ready)
+
+core principles:
+  If you can use real data, you don’t need to estimate.
+  Know the margin of error when you must estimate
+  All decisions must be based on data
 
 ───────────────────────────────────────────────────────────────────────────────
 
-版本: v3.0 Final Edition
-日期: 2026-02-16
-作者: Amazon FBA Actuary System
+version: v3.0 Final Edition
+Date: 2026-02-16
+Author: Amazon FBA Actuary System
 
-"数据驱动决策，让每一分钱都花在刀刃上。"
+"Data-driven decisions make every penny spent wisely."
 
 ───────────────────────────────────────────────────────────────────────────────

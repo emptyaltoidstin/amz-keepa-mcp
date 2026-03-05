@@ -6,7 +6,7 @@ MCP server for Amazon FBA actuary analysis
 
 Usage with Claude Code:
 1. Configure MCP server in Claude Code settings
-2. Use: @amz-keepa 分析 ASIN B0F6B5R47Q
+2. Use: @amz-keepa analysis ASIN B0F6B5R47Q
 """
 
 import os
@@ -53,14 +53,14 @@ class AmzKeepaServer:
             return [
                 Resource(
                     uri="docs://readme",
-                    name="使用文档",
-                    description="Amz-Keepa-MCP 使用说明",
+                    name="Use documentation",
+                    description="Amz-Keepa-MCP Instructions for Use",
                     mimeType="text/markdown"
                 ),
                 Resource(
                     uri="docs://commission-rates",
-                    name="佣金比例表",
-                    description="Amazon各类目佣金比例",
+                    name="Commission scale table",
+                    description="Amazon commission ratio for various categories",
                     mimeType="text/markdown"
                 )
             ]
@@ -80,17 +80,17 @@ class AmzKeepaServer:
             return [
                 Tool(
                     name="analyze_asin",
-                    description="分析Amazon ASIN，生成完整精算师报告",
+                    description="Analyze Amazon ASIN and generate a complete actuary report",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "asin": {
                                 "type": "string",
-                                "description": "Amazon产品ASIN (如: B0F6B5R47Q)"
+                                "description": "Amazon product ASIN (Such as: B0F6B5R47Q)"
                             },
                             "target_moq": {
                                 "type": "integer",
-                                "description": "目标采购量 (可选，默认100)",
+                                "description": "Target purchase quantity (Optional, default 100)",
                                 "default": 100
                             }
                         },
@@ -99,13 +99,13 @@ class AmzKeepaServer:
                 ),
                 Tool(
                     name="get_product_info",
-                    description="获取产品基本信息 (快速查询)",
+                    description="Get basic product information (Quick query)",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "asin": {
                                 "type": "string",
-                                "description": "Amazon产品ASIN"
+                                "description": "Amazon product ASIN"
                             }
                         },
                         "required": ["asin"]
@@ -113,31 +113,31 @@ class AmzKeepaServer:
                 ),
                 Tool(
                     name="calculate_cogs",
-                    description="计算COGS成本",
+                    description="Calculate COGS cost",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "procurement_price_rmb": {
                                 "type": "number",
-                                "description": "1688采购价 (RMB)"
+                                "description": "1688 purchase price (RMB)"
                             },
                             "weight_kg": {
                                 "type": "number",
-                                "description": "产品重量 (kg)"
+                                "description": "Product weight (kg)"
                             },
                             "shipping_rate": {
                                 "type": "number",
-                                "description": "船运价格 RMB/kg (可选，默认12)",
+                                "description": "Shipping price RMB/kg (Optional, default 12)",
                                 "default": 12
                             },
                             "tariff_rate": {
                                 "type": "number",
-                                "description": "关税率 (可选，默认0.15)",
+                                "description": "tariff rate (Optional, default 0.15)",
                                 "default": 0.15
                             },
                             "exchange_rate": {
                                 "type": "number",
-                                "description": "汇率 (可选，默认7.2)",
+                                "description": "exchange rate (Optional, default 7.2)",
                                 "default": 7.2
                             }
                         },
@@ -165,16 +165,16 @@ class AmzKeepaServer:
         target_moq = arguments.get("target_moq", 100)
         
         if not asin:
-            return [TextContent(type="text", text="❌ 错误: 请提供有效的ASIN")]
+            return [TextContent(type="text", text="❌ Error: Please provide a valid ASIN")]
         
         # Validate ASIN format
         if not asin.startswith("B") or len(asin) != 10:
-            return [TextContent(type="text", text=f"⚠️ 警告: ASIN '{asin}' 格式可能不正确，标准ASIN为10位字符")]
+            return [TextContent(type="text", text=f"⚠️ WARNING: ASIN '{asin}' The format may be incorrect, standard ASIN is 10 characters")]
         
         # Check API key
         keepa_key = os.getenv("KEEPA_KEY")
         if not keepa_key:
-            return [TextContent(type="text", text="❌ 错误: 未设置 KEEPA_KEY 环境变量")]
+            return [TextContent(type="text", text="❌ Error: KEEPA not set_KEY environment variable")]
         
         # Generate report
         try:
@@ -183,72 +183,72 @@ class AmzKeepaServer:
             result = generate_complete_report(asin, target_moq)
             
             if result is None:
-                return [TextContent(type="text", text=f"❌ 生成报告失败，请检查ASIN '{asin}' 是否有效")]
+                return [TextContent(type="text", text=f"❌ Failed to generate report, please check ASIN '{asin}' Is it valid?")]
             
             report_path = result['unified_report']
             variants_count = result['variants_count']
             
             # Generate response
-            response = f"""✅ 统一精算师报告生成完成!
+            response = f"""✅ The unified actuary report is generated!
 
 📦 ASIN: {result['parent_asin']}
-📊 变体数量: {variants_count}
+📊Number of variants: {variants_count}
 
-📁 报告路径:
+📁 Report path:
    {report_path}
 
-📋 报告内容:
-   ✓ 产品信息 (品牌/类目/总销量/评论/评分)
-   ✓ 交互式成本计算器 (填入1688采购价即计算)
-   ✓ 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)
-   ✓ 帕累托分析 (80/20核心变体)
-   ✓ 风险评估
-   ✓ 投资建议与行动计划
+📋 Report content:
+   ✓ Product information (brand/Category/total sales/Comment/score)
+   ✓ Interactive cost calculator (Fill in the 1688 purchase price and it will be calculated.)
+   ✓ Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)
+   ✓ Pareto analysis (80/20 core variants)
+   ✓ Risk assessment
+   ✓ Investment advice and action plan
 
-📝 使用方法:
-   1. 打开报告查看完整分析
-   2. 在"采购成本"输入框填入1688采购价
-   3. 系统自动计算完整利润分析
+📝 How to use:
+   1. Open the report to view the complete analysis
+   2. in"Procurement cost"Fill in the input box with the purchase price of 1688
+   3. The system automatically calculates complete profit analysis
 
-💡 提示:
-   所有FBA费用基于Keepa真实尺寸重量计算
-   佣金比例基于类目自动确定 (Electronics 8%, Clothing 17%, 等)
+💡 Tips:
+   All FBA fees are calculated based on Keepa true dimensional weight
+   The commission ratio is automatically determined based on the category (Electronics 8%, Clothing 17%, Wait)
 """
             return [TextContent(type="text", text=response)]
             
         except Exception as e:
-            return [TextContent(type="text", text=f"❌ 生成报告时出错: {str(e)}")]
+            return [TextContent(type="text", text=f"❌ Error while generating report: {str(e)}")]
     
     async def _handle_get_product_info(self, arguments: Dict) -> list[TextContent]:
         """Handle get_product_info tool"""
         asin = arguments.get("asin", "").strip().upper()
         
         if not asin:
-            return [TextContent(type="text", text="❌ 请提供ASIN")]
+            return [TextContent(type="text", text="❌ Please provide ASIN")]
         
         try:
             from variant_auto_collector import VariantAutoCollector
             
             api_key = os.getenv("KEEPA_KEY")
             if not api_key:
-                return [TextContent(type="text", text="❌ 未设置 KEEPA_KEY")]
+                return [TextContent(type="text", text="❌ KEEPA not set_KEY")]
             
             collector = VariantAutoCollector(api_key)
             products, parent_info = collector.collect_variants(asin)
             
             if not products:
-                return [TextContent(type="text", text=f"❌ 未找到ASIN '{asin}' 的数据")]
+                return [TextContent(type="text", text=f"❌ ASIN not found '{asin}' data")]
             
             # Format product info
-            info = f"""📦 产品信息: {asin}
+            info = f"""📦 Product information: {asin}
 
-基本信息:
-   父ASIN: {parent_info.get('parent_asin', 'N/A')}
-   品牌: {parent_info.get('brand', 'N/A')}
-   类目: {parent_info.get('category', 'N/A')}
-   变体数量: {len(products)}
+Basic information:
+   Parent ASIN: {parent_info.get('parent_asin', 'N/A')}
+   brand: {parent_info.get('brand', 'N/A')}
+   Category: {parent_info.get('category', 'N/A')}
+   Number of variants: {len(products)}
 
-变体列表:
+Variation list:
 """
             for i, p in enumerate(products[:5], 1):
                 attrs = p.get('attributes', [])
@@ -257,12 +257,12 @@ class AmzKeepaServer:
                 info += f"   {i}. {p.get('asin', '')} - {color}/{size}\n"
             
             if len(products) > 5:
-                info += f"   ... 还有 {len(products)-5} 个变体\n"
+                info += f"   ...and {len(products)-5} variants\n"
             
             return [TextContent(type="text", text=info)]
             
         except Exception as e:
-            return [TextContent(type="text", text=f"❌ 查询失败: {str(e)}")]
+            return [TextContent(type="text", text=f"❌ Query failed: {str(e)}")]
     
     async def _handle_calculate_cogs(self, arguments: Dict) -> list[TextContent]:
         """Handle calculate_cogs tool"""
@@ -273,7 +273,7 @@ class AmzKeepaServer:
         exchange_rate = arguments.get("exchange_rate", 7.2)
         
         if procurement <= 0 or weight <= 0:
-            return [TextContent(type="text", text="❌ 请提供有效的采购价和重量")]
+            return [TextContent(type="text", text="❌ Please provide valid purchase price and weight")]
         
         # Calculate
         shipping = weight * shipping_rate
@@ -282,86 +282,86 @@ class AmzKeepaServer:
         total_rmb = subtotal + tariff
         cogs_usd = total_rmb / exchange_rate
         
-        result = f"""💰 COGS成本计算
+        result = f"""💰 COGS cost calculation
 
-输入:
-   采购价: ¥{procurement:.2f}
-   重量: {weight:.2f} kg
-   船运: ¥{shipping_rate}/kg
-   关税: {tariff_rate*100:.0f}%
-   汇率: {exchange_rate}
+input:
+   purchase price: ¥{procurement:.2f}
+   weight: {weight:.2f} kg
+   Shipping: ¥{shipping_rate}/kg
+   tariff: {tariff_rate*100:.0f}%
+   exchange rate: {exchange_rate}
 
-计算:
-   头程运费 = {weight:.2f} × {shipping_rate} = ¥{shipping:.2f}
-   小计 = {procurement:.2f} + {shipping:.2f} = ¥{subtotal:.2f}
-   关税 = {subtotal:.2f} × {tariff_rate} = ¥{tariff:.2f}
-   总计(RMB) = ¥{total_rmb:.2f}
+Calculate:
+   First leg freight = {weight:.2f} × {shipping_rate} = ¥{shipping:.2f}
+   Subtotal = {procurement:.2f} + {shipping:.2f} = ¥{subtotal:.2f}
+   tariff = {subtotal:.2f} × {tariff_rate} = ¥{tariff:.2f}
+   total(RMB) = ¥{total_rmb:.2f}
    
    COGS(USD) = {total_rmb:.2f} ÷ {exchange_rate} = ${cogs_usd:.2f}
 
-✅ 总COGS: ${cogs_usd:.2f} USD
+✅ Total COGS: ${cogs_usd:.2f} USD
 """
         return [TextContent(type="text", text=result)]
     
     def _get_readme(self) -> str:
         """Get readme content"""
-        return """# Amz-Keepa-MCP 使用指南
+        return """# Amz-Keepa-MCP User Guide
 
-## 标准流程
+## standard process
 
-使用 `analyze_asin` 工具生成完整报告：
-
-```
-@amz-keepa 分析 ASIN B0F6B5R47Q
-```
-
-或带参数：
+use `analyze_asin` The tool generates a full report:
 
 ```
-@amz-keepa 分析 ASIN B0F6B5R47Q，目标采购量 200
+@amz-keepa analysis ASIN B0F6B5R47Q
 ```
 
-## 工具列表
+Or with parameters:
+
+```
+@amz-keepa analyzes ASIN B0F6B5R47Q, target purchase quantity 200
+```
+
+## Tool list
 
 ### 1. analyze_asin
-生成完整的统一精算师报告
+Generate complete unified actuarial report
 
-**参数:**
-- `asin`: Amazon产品ASIN (必需)
-- `target_moq`: 目标采购量 (可选，默认100)
+**parameters:**
+- `asin`: Amazon product ASIN (required)
+- `target_moq`: Target purchase quantity (Optional, default 100)
 
 ### 2. get_product_info
-快速查询产品基本信息
+Quickly query basic product information
 
-**参数:**
-- `asin`: Amazon产品ASIN (必需)
+**parameters:**
+- `asin`: Amazon product ASIN (required)
 
 ### 3. calculate_cogs
-计算COGS成本
+Calculate COGS cost
 
-**参数:**
-- `procurement_price_rmb`: 1688采购价 (必需)
-- `weight_kg`: 产品重量kg (必需)
-- `shipping_rate`: 船运价格 (可选，默认12)
-- `tariff_rate`: 关税率 (可选，默认0.15)
-- `exchange_rate`: 汇率 (可选，默认7.2)
+**parameters:**
+- `procurement_price_rmb`: 1688 purchase price (required)
+- `weight_kg`: Product weightkg (required)
+- `shipping_rate`: shipping price (Optional, default 12)
+- `tariff_rate`: tariff rate (Optional, default 0.15)
+- `exchange_rate`: exchange rate (Optional, default 7.2)
 
-## 佣金比例参考
+## Commission ratio reference
 
-| 类目 | 佣金 |
+| Category | Commission |
 |------|------|
 | Electronics | 8% |
 | Clothing | 17% |
 | Jewelry | 20% |
 | Home | 15% |
-| 其他 | 15% |
+| Others | 15% |
 """
     
     def _get_commission_rates(self) -> str:
         """Get commission rates"""
-        return """# Amazon佣金比例表
+        return """# Amazon commission ratio table
 
-| 类目 | 佣金比例 |
+| Category | Commission ratio |
 |------|----------|
 | Amazon Device Accessories | 45% |
 | Electronics | 8% |
@@ -388,7 +388,7 @@ class AmzKeepaServer:
 | Office Products | 15% |
 | Industrial | 15% |
 | Tools | 15% |
-| 其他 | 15% |
+| Others | 15% |
 """
     
     async def run(self):

@@ -1,11 +1,11 @@
 """
-All-in-One 交互式精算师报告
+All-in-One Interactive Actuarial Report
 =============================
-包含内置计算器的完整HTML报告
-- 使用Keepa API真实重量数据
-- 只需填入采购成本（RMB）
-- 自动计算头程运费（12RMB/kg）
-- 实时更新利润分析
+Full HTML report with built-in calculator
+- Real weight data using Keepa API
+- Just fill in the purchase cost (RMB)
+- Automatically calculate first-way freight (12RMB/kg）
+- Real-time updated profit analysis
 """
 
 import json
@@ -15,14 +15,14 @@ from typing import Dict, List
 
 class AllInOneInteractiveReport:
     """
-    All-in-One交互式报告生成器
+    All-in-One interactive report generator
     
-    特点：
-    - 使用Keepa API真实重量数据 (packageWeight)
-    - 头程运费 = 重量(kg) × 12 RMB/kg
-    - 只需填入采购成本（RMB）
-    - 关税 15%
-    - 自动转换为USD COGS
+    Features:
+    - Real weight data using Keepa API (packageWeight)
+    - First leg freight = weight(kg) × 12 RMB/kg
+    - Just fill in the purchase cost (RMB)
+    - Tariff 15%
+    - Automatic conversion to USD COGS
     """
     
     def __init__(self):
@@ -32,12 +32,12 @@ class AllInOneInteractiveReport:
         
     def generate(self, asin: str, products: List[Dict], analysis_data: Dict, 
                  output_path: str = None) -> str:
-        """生成交互式报告"""
+        """Generate interactive reports"""
         
         if output_path is None:
             output_path = f'cache/reports/{asin}_ALLINONE_INTERACTIVE.html'
         
-        # 准备变体数据（包含真实重量）
+        # Prepare variant data (including real weight)
         variants_with_weight = self._prepare_variants_data(products, analysis_data)
         
         html = self._build_html(asin, variants_with_weight, analysis_data)
@@ -48,29 +48,29 @@ class AllInOneInteractiveReport:
         return output_path
     
     def _prepare_variants_data(self, products: List[Dict], analysis_data: Dict) -> List[Dict]:
-        """准备变体数据，包含真实重量"""
+        """Prepare variant data, including true weight"""
         variants = []
         
         for product in products:
             asin = product.get('asin', '')
             
-            # 获取重量数据（克转千克）
+            # Get weight data (grams to kilograms)
             package_weight_g = product.get('packageWeight', 0) or 0
             item_weight_g = product.get('itemWeight', 0) or 0
             
-            # 优先使用packageWeight，如果没有则使用itemWeight
+            # Use packageWeight first, if not, use itemWeight
             weight_kg = (package_weight_g or item_weight_g) / 1000 if (package_weight_g or item_weight_g) else 0.3
             
-            # 如果没有重量数据，使用估算值
+            # If weight data is not available, use estimates
             if weight_kg == 0:
-                weight_kg = 0.3  # 默认300g
+                weight_kg = 0.3  # Default 300g
             
-            # 获取其他属性
+            # Get other properties
             attrs = product.get('attributes', [])
             color = self._get_attr(attrs, 'Color')
             size = self._get_attr(attrs, 'Size')
             
-            # 获取价格
+            # get price
             data = product.get('data', {})
             buybox_price = 0
             if data.get('buyBoxSellerIdHistory'):
@@ -81,12 +81,12 @@ class AllInOneInteractiveReport:
             if buybox_price == 0:
                 buybox_price = product.get('stats', {}).get('buyBoxPrice', 2999) / 100
             
-            # 获取销量
+            # Get sales
             bought_month = product.get('boughtInPastMonth', 0)
             if isinstance(bought_month, dict):
                 bought_month = 0
             
-            # 获取BSR
+            # Get BSR
             bsr = self._get_bsr(data)
             
             variants.append({
@@ -103,7 +103,7 @@ class AllInOneInteractiveReport:
         return variants
     
     def _get_attr(self, attrs: List, name: str) -> str:
-        """获取属性值"""
+        """Get attribute value"""
         for attr in attrs:
             if isinstance(attr, dict):
                 if attr.get('name') == name:
@@ -111,7 +111,7 @@ class AllInOneInteractiveReport:
         return 'N/A'
     
     def _get_current_price(self, csv_data) -> float:
-        """获取当前价格"""
+        """Get current price"""
         if not csv_data:
             return 0
         if isinstance(csv_data, list) and len(csv_data) >= 2:
@@ -119,7 +119,7 @@ class AllInOneInteractiveReport:
         return 0
     
     def _get_bsr(self, data: Dict) -> int:
-        """获取BSR"""
+        """Get BSR"""
         csv = data.get('csv', [])
         if len(csv) > 3 and csv[3]:
             bsr_data = csv[3]
@@ -128,12 +128,12 @@ class AllInOneInteractiveReport:
         return 999999
     
     def _build_html(self, asin: str, variants: List[Dict], analysis_data: Dict) -> str:
-        """构建完整的交互式HTML"""
+        """Build complete interactive HTML"""
         
         variants_json = json.dumps(variants, ensure_ascii=False)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # 计算平均重量
+        # Calculate average weight
         avg_weight = sum(v['weight_kg'] for v in variants) / len(variants) if variants else 0.3
         
         html = f'''<!DOCTYPE html>
@@ -141,7 +141,7 @@ class AllInOneInteractiveReport:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All-in-One 交互式精算师报告 | {asin}</title>
+    <title>All-in-One Interactive Actuarial Report | {asin}</title>
     <style>
         :root {{
             --bg: #0a0a0a;
@@ -559,8 +559,8 @@ class AllInOneInteractiveReport:
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>All-in-One 交互式精算师报告</h1>
-            <div class="subtitle">填入采购成本，即刻获取完整利润分析</div>
+            <h1>All-in-One Interactive Actuarial Report</h1>
+            <div class="subtitle">Fill in the purchase cost and get a complete profit analysis instantly</div>
             <div class="asin">ASIN: {asin}</div>
         </header>
         
@@ -568,30 +568,30 @@ class AllInOneInteractiveReport:
         <div class="calculator-section">
             <div class="section-header">
                 <span class="icon">🔧</span>
-                <h2>成本计算器</h2>
+                <h2>cost calculator</h2>
             </div>
             
             <!-- Main Input -->
             <div class="main-input">
-                <label>采购成本</label>
+                <label>Procurement cost</label>
                 <input type="number" class="input-large" id="procurementCost" 
                        placeholder="0" oninput="calculateAll()">
-                <div class="input-unit">人民币 (RMB)</div>
+                <div class="input-unit">RMB (RMB)</div>
             </div>
             
             <!-- Settings -->
             <div class="settings-grid">
                 <div class="setting-box">
-                    <label>船运价格</label>
+                    <label>shipping price</label>
                     <input type="number" id="shippingRate" value="{self.shipping_rate}" 
                            oninput="calculateAll()">
                 </div>
                 <div class="setting-box">
-                    <label>关税率</label>
+                    <label>tariff rate</label>
                     <div class="value-static">15%</div>
                 </div>
                 <div class="setting-box">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <input type="number" id="exchangeRate" value="{self.exchange_rate}" 
                            step="0.1" oninput="calculateAll()">
                 </div>
@@ -603,30 +603,30 @@ class AllInOneInteractiveReport:
             
             <!-- Cost Breakdown -->
             <div class="cost-breakdown">
-                <div class="breakdown-title">成本构成计算流程</div>
+                <div class="breakdown-title">Cost component calculation process</div>
                 <div class="breakdown-flow">
                     <div class="flow-item">
-                        <label>采购成本</label>
+                        <label>Procurement cost</label>
                         <div class="value" id="costProcurement">-</div>
                     </div>
                     <div class="flow-op">+</div>
                     <div class="flow-item">
-                        <label>头程运费</label>
+                        <label>First leg freight</label>
                         <div class="value" id="costShipping">-</div>
                     </div>
                     <div class="flow-op">×</div>
                     <div class="flow-item">
-                        <label>关税 15%</label>
+                        <label>Tariff 15%</label>
                         <div class="value">1.15</div>
                     </div>
                     <div class="flow-op">÷</div>
                     <div class="flow-item">
-                        <label>汇率</label>
+                        <label>exchange rate</label>
                         <div class="value" id="costExchange">-</div>
                     </div>
                     <div class="flow-arrow">→</div>
                     <div class="flow-item highlight">
-                        <label>总COGS (USD)</label>
+                        <label>Total COGS (USD)</label>
                         <div class="value" id="costTotal">-</div>
                     </div>
                 </div>
@@ -637,24 +637,24 @@ class AllInOneInteractiveReport:
         <div class="variants-section">
             <div class="section-header">
                 <span class="icon">📦</span>
-                <h2>变体分析</h2>
+                <h2>Variant analysis</h2>
             </div>
             
             <table class="variants-table">
                 <thead>
                     <tr>
-                        <th>变体</th>
-                        <th>重量</th>
-                        <th>价格</th>
-                        <th>头程运费</th>
+                        <th>Variants</th>
+                        <th>weight</th>
+                        <th>price</th>
+                        <th>First leg freight</th>
                         <th>COGS</th>
-                        <th>月销</th>
-                        <th>利润</th>
-                        <th>利润率</th>
+                        <th>monthly sales</th>
+                        <th>profit</th>
+                        <th>profit margin</th>
                     </tr>
                 </thead>
                 <tbody id="variantsTableBody">
-                    <!-- 动态生成 -->
+                    <!-- Dynamically generated -->
                 </tbody>
             </table>
         </div>
@@ -662,55 +662,55 @@ class AllInOneInteractiveReport:
         <!-- Summary -->
         <div class="summary-grid" id="summarySection" style="display: none;">
             <div class="summary-card">
-                <label>预计月度总利润</label>
+                <label>Estimated monthly total profit</label>
                 <div class="value" id="totalProfit">$0</div>
             </div>
             <div class="summary-card">
-                <label>预计月度总销量</label>
+                <label>Estimated total monthly sales</label>
                 <div class="value" id="totalSales">0</div>
             </div>
             <div class="summary-card">
-                <label>平均利润率</label>
+                <label>average profit margin</label>
                 <div class="value" id="avgMargin">0%</div>
             </div>
             <div class="summary-card highlight">
-                <label>ROI估算</label>
+                <label>ROI estimation</label>
                 <div class="value" id="roiEstimate">0%</div>
             </div>
         </div>
         
         <!-- Verdict -->
         <div class="verdict-section" id="verdictSection" style="display: none;">
-            <div class="verdict-label">投资建议</div>
+            <div class="verdict-label">investment advice</div>
             <div class="verdict-value" id="verdictValue">-</div>
             <div class="verdict-confidence" id="verdictConfidence">-</div>
         </div>
         
         <!-- Formula -->
         <div class="formula-section">
-            <div class="formula-title">计算公式详解</div>
+            <div class="formula-title">Detailed explanation of calculation formula</div>
             <div class="formula-code">
-<span class="comment">// 头程运费计算 (基于Keepa API真实重量)</span>
-<span class="variable">头程运费</span> = 重量(kg) × 船运价格(RMB/kg)
+<span class="comment">// First leg freight calculation (Real weight based on Keepa API)</span>
+<span class="variable">First leg freight</span> = weight(kg) × Shipping price(RMB/kg)
 
-<span class="comment">// COGS计算流程</span>
-<span class="variable">COGS(USD)</span> = [采购成本(RMB) + 头程运费(RMB)] × <span class="number">1.15</span>(关税) ÷ 汇率
+<span class="comment">// COGS calculation process</span>
+<span class="variable">COGS(USD)</span> = [Procurement cost(RMB) + First leg freight(RMB)] × <span class="number">1.15</span>(tariff) ÷ exchange rate
 
-<span class="comment">// 单件利润计算 (TACOS模型)</span>
-<span class="variable">利润</span> = 售价 - COGS - FBA费用 - 佣金 - 广告成本 - 退货成本
+<span class="comment">// Single piece profit calculation (TACOS model)</span>
+<span class="variable">profit</span> = selling price - COGS - FBA fees - Commission - advertising cost - return cost
 
-<span class="comment">// 月度利润</span>
-<span class="variable">月利润</span> = 单件利润 × 月销量
+<span class="comment">// monthly profit</span>
+<span class="variable">monthly profit</span> = Profit per piece × monthly sales
             </div>
         </div>
     </div>
     
     <script>
-        // 变体数据（包含Keepa真实重量）
+        // Variant data (including Keepa real weight)
         const variantsData = {variants_json};
         const avgWeight = {avg_weight:.3f};
         
-        // 初始化表格
+        // Initialization form
         function initTable() {{
             const tbody = document.getElementById('variantsTableBody');
             tbody.innerHTML = '';
@@ -736,17 +736,17 @@ class AllInOneInteractiveReport:
             }});
         }}
         
-        // 计算所有
+        // Count all
         function calculateAll() {{
             const procurementRMB = parseFloat(document.getElementById('procurementCost').value) || 0;
             const shippingRate = parseFloat(document.getElementById('shippingRate').value) || {self.shipping_rate};
             const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || {self.exchange_rate};
             
-            // 更新流程显示
+            // Update process display
             document.getElementById('costProcurement').textContent = procurementRMB > 0 ? procurementRMB.toFixed(2) + ' RMB' : '-';
             document.getElementById('costExchange').textContent = exchangeRate.toFixed(1);
             
-            // 计算每个变体
+            // Count each variant
             const rows = document.querySelectorAll('#variantsTableBody tr');
             let totalProfit = 0;
             let totalSales = 0;
@@ -759,21 +759,21 @@ class AllInOneInteractiveReport:
                 const price = v.price;
                 const sales = v.sales || 0;
                 
-                // 计算头程运费
+                // Calculate first leg freight
                 const shippingRMB = procurementRMB > 0 ? weightKg * shippingRate : 0;
                 
-                // 计算COGS
+                // Calculate COGS
                 let cogsUSD = 0;
                 if (procurementRMB > 0) {{
                     const subtotalRMB = procurementRMB + shippingRMB;
-                    const totalRMB = subtotalRMB * 1.15; // 关税
+                    const totalRMB = subtotalRMB * 1.15; // tariff
                     cogsUSD = totalRMB / exchangeRate;
                 }}
                 
-                // 估算FBA费用
+                // Estimate FBA fees
                 const fbaFee = estimateFBAFee(weightKg);
                 
-                // 计算费用
+                // Calculate fees
                 const referralFee = price * 0.15;
                 const returnCost = price * 0.05 * 0.3;
                 const storageFee = 0.06;
@@ -784,7 +784,7 @@ class AllInOneInteractiveReport:
                 const margin = price > 0 ? (profit / price) * 100 : 0;
                 const monthlyProfit = profit * sales;
                 
-                // 更新行
+                // update row
                 const shippingCell = row.querySelector('.shipping-cost');
                 const cogsCell = row.querySelector('.cogs-value');
                 const profitCell = row.querySelector('.profit-value');
@@ -813,7 +813,7 @@ class AllInOneInteractiveReport:
                 }}
             }});
             
-            // 更新汇总
+            // Update summary
             if (procurementRMB > 0) {{
                 document.getElementById('summarySection').style.display = 'grid';
                 document.getElementById('verdictSection').style.display = 'block';
@@ -824,12 +824,12 @@ class AllInOneInteractiveReport:
                 const avgMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
                 document.getElementById('avgMargin').textContent = avgMargin.toFixed(1) + '%';
                 
-                // ROI估算
+                // ROI estimation
                 const monthlyCogs = procurementRMB * totalSales / exchangeRate;
                 const roi = monthlyCogs > 0 ? (totalProfit / monthlyCogs) * 100 : 0;
                 document.getElementById('roiEstimate').textContent = roi.toFixed(0) + '%';
                 
-                // 决策
+                // decision making
                 updateVerdict(avgMargin, roi);
             }} else {{
                 document.getElementById('summarySection').style.display = 'none';
@@ -837,7 +837,7 @@ class AllInOneInteractiveReport:
             }}
         }}
         
-        // 估算FBA费用
+        // Estimate FBA fees
         function estimateFBAFee(weightKg) {{
             const weightLb = weightKg * 2.20462;
             if (weightLb <= 0.5) return 3.22;
@@ -846,31 +846,31 @@ class AllInOneInteractiveReport:
             return 5.77 + (weightLb - 2.0) * 0.50;
         }}
         
-        // 更新决策
+        // update decision
         function updateVerdict(margin, roi) {{
             const verdictEl = document.getElementById('verdictValue');
             const confidenceEl = document.getElementById('verdictConfidence');
             
             let verdict = 'avoid';
-            let text = '建议避免';
+            let text = 'Recommended to avoid';
             let confidence = 60;
             
             if (margin > 20 && roi > 50) {{
                 verdict = 'proceed';
-                text = '建议投资';
+                text = 'Recommended investment';
                 confidence = 85;
             }} else if (margin > 10 && roi > 20) {{
                 verdict = 'caution';
-                text = '谨慎考虑';
+                text = 'Consider carefully';
                 confidence = 70;
             }}
             
             verdictEl.textContent = text;
             verdictEl.className = 'verdict-value ' + verdict;
-            confidenceEl.textContent = '置信度 ' + confidence + '%';
+            confidenceEl.textContent = 'Confidence ' + confidence + '%';
         }}
         
-        // 初始化
+        // initialization
         initTable();
         calculateAll();
     </script>
@@ -884,39 +884,39 @@ def generate_allinone_report(asin: str, products: List[Dict],
                               analysis_data: Dict = None,
                               output_path: str = None) -> str:
     """
-    生成All-in-One交互式报告
+    GenerateAll-in-Oneinteractive report
     
     Args:
-        asin: 父ASIN
-        products: Keepa API产品数据列表
-        analysis_data: 分析数据（可选）
-        output_path: 输出路径
+        asin: Parent ASIN
+        products: Keepa API product data list
+        analysis_data: Analyze data (optional)
+        output_path: Output path
     
     Returns:
-        报告路径
+        Report path
     """
     generator = AllInOneInteractiveReport()
     return generator.generate(asin, products, analysis_data or {}, output_path)
 
 
-# 测试代码
+# test code
 if __name__ == "__main__":
-    # 模拟数据
+    # simulated data
     test_products = [
         {
             'asin': 'B0TEST001',
-            'packageWeight': 450,  # 450克
+            'packageWeight': 450,  # 450g
             'itemWeight': 380,
-            'attributes': [{'name': 'Color', 'value': '黑色'}, {'name': 'Size', 'value': 'L'}],
+            'attributes': [{'name': 'Color', 'value': 'black'}, {'name': 'Size', 'value': 'L'}],
             'data': {'csv': [[], [], [], [100, 5000, 8000], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [2999]]},
             'stats': {'buyBoxPrice': 2999},
             'boughtInPastMonth': 600
         },
         {
             'asin': 'B0TEST002',
-            'packageWeight': 380,  # 380克
+            'packageWeight': 380,  # 380g
             'itemWeight': 320,
-            'attributes': [{'name': 'Color', 'value': '白色'}, {'name': 'Size', 'value': 'M'}],
+            'attributes': [{'name': 'Color', 'value': 'white'}, {'name': 'Size', 'value': 'M'}],
             'data': {'csv': [[], [], [], [100, 4500, 7500], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [2799]]},
             'stats': {'buyBoxPrice': 2799},
             'boughtInPastMonth': 450
@@ -924,4 +924,4 @@ if __name__ == "__main__":
     ]
     
     output = generate_allinone_report('B0TEST001', test_products)
-    print(f"报告已生成: {output}")
+    print(f"Report generated: {output}")

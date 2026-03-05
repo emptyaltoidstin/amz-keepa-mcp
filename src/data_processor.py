@@ -1,6 +1,6 @@
 """
-Keepa 数据处理器
-将 Keepa API 返回的原始数据转换为结构化分析数据
+Keepa data processor
+Convert raw data returned by the Keepa API into structured analytics data
 """
 
 import numpy as np
@@ -11,18 +11,18 @@ from typing import Dict, List, Optional, Any, Tuple
 
 class KeepaDataProcessor:
     """
-    处理 Keepa API 返回的原始数据
+    Processing raw data returned by the Keepa API
     
-    Keepa 数据格式说明:
-    - 时间戳: 从 2011-01-01 开始的分钟数
-    - 价格单位: 分 (需要除以 100 转换为美元)
-    - -1 表示无数据/断货
+    Keepa data format description:
+    - Timestamp: from 2011-01-01 starting minutes
+    - price unit: points (Need to divide by 100 to convert to USD)
+    - -1 means no data/Out of stock
     """
     
-    # Keepa 时间起点
+    # Keepa time starting point
     KEEPA_EPOCH = datetime(2011, 1, 1)
     
-    # 数据字段映射
+    # Data field mapping
     PRICE_FIELDS = {
         'AMAZON': 'amazon_price',
         'NEW': 'new_price',
@@ -45,23 +45,23 @@ class KeepaDataProcessor:
         self.stats = {}
     
     def keepa_time_to_datetime(self, keepa_minutes: int) -> datetime:
-        """将 Keepa 时间转换为 datetime"""
+        """Convert Keepa time to datetime"""
         return self.KEEPA_EPOCH + timedelta(minutes=int(keepa_minutes))
     
     def datetime_to_keepa_time(self, dt: datetime) -> int:
-        """将 datetime 转换为 Keepa 时间"""
+        """Convert datetime to Keepa time"""
         return int((dt - self.KEEPA_EPOCH).total_seconds() / 60)
     
     def process_product(self, product: Dict, days: int = 90) -> Dict[str, Any]:
         """
-        处理单个产品数据
+        Process individual product data
         
         Args:
-            product: Keepa API 返回的产品数据
-            days: 分析天数
+            product: Product data returned by Keepa API
+            days: Analysis days
         
         Returns:
-            结构化分析数据
+            Structured analytics data
         """
         result = {
             'asin': product.get('asin', 'N/A'),
@@ -73,7 +73,7 @@ class KeepaDataProcessor:
             'package_dimensions': self._extract_dimensions(product),
             'images': product.get('imagesCSV', ''),
             'last_update': datetime.now().isoformat(),
-            # 新增: 品牌和专业度指标
+            # New: Brand and professionalism indicators
             'has_aplus_content': product.get('hasAPlusContent', False),
             'video_count': len(product.get('videos', [])) if product.get('videos') else 0,
             'has_main_video': product.get('hasMainVideo', False),
@@ -86,31 +86,31 @@ class KeepaDataProcessor:
             'style': product.get('style', 'N/A'),
         }
         
-        # 处理价格数据
+        # Process price data
         price_data = self._process_price_data(product, days)
         result.update(price_data)
         
-        # 处理排名数据
+        # Process ranking data
         rank_data = self._process_rank_data(product, days)
         result.update(rank_data)
         
-        # 处理卖家数据
+        # Process seller data
         seller_data = self._process_seller_data(product, days)
         result.update(seller_data)
         
-        # 处理评论数据
+        # Process comment data
         review_data = self._process_review_data(product, days)
         result.update(review_data)
         
-        # 处理库存/断货数据
+        # Process inventory/Out of stock data
         stock_data = self._process_stock_data(product, days)
         result.update(stock_data)
         
-        # 处理费用数据 (FBA费、推荐费等)
+        # Process expense data (FBA fees, recommendation fees, etc.)
         fee_data = self._process_fee_data(product)
         result.update(fee_data)
         
-        # 计算衍生指标
+        # Calculate derived indicators
         derived_data = self._calculate_derived_metrics(result, days)
         result.update(derived_data)
         
@@ -262,12 +262,12 @@ class KeepaDataProcessor:
         return result
     
     def _process_seller_data(self, product: Dict, days: int) -> Dict:
-        """处理卖家数据 - 包含品牌垄断度分析"""
+        """Process seller data - Contains brand monopoly analysis"""
         data = product.get('data', {})
         
         result = {}
         
-        # 新货卖家数
+        # Number of new goods sellers
         count_new_data = data.get('COUNT_NEW', [])
         new_offers = self._extract_time_series(count_new_data, 0)
         result['new_offers_history'] = new_offers
@@ -275,28 +275,28 @@ class KeepaDataProcessor:
         result['avg_offers'] = round(np.mean(new_offers), 1) if new_offers else None
         result['max_offers'] = int(max(new_offers)) if new_offers else None
         
-        # FBA 卖家数
+        # Number of FBA sellers
         fba_data = data.get('COUNT_FBA', [])
         fba_offers = self._extract_time_series(fba_data, 0)
         result['fba_offers'] = int(fba_offers[-1]) if fba_offers else None
         result['fba_offers_avg'] = round(np.mean(fba_offers), 1) if fba_offers else None
         
-        # FBM 卖家数
+        # Number of FBM sellers
         fbm_data = data.get('COUNT_FBM_SHIPPING', [])
         fbm_offers = self._extract_time_series(fbm_data, 0)
         result['fbm_offers'] = int(fbm_offers[-1]) if fbm_offers else None
         
-        # Buy Box 信息
+        # Buy Box Information
         buybox_data = product.get('buyBoxSellerIdHistory', [])
         if buybox_data:
             result['buybox_winner'] = buybox_data[-1] if isinstance(buybox_data, list) else buybox_data
         else:
             result['buybox_winner'] = 'Unknown'
         
-        # 判断是否有亚马逊自营
+        # Determine whether it is self-operated by Amazon
         result['is_amazon_selling'] = data.get('AMAZON', []) and len(data.get('AMAZON', [])) > 0
         
-        # 新增: Buy Box卖家历史分析
+        # New: Buy Box seller history analysis
         buybox_history = data.get('BUY_BOX_SELLER', [])
         if buybox_history:
             result['buybox_seller_changes'] = self._count_seller_changes(buybox_history)
@@ -306,19 +306,19 @@ class KeepaDataProcessor:
         return result
     
     def _process_review_data(self, product: Dict, days: int) -> Dict:
-        """处理评论数据 - 包含退货率指标"""
+        """Process comment data - Includes return rate metrics"""
         data = product.get('data', {})
         
         result = {}
         
-        # 评分
+        # score
         rating_data = data.get('RATING', [])
         ratings = self._extract_time_series(rating_data, 0)
         result['rating_history'] = ratings
         result['current_rating'] = round(ratings[-1], 1) if ratings else None
         result['avg_rating'] = round(np.mean(ratings), 2) if ratings else None
         
-        # 评论数
+        # Number of comments
         reviews_data = data.get('COUNT_REVIEWS', [])
         review_counts = self._extract_time_series(reviews_data, 0)
         result['review_count_history'] = review_counts
@@ -327,83 +327,83 @@ class KeepaDataProcessor:
         result['reviews_90d'] = self._calculate_review_growth(review_counts, 90)
         result['review_trend'] = self._calculate_trend(review_counts) if review_counts else 'No Data'
         
-        # 新增: 评论数多时间窗口平均
+        # New: Average number of comments over multiple time windows
         result['reviews_90d_avg'] = self._calculate_window_average(review_counts, 90)
         result['reviews_180d_avg'] = self._calculate_window_average(review_counts, 180)
         result['reviews_365d_avg'] = self._calculate_window_average(review_counts, 365)
         
-        # 新增: 退货率 (如果Keepa提供)
+        # New: return rate (If Keepa provides)
         return_rate_data = data.get('RETURN_RATE', [])
         if return_rate_data:
             return_rates = self._extract_time_series(return_rate_data, 0)
             result['return_rate'] = return_rates[-1] if return_rates else None
             result['return_rate_avg'] = round(np.mean(return_rates), 2) if return_rates else None
         else:
-            # 基于评论情感等估算退货风险
+            # Estimating return risk based on review sentiment, etc.
             result['return_rate'] = None
             result['return_risk_level'] = self._estimate_return_risk(product, result)
         
         return result
     
     def _process_stock_data(self, product: Dict, days: int) -> Dict:
-        """处理库存/断货数据 - 包含库存紧张信号"""
+        """Process inventory/Out of stock data - Contains tight inventory signals"""
         data = product.get('data', {})
         
         result = {
             'out_of_stock_days': 0,
             'stockouts_count': 0,
             'last_in_stock': None,
-            'inventory_tension': False,  # 新增: 库存紧张信号
-            'buybox_stock_level': None,  # 新增: Buy Box库存水平
+            'inventory_tension': False,  # New: tight inventory signal
+            'buybox_stock_level': None,  # New: Buy Box inventory levels
         }
         
-        # 通过价格数据判断断货情况 (-1 表示无货)
-        # Amazon 自营价格
+        # Use price data to determine out-of-stock status (-1 means out of stock)
+        # Amazon self-operated price
         amazon_prices = data.get('AMAZON', [])
         if amazon_prices:
             stockout_periods = self._detect_stockouts(amazon_prices, days)
             result['out_of_stock_days'] = stockout_periods['total_days']
             result['stockouts_count'] = stockout_periods['count']
         
-        # 新增: Buy Box库存水平检测 (通过Buy Box价格变化频率)
+        # New: Buy Box inventory level detection (Frequency of price changes via Buy Box)
         buybox_data = data.get('BUY_BOX_SHIPPING', [])
         if buybox_data:
             result['buybox_stock_level'] = self._estimate_buybox_inventory(buybox_data)
-            # 如果Buy Box库存水平低且OOS天数>0，标记为库存紧张
+            # If Buy Box inventory level is low and OOS days>0, marked as tight inventory
             if result['buybox_stock_level'] == 'low' or result['out_of_stock_days'] > 0:
                 result['inventory_tension'] = True
         
-        # 新增: 90天OOS百分比
+        # New: 90-day OOS percentage
         result['oos_rate_90d'] = self._calculate_oos_rate(data, 90)
         
         return result
     
     def _process_fee_data(self, product: Dict) -> Dict:
-        """处理费用数据 - FBA费、推荐费等"""
+        """Process expense data - FBA fees, recommendation fees, etc."""
         data = product.get('data', {})
         
         result = {}
         
-        # 推荐费比例
+        # Recommendation fee ratio
         referral_fee_data = data.get('REFERRAL_FEE_PERCENT', [])
         if referral_fee_data:
             referral_fees = self._extract_time_series(referral_fee_data, 0)
             result['referral_fee_percent'] = round(referral_fees[-1], 2) if referral_fees else 15.0
         else:
-            # 默认推荐费15%
+            # Default referral fee 15%
             result['referral_fee_percent'] = 15.0
         
-        # FBA费用 (如果有)
+        # FBA fees (if there is)
         fba_fee_data = data.get('FULFILLMENT_FEE', [])
         if fba_fee_data:
             fba_fees = self._extract_time_series(fba_fee_data, 0)
             result['fba_fee'] = round(fba_fees[-1], 2) if fba_fees else None
         else:
-            # 估算FBA费用基于重量
+            # Estimated FBA fees based on weight
             weight = product.get('packageWeight', 0) or product.get('itemWeight', 0)
             result['fba_fee'] = self._estimate_fba_fee(weight)
         
-        # 计算基于当前Buy Box价格的推荐费金额
+        # Calculate the referral fee amount based on the current Buy Box price
         if result.get('referral_fee_percent') and data.get('BUY_BOX_SHIPPING', []):
             buybox_prices = self._extract_time_series(data.get('BUY_BOX_SHIPPING', []), 0)
             if buybox_prices:
@@ -413,10 +413,10 @@ class KeepaDataProcessor:
         return result
     
     def _calculate_derived_metrics(self, data: Dict, days: int) -> Dict:
-        """计算衍生指标 - 包含PDF启发的新指标"""
+        """Calculate derived indicators - Contains new indicators inspired by PDF"""
         result = {}
         
-        # 价格变化率
+        # price change rate
         if data.get('min_price') and data.get('max_price') and data.get('max_price') > 0:
             result['price_volatility'] = round(
                 (data['max_price'] - data['min_price']) / data['max_price'] * 100, 1
@@ -424,7 +424,7 @@ class KeepaDataProcessor:
         else:
             result['price_volatility'] = 0
         
-        # 新增: 定价权指数 (当前价格 vs 历史均价)
+        # New: pricing power index (Current price vs historical average price)
         if data.get('current_price') and data.get('price_365d_avg') and data['price_365d_avg'] > 0:
             result['pricing_power_index'] = round(
                 (data['current_price'] - data['price_365d_avg']) / data['price_365d_avg'] * 100, 1
@@ -432,7 +432,7 @@ class KeepaDataProcessor:
         else:
             result['pricing_power_index'] = 0
         
-        # 新增: 排名恶化率 (当前排名 vs 365天平均，正值表示排名变差)
+        # New: Ranking deterioration rate (Current ranking vs 365-day average, positive value indicates ranking deterioration)
         if data.get('current_rank') and data.get('rank_365d_avg') and data['rank_365d_avg'] > 0:
             result['rank_deterioration_rate'] = round(
                 (data['current_rank'] - data['rank_365d_avg']) / data['rank_365d_avg'] * 100, 1
@@ -440,13 +440,13 @@ class KeepaDataProcessor:
         else:
             result['rank_deterioration_rate'] = 0
         
-        # 利润率估算 (基于 Buy Box 价格)
+        # profit margin estimate (Based on Buy Box price)
         if data.get('avg_price'):
-            # 使用实际费用数据
+            # Use actual cost data
             referral_fee = data.get('referral_fee_percent', 15) / 100
             fba_fee = data.get('fba_fee', 5.0)
             
-            # 粗略估算: 假设成本为价格的 35%
+            # Rough estimate: Assume cost is 35 of price%
             estimated_cost = data['avg_price'] * 0.35
             referral_amount = data['avg_price'] * referral_fee
             
@@ -457,7 +457,7 @@ class KeepaDataProcessor:
             result['estimated_profit'] = None
             result['estimated_margin'] = None
         
-        # 竞争强度
+        # competitive intensity
         if data.get('current_offers'):
             if data['current_offers'] < 5:
                 result['competition_level'] = 'Low'
@@ -468,25 +468,25 @@ class KeepaDataProcessor:
         else:
             result['competition_level'] = 'Unknown'
         
-        # 新增: 品牌垄断度评估
+        # New: Brand monopoly assessment
         result['brand_dominance'] = self._assess_brand_dominance(data)
         
-        # 新增: 卖家集中度
+        # New: Seller concentration
         result['seller_concentration'] = self._calculate_seller_concentration(data)
         
-        # 产品生命周期判断
+        # Product life cycle judgment
         result['lifecycle_stage'] = self._determine_lifecycle_stage(data)
         
         return result
     
     def _assess_brand_dominance(self, data: Dict) -> Dict:
-        """评估品牌垄断度 - 基于PDF学习"""
+        """Assess brand monopoly - Learning based on PDF"""
         offers = data.get('current_offers', 0) or 0
         fba_offers = data.get('fba_offers', 0) or 0
         buybox_winner = data.get('buybox_winner', '')
         brand = data.get('brand', '')
         
-        # 判断是否为品牌方自营
+        # Determine whether it is self-operated by the brand
         is_brand_seller = brand.lower() in buybox_winner.lower() if brand and buybox_winner else False
         
         if offers == 1 and fba_offers == 1:
@@ -514,7 +514,7 @@ class KeepaDataProcessor:
         }
     
     def _calculate_seller_concentration(self, data: Dict) -> str:
-        """计算卖家集中度"""
+        """Calculate seller concentration"""
         offers = data.get('current_offers', 0) or 0
         
         if offers == 1:
@@ -529,11 +529,11 @@ class KeepaDataProcessor:
             return 'Very Low (Perfect Competition)'
     
     def _estimate_return_risk(self, product: Dict, review_data: Dict) -> str:
-        """估算退货风险等级"""
+        """Estimate return risk level"""
         rating = review_data.get('current_rating', 0) or 0
         category = product.get('categoryTree', [{}])[0].get('name', '') if product.get('categoryTree') else ''
         
-        # 高风险类目
+        # high risk category
         high_return_categories = ['Apparel', 'Shoes', 'Clothing', 'Fashion']
         
         if rating < 4.0:
@@ -544,29 +544,29 @@ class KeepaDataProcessor:
             return 'Low'
     
     def _estimate_buybox_inventory(self, buybox_data: List) -> str:
-        """估算Buy Box库存水平"""
-        # 简化估算: 基于价格变化频率
+        """Estimate Buy Box inventory levels"""
+        # Simplify estimating: Based on price change frequency
         if len(buybox_data) < 10:
             return 'unknown'
         
-        # 如果价格频繁变化，可能库存波动大
+        # If prices change frequently, inventory may fluctuate greatly
         recent_changes = sum(1 for i in range(1, min(20, len(buybox_data))) 
                             if abs(buybox_data[i] - buybox_data[i-1]) > 0.01)
         
         if recent_changes > 10:
-            return 'low'  # 价格波动大，可能库存紧张
+            return 'low'  # Prices fluctuate greatly and inventory may be tight
         elif recent_changes > 5:
             return 'medium'
         else:
             return 'normal'
     
     def _calculate_oos_rate(self, data: Dict, days: int) -> float:
-        """计算OOS率 (Out of Stock Rate)"""
+        """Calculate OOS rate (Out of Stock Rate)"""
         amazon_data = data.get('AMAZON', [])
         if not amazon_data or len(amazon_data) < 2:
             return 0.0
         
-        # 计算断货天数占比
+        # Calculate the proportion of days out of stock
         cutoff_time = self.datetime_to_keepa_time(datetime.now() - timedelta(days=days))
         oos_count = 0
         total_count = 0
@@ -584,11 +584,11 @@ class KeepaDataProcessor:
         return round(oos_count / total_count * 100, 1) if total_count > 0 else 0.0
     
     def _estimate_fba_fee(self, weight: float) -> float:
-        """基于重量估算FBA费用"""
+        """Estimate FBA fees based on weight"""
         if weight <= 0:
             return 5.0
         
-        # 简化估算模型
+        # Simplified estimation model
         if weight <= 0.25:  # 4 oz
             return 3.22
         elif weight <= 0.5:  # 8 oz
@@ -632,16 +632,16 @@ class KeepaDataProcessor:
         return values
     
     def _calculate_window_average(self, values: List[float], days: int) -> Optional[float]:
-        """计算指定时间窗口的平均值"""
+        """Calculate the average of a specified time window"""
         if not values:
             return None
-        # 假设数据均匀分布，取最近 N 天的数据
+        # Assuming that the data is uniformly distributed, take the data of the last N days
         points = max(1, int(len(values) * days / 365))
         window_values = values[-points:] if points < len(values) else values
         return round(np.mean(window_values), 2) if window_values else None
     
     def _calculate_window_min(self, values: List[float], days: int) -> Optional[float]:
-        """计算指定时间窗口的最小值"""
+        """Calculate the minimum value of a specified time window"""
         if not values:
             return None
         points = max(1, int(len(values) * days / 365))
@@ -649,7 +649,7 @@ class KeepaDataProcessor:
         return round(min(window_values), 2) if window_values else None
     
     def _calculate_window_max(self, values: List[float], days: int) -> Optional[float]:
-        """计算指定时间窗口的最大值"""
+        """Calculate the maximum value of a specified time window"""
         if not values:
             return None
         points = max(1, int(len(values) * days / 365))
@@ -657,7 +657,7 @@ class KeepaDataProcessor:
         return round(max(window_values), 2) if window_values else None
     
     def _count_rank_drops(self, ranks: List[float], days: int) -> int:
-        """统计排名下降次数 (排名数字变大表示下降)"""
+        """Statistical ranking drops (A larger ranking number indicates a decline)"""
         if not ranks or len(ranks) < 2:
             return 0
         
@@ -666,13 +666,13 @@ class KeepaDataProcessor:
         
         drops = 0
         for i in range(1, len(window_ranks)):
-            if window_ranks[i] > window_ranks[i-1] * 1.05:  # 排名恶化超过5%
+            if window_ranks[i] > window_ranks[i-1] * 1.05:  # Ranking deteriorated by more than 5%
                 drops += 1
         
         return drops
     
     def _count_seller_changes(self, seller_history: List) -> int:
-        """统计Buy Box卖家变化次数"""
+        """Count the number of changes in Buy Box sellers"""
         if not seller_history or len(seller_history) < 2:
             return 0
         
@@ -684,7 +684,7 @@ class KeepaDataProcessor:
         return changes
     
     def _calculate_price_stability(self, prices: List[float]) -> str:
-        """计算价格稳定性"""
+        """Calculate price stability"""
         if len(prices) < 2:
             return 'No Data'
         
@@ -700,7 +700,7 @@ class KeepaDataProcessor:
             return 'High Volatility'
     
     def _count_price_drops(self, prices: List[float], threshold: float = 0.1) -> int:
-        """统计价格大幅下降次数"""
+        """Count the number of significant price drops"""
         if len(prices) < 2:
             return 0
         
@@ -714,7 +714,7 @@ class KeepaDataProcessor:
         return drops
     
     def _calculate_trend(self, values: List[float]) -> str:
-        """计算趋势"""
+        """Calculate trends"""
         if len(values) < 10:
             return 'Insufficient Data'
         
@@ -730,7 +730,7 @@ class KeepaDataProcessor:
             return 'Stable ➡️'
     
     def _calculate_review_growth(self, review_counts: List[float], days: int) -> int:
-        """计算评论增长数"""
+        """Calculate comment growth"""
         if len(review_counts) < 2:
             return 0
         
@@ -747,7 +747,7 @@ class KeepaDataProcessor:
         return max(0, int(recent - past))
     
     def _detect_stockouts(self, prices: List, days: int) -> Dict:
-        """检测断货情况"""
+        """Detect out-of-stock situations"""
         if not prices or len(prices) < 2:
             return {'total_days': 0, 'count': 0}
         
@@ -779,7 +779,7 @@ class KeepaDataProcessor:
         }
     
     def _estimate_monthly_sales(self, avg_rank: int) -> str:
-        """根据 BSR 估算月销量"""
+        """Estimated monthly sales based on BSR"""
         if not avg_rank:
             return 'Unknown'
         
@@ -799,7 +799,7 @@ class KeepaDataProcessor:
             return '<10'
     
     def _determine_lifecycle_stage(self, data: Dict) -> str:
-        """判断产品生命周期阶段"""
+        """Determine product life cycle stage"""
         reviews = data.get('total_reviews', 0) or 0
         rating = data.get('current_rating', 0) or 0
         rank_trend = data.get('rank_trend', '')
@@ -817,7 +817,7 @@ class KeepaDataProcessor:
             return 'Stable Phase ➡️'
     
     def _extract_dimensions(self, product: Dict) -> Dict:
-        """提取包装尺寸信息"""
+        """Extract package size information"""
         return {
             'length': product.get('packageLength', 0),
             'width': product.get('packageWidth', 0),

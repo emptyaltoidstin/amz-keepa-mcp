@@ -1,6 +1,6 @@
 """
-季节性预测模型
-基于历史数据预测产品的季节性趋势和未来销量
+Seasonal Forecasting Model
+Predict seasonal trends and future sales of products based on historical data
 """
 
 import numpy as np
@@ -14,17 +14,17 @@ from scipy.fft import fft
 
 @dataclass
 class SeasonalPattern:
-    """季节性模式"""
-    seasonality_strength: float  # 0-1，季节性强度
-    peak_months: List[int]  # 销售高峰月份
-    low_months: List[int]  # 销售低谷月份
+    """seasonal pattern"""
+    seasonality_strength: float  # 0-1. Seasonal intensity
+    peak_months: List[int]  # Peak sales months
+    low_months: List[int]  # Low sales months
     trend_direction: str  # 'up', 'down', 'stable'
-    confidence: float  # 预测置信度
+    confidence: float  # Prediction confidence
 
 
 @dataclass
 class SalesForecast:
-    """销量预测"""
+    """sales forecast"""
     date: datetime
     predicted_rank: int
     confidence_interval: Tuple[int, int]
@@ -33,13 +33,13 @@ class SalesForecast:
 
 class SeasonalPredictor:
     """
-    季节性预测器
+    seasonal predictor
     
-    功能:
-    1. 检测季节性模式
-    2. 预测未来销量趋势
-    3. 识别最佳备货时机
-    4. 风险评估
+    Function:
+    1. Detect seasonal patterns
+    2. Predict future sales trends
+    3. Identify the best time to stock up
+    4. Risk assessment
     """
     
     def __init__(self):
@@ -51,19 +51,19 @@ class SeasonalPredictor:
     
     def analyze(self, product_data: Dict, days: int = 365) -> Dict[str, Any]:
         """
-        执行季节性分析
+        Perform seasonal analysis
         
         Args:
-            product_data: 产品数据
-            days: 分析天数
+            product_data: product data
+            days: Analysis days
         
         Returns:
-            季节性分析报告
+            Seasonal Analysis Report
         """
         data = product_data.get('data', {})
         category = product_data.get('category', '')
         
-        # 提取时间序列
+        # Extract time series
         times, ranks = self._extract_series(data.get('SALES', []), days)
         times_price, prices = self._extract_series(data.get('NEW', []), days)
         
@@ -73,13 +73,13 @@ class SeasonalPredictor:
                 'data_points': len(times)
             }
         
-        # 创建 DataFrame
+        # Create DataFrame
         df = pd.DataFrame({'date': times, 'rank': ranks})
         df['month'] = df['date'].dt.month
         df['dayofyear'] = df['date'].dt.dayofyear
         df['week'] = df['date'].dt.isocalendar().week
         
-        # 执行各项分析
+        # Perform analyzes
         seasonal_pattern = self._detect_seasonality(df, category)
         trend_analysis = self._analyze_trend(df)
         forecast = self._generate_forecast(df, days=90)
@@ -95,7 +95,7 @@ class SeasonalPredictor:
         }
     
     def _extract_series(self, data: np.ndarray, days: int) -> Tuple[List[datetime], List[int]]:
-        """提取时间序列"""
+        """Extract time series"""
         if data is None or len(data) == 0:
             return [], []
         
@@ -121,7 +121,7 @@ class SeasonalPredictor:
         return times, values
     
     def _detect_seasonality(self, df: pd.DataFrame, category: str) -> SeasonalPattern:
-        """检测季节性模式"""
+        """Detect seasonal patterns"""
         
         if len(df) < 60:
             return SeasonalPattern(
@@ -132,20 +132,20 @@ class SeasonalPredictor:
                 confidence=0.0
             )
         
-        # 按月聚合
+        # Aggregate by month
         monthly_avg = df.groupby('month')['rank'].mean()
         
-        # 计算季节性强度（变异系数）
+        # Calculate seasonal intensity (coefficient of variation)
         cv = monthly_avg.std() / monthly_avg.mean() if monthly_avg.mean() > 0 else 0
-        seasonality_strength = min(cv * 2, 1.0)  # 归一化到 0-1
+        seasonality_strength = min(cv * 2, 1.0)  # normalized to 0-1
         
-        # 识别高低峰月份
-        # 注意：BSR 越小销量越高，所以排名低的月份是高峰
+        # Identify high and low peak months
+        # Note: The smaller the BSR, the higher the sales volume, so the month with the lowest ranking is the peak
         sorted_months = monthly_avg.sort_values()
         peak_months = sorted_months.head(3).index.tolist()
         low_months = sorted_months.tail(3).index.tolist()
         
-        # 基于类目的季节性调整
+        # Category-based seasonal adjustment
         category_lower = category.lower()
         expected_seasonality = 'low'
         for level, cats in self.seasonal_categories.items():
@@ -153,13 +153,13 @@ class SeasonalPredictor:
                 expected_seasonality = level
                 break
         
-        # 趋势方向
+        # trend direction
         if len(df) > 60:
             first_half = df.head(len(df)//2)['rank'].mean()
             second_half = df.tail(len(df)//2)['rank'].mean()
             
             if second_half < first_half * 0.9:
-                trend_direction = 'up'  # 排名上升 = 销量上升
+                trend_direction = 'up'  # Ranking up = sales increase
             elif second_half > first_half * 1.1:
                 trend_direction = 'down'
             else:
@@ -172,23 +172,23 @@ class SeasonalPredictor:
             peak_months=peak_months,
             low_months=low_months,
             trend_direction=trend_direction,
-            confidence=min(len(df) / 365, 1.0)  # 数据越多置信度越高
+            confidence=min(len(df) / 365, 1.0)  # The more data, the higher the confidence
         )
     
     def _analyze_trend(self, df: pd.DataFrame) -> Dict:
-        """分析趋势"""
+        """Analyze trends"""
         if len(df) < 30:
             return {'error': 'Insufficient data'}
         
-        # 线性回归
+        # linear regression
         x = np.arange(len(df))
         slope, intercept, r_value, p_value, std_err = stats.linregress(x, df['rank'])
         
-        # 计算移动平均
+        # Calculate moving average
         df['ma7'] = df['rank'].rolling(window=7, min_periods=1).mean()
         df['ma30'] = df['rank'].rolling(window=30, min_periods=1).mean()
         
-        # 波动性
+        # Volatility
         volatility = df['rank'].std() / df['rank'].mean() if df['rank'].mean() > 0 else 0
         
         return {
@@ -203,7 +203,7 @@ class SeasonalPredictor:
         }
     
     def _generate_forecast(self, df: pd.DataFrame, days: int = 90) -> List[SalesForecast]:
-        """生成销量预测"""
+        """Generate sales forecast"""
         
         if len(df) < 30:
             return []
@@ -212,30 +212,30 @@ class SeasonalPredictor:
         last_date = df['date'].max()
         last_rank = df['rank'].iloc[-1]
         
-        # 简单线性外推 + 季节性调整
+        # simple linear extrapolation + Seasonal adjustment
         x = np.arange(len(df))
         slope, intercept, _, _, _ = stats.linregress(x, df['rank'])
         
-        # 计算标准差用于置信区间
+        # Calculate standard deviation for confidence interval
         residuals = df['rank'] - (slope * x + intercept)
         std_residuals = residuals.std()
         
         for i in range(1, days + 1):
             future_date = last_date + timedelta(days=i)
             
-            # 线性预测
+            # linear prediction
             predicted = last_rank + slope * i
             
-            # 季节性调整
+            # Seasonal adjustment
             month = future_date.month
             monthly_effect = self._get_monthly_effect(df, month)
             predicted *= (1 + monthly_effect)
             
-            # 确保合理范围
+            # Ensure reasonable range
             predicted = max(1, int(predicted))
             
-            # 置信区间 (95%)
-            margin = 1.96 * std_residuals * np.sqrt(1 + i/len(df))  # 随时间扩大
+            # confidence interval (95%)
+            margin = 1.96 * std_residuals * np.sqrt(1 + i/len(df))  # Expand over time
             lower = max(1, int(predicted - margin))
             upper = int(predicted + margin)
             
@@ -249,7 +249,7 @@ class SeasonalPredictor:
         return forecasts
     
     def _get_monthly_effect(self, df: pd.DataFrame, month: int) -> float:
-        """获取月份效应"""
+        """Get month effect"""
         if len(df) < 60:
             return 0.0
         
@@ -258,11 +258,11 @@ class SeasonalPredictor:
         
         if month in monthly_avg.index and overall_avg > 0:
             effect = (monthly_avg[month] - overall_avg) / overall_avg
-            return -effect  # BSR 越小销量越高，所以取反
+            return -effect  # The smaller the BSR, the higher the sales volume, so the inverse
         return 0.0
     
     def _calculate_probability(self, predicted: int, lower: int, upper: int) -> float:
-        """计算预测概率"""
+        """Calculate predicted probability"""
         interval_width = upper - lower
         if interval_width == 0:
             return 1.0
@@ -271,14 +271,14 @@ class SeasonalPredictor:
     def _generate_inventory_plan(self, df: pd.DataFrame, 
                                   seasonal: SeasonalPattern, 
                                   forecast: List[SalesForecast]) -> Dict:
-        """生成备货计划"""
+        """Generate stocking plan"""
         
         if not forecast:
             return {'error': 'No forecast available'}
         
         current_month = datetime.now().month
         
-        # 识别即将到来的高峰/低谷
+        # Identify upcoming peaks/low point
         upcoming_peak = None
         upcoming_low = None
         
@@ -288,7 +288,7 @@ class SeasonalPredictor:
             if f.date.month in seasonal.low_months and upcoming_low is None:
                 upcoming_low = f
         
-        # 备货建议
+        # Stocking suggestions
         recommendations = []
         
         if upcoming_peak:
@@ -309,11 +309,11 @@ class SeasonalPredictor:
                 'reason': f'Low season in month {upcoming_low.date.month}'
             })
         
-        # 计算推荐库存量
+        # Calculate recommended inventory levels
         if forecast:
             avg_predicted_rank = np.mean([f.predicted_rank for f in forecast[:30]])
             
-            # 根据排名估算日销量
+            # Estimate daily sales based on ranking
             if avg_predicted_rank < 1000:
                 daily_sales = 50
             elif avg_predicted_rank < 5000:
@@ -325,12 +325,12 @@ class SeasonalPredictor:
             else:
                 daily_sales = 2
             
-            recommended_stock = daily_sales * 30  # 30天库存
+            recommended_stock = daily_sales * 30  # 30 days in stock
             
             if seasonal.seasonality_strength > 0.3 and upcoming_peak:
-                recommended_stock = int(recommended_stock * 1.5)  # 季节性高峰增加50%
+                recommended_stock = int(recommended_stock * 1.5)  # Seasonal peak increases by 50%
         else:
-            recommended_stock = 300  # 默认值
+            recommended_stock = 300  # Default value
         
         return {
             'recommended_stock_level': recommended_stock,
@@ -341,38 +341,38 @@ class SeasonalPredictor:
         }
     
     def _generate_insights(self, seasonal: SeasonalPattern, trend: Dict, category: str) -> List[str]:
-        """生成洞察"""
+        """generate insights"""
         insights = []
         
-        # 季节性洞察
+        # Seasonal insights
         if seasonal.seasonality_strength > 0.4:
             peak_names = self._month_names(seasonal.peak_months)
             low_names = self._month_names(seasonal.low_months)
-            insights.append(f"📈 **强季节性产品** - 销售高峰: {peak_names}, 低谷: {low_names}")
+            insights.append(f"📈 **Strong seasonal products** - sales peak: {peak_names}, low point: {low_names}")
         elif seasonal.seasonality_strength > 0.2:
-            insights.append(f"📊 **中等季节性** - 存在一定的季节波动")
+            insights.append(f"📊 **Moderately seasonal** - There are certain seasonal fluctuations")
         else:
-            insights.append(f"📉 **低季节性** - 全年销售相对稳定")
+            insights.append(f"📉 **low seasonality** - Sales are relatively stable throughout the year")
         
-        # 趋势洞察
+        # Trend Insights
         trend_dir = trend.get('trend_direction', 'stable')
         if trend_dir == 'improving':
-            insights.append(f"🚀 **上升趋势** - 产品销量正在增长，市场热度提升")
+            insights.append(f"🚀 **uptrend** - Product sales are growing and market popularity is increasing")
         elif trend_dir == 'declining':
-            insights.append(f"⚠️ **下降趋势** - 产品销量下滑，可能面临竞争或市场饱和")
+            insights.append(f"⚠️ **downtrend** - Product sales decline and may face competition or market saturation")
         
-        # 类目洞察
+        # Category Insights
         category_lower = category.lower()
         for level, cats in self.seasonal_categories.items():
             if any(cat.lower() in category_lower for cat in cats):
                 if level == 'high':
-                    insights.append(f"🎯 **高季节性类目** - 需要精细的季节性库存管理")
+                    insights.append(f"🎯 **Highly seasonal categories** - Requires sophisticated seasonal inventory management")
                 break
         
         return insights
     
     def _generate_recommendations(self, seasonal: SeasonalPattern, inventory: Dict) -> List[Dict]:
-        """生成建议"""
+        """Generate suggestions"""
         recommendations = []
         
         if seasonal.seasonality_strength > 0.3:
@@ -399,13 +399,13 @@ class SeasonalPredictor:
         return recommendations
     
     def _month_names(self, months: List[int]) -> str:
-        """月份数字转名称"""
+        """Month number to name"""
         names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         return ', '.join([names[m-1] for m in months])
     
     def generate_seasonal_report(self, analysis: Dict, asin: str) -> str:
-        """生成季节性分析报告"""
+        """Generate seasonal analysis report"""
         
         seasonal = analysis.get('seasonal_pattern')
         trend = analysis.get('trend_analysis', {})
@@ -415,57 +415,57 @@ class SeasonalPredictor:
         recommendations = analysis.get('recommendations', [])
         
         if 'error' in analysis:
-            return f"❌ 季节性分析失败: {analysis['error']}"
+            return f"❌ Seasonal analysis failed: {analysis['error']}"
         
-        report = f"""# 📅 季节性分析与预测报告
+        report = f"""# 📅 Seasonal analysis and forecast report
 
 **ASIN**: {asin}  
-**分析周期**: 过去365天  
-**预测周期**: 未来90天
+**Analysis cycle**: past 365 days  
+**Forecast period**: next 90 days
 
 ---
 
-## 🌊 季节性模式
+## 🌊 Seasonal mode
 
-### 季节性强度
+### seasonal intensity
 ```
 {'█' * int(seasonal.seasonality_strength * 20)}{'░' * (20 - int(seasonal.seasonality_strength * 20))} {seasonal.seasonality_strength:.0%}
 ```
 
-**评估**: {'强季节性 - 需要精细的季节性管理' if seasonal.seasonality_strength > 0.4 else '中等季节性 - 存在一定的波动' if seasonal.seasonality_strength > 0.2 else '低季节性 - 全年相对稳定'}
+**Assessment**: {'strong seasonality - Requires careful seasonal management' if seasonal.seasonality_strength > 0.4 else 'Moderately seasonal - There is some fluctuation' if seasonal.seasonality_strength > 0.2 else 'low seasonality - Relatively stable throughout the year'}
 
-### 销售日历
+### sales calendar
 
-| 季度 | 月份 | 销售预期 | 建议动作 |
+| quarter | month | sales expectations | Recommended action |
 |------|------|----------|----------|
-| **高峰** | {self._month_names(seasonal.peak_months)} | 🔥 销量增长 30-50% | 提前备货，适度提价 |
-| **平季** | 其他月份 | ➡️ 正常销量 | 维持标准库存 |
-| **低谷** | {self._month_names(seasonal.low_months)} | 📉 销量下降 20-30% | 减少库存，促销活动 |
+| **peak** | {self._month_names(seasonal.peak_months)} | 🔥 Sales increased by 30-50% | Stock up in advance and raise prices appropriately |
+| **shoulder season** | other months | ➡️Normal sales | Maintain standard inventory |
+| **low point** | {self._month_names(seasonal.low_months)} | 📉 Sales dropped by 20-30% | Inventory reduction, promotions |
 
 ---
 
-## 📈 趋势分析
+## 📈 Trend analysis
 
-| 指标 | 数值 | 解读 |
+| indicator | numerical value | Interpretation |
 |------|------|------|
-| 趋势方向 | {trend.get('trend_direction', 'Unknown')} | {'销量上升' if trend.get('trend_direction') == 'improving' else '销量下降' if trend.get('trend_direction') == 'declining' else '相对稳定'} |
-| 趋势强度 | {trend.get('trend_strength', 'Unknown')} | R² = {trend.get('r_squared', 0):.2f} |
-| 波动性 | {trend.get('volatility', 0):.1%} | {'高波动' if trend.get('volatility', 0) > 0.3 else '中等波动' if trend.get('volatility', 0) > 0.15 else '低波动'} |
+| trend direction | {trend.get('trend_direction', 'Unknown')} | {'sales increase' if trend.get('trend_direction') == 'improving' else 'sales drop' if trend.get('trend_direction') == 'declining' else 'relatively stable'} |
+| trend strength | {trend.get('trend_strength', 'Unknown')} | R² = {trend.get('r_squared', 0):.2f} |
+| Volatility | {trend.get('volatility', 0):.1%} | {'High volatility' if trend.get('volatility', 0) > 0.3 else 'medium volatility' if trend.get('volatility', 0) > 0.15 else 'low volatility'} |
 
 ---
 
-## 🔮 未来90天预测
+## 🔮 Forecast for the next 90 days
 
-### 销量预测
+### sales forecast
 
 """
         
-        # 添加预测表格
+        # Add forecast table
         if forecast:
-            report += "| 时间段 | 预测 BSR | 置信区间 | 概率 |\n"
+            report += "| time period | Predict BSR | confidence interval | Probability |\n"
             report += "|--------|----------|----------|------|\n"
             
-            # 按周汇总
+            # Summary by week
             weeks = {}
             for f in forecast:
                 week_key = f.date.strftime('%Y-W%W')
@@ -473,7 +473,7 @@ class SeasonalPredictor:
                     weeks[week_key] = []
                 weeks[week_key].append(f)
             
-            for week, forecasts in list(weeks.items())[:12]:  # 显示前12周
+            for week, forecasts in list(weeks.items())[:12]:  # Showing the previous 12 weeks
                 avg_rank = int(np.mean([f.predicted_rank for f in forecasts]))
                 avg_lower = int(np.mean([f.confidence_interval[0] for f in forecasts]))
                 avg_upper = int(np.mean([f.confidence_interval[1] for f in forecasts]))
@@ -486,17 +486,17 @@ class SeasonalPredictor:
 
 ---
 
-## 📦 备货计划
+## 📦 Stocking plan
 
-### 库存建议
+### Inventory recommendations
 
-| 指标 | 建议值 | 说明 |
+| indicator | Recommended value | Description |
 |------|--------|------|
-| 标准库存 | {inventory.get('recommended_stock_level', 300)} 件 | 基于预测日均销量 |
-| 补货点 | {inventory.get('reorder_point', 100)} 件 | 库存预警线 |
-| 最大库存 | {inventory.get('max_stock', 450)} 件 | 防止积压 |
+| Standard stock | {inventory.get('recommended_stock_level', 300)} pieces | Based on forecasted average daily sales |
+| replenishment point | {inventory.get('reorder_point', 100)} pieces | Inventory warning line |
+| Maximum inventory | {inventory.get('max_stock', 450)} pieces | Prevent backlog |
 
-### 季节性调整
+### Seasonal adjustment
 
 """
         
@@ -504,18 +504,18 @@ class SeasonalPredictor:
             for adj in inventory['seasonal_adjustments']:
                 report += f"""
 **{adj['action']}**
-- 时机: {adj['timing']}
-- 调整: {adj['quantity_suggestion']}
-- 原因: {adj['reason']}
+- timing: {adj['timing']}
+- adjust: {adj['quantity_suggestion']}
+- Reason: {adj['reason']}
 """
         else:
-            report += "暂无特殊的季节性调整建议\n"
+            report += "No special seasonal adjustment recommendations are currently available\n"
         
         report += f"""
 
 ---
 
-## 💡 关键洞察
+## 💡 Key Insights
 
 """
         
@@ -526,25 +526,25 @@ class SeasonalPredictor:
 
 ---
 
-## 🎯 行动建议
+## 🎯 Action suggestions
 
 """
         
         for rec in recommendations:
             priority_emoji = {'High': '🔴', 'Medium': '🟡', 'Low': '🟢'}.get(rec.get('priority', ''), '⚪')
             report += f"""
-{priority_emoji} **{rec.get('priority', 'Medium')} 优先级**
+{priority_emoji} **{rec.get('priority', 'Medium')} priority**
 
-**行动**: {rec.get('action')}
+**action**: {rec.get('action')}
 
-**详情**: {rec.get('details')}
+**Details**: {rec.get('details')}
 
 """
         
         report += """
 ---
 
-**免责声明**: 预测基于历史数据分析，实际结果可能因市场变化而有所不同。建议结合实际情况灵活调整。
+**Disclaimer**: Forecasts are based on historical data analysis and actual results may vary due to market changes. It is recommended to make flexible adjustments based on the actual situation.
 """
         
         return report

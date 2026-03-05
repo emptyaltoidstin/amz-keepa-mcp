@@ -9,19 +9,19 @@
         "KEEPA_KEY": "${KEEPA_KEY}",
         "PYTHONPATH": "/Users/blobeats/Downloads/amz-keepa-mcp"
       },
-      "description": "Amazon FBA精算师系统 - 基于Keepa数据的选品分析",
+      "description": "Amazon FBA Actuary System - Product selection analysis based on Keepa data",
       "tools": [
         {
           "name": "analyze_asin",
-          "description": "分析Amazon ASIN，生成完整精算师报告"
+          "description": "Analyze Amazon ASIN and generate a complete actuary report"
         },
         {
           "name": "get_product_info",
-          "description": "获取产品基本信息"
+          "description": "Get basic product information"
         },
         {
           "name": "calculate_cogs",
-          "description": "计算COGS成本"
+          "description": "Calculate COGS cost"
         }
       ]
     }

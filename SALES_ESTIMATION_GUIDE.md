@@ -1,29 +1,29 @@
-# 销量估算方法说明
+# Description of Sales Estimation Method
 
-## 📊 数据来源优先级
+## 📊 Data source priority
 
-系统使用以下优先级获取销量数据：
+The system uses the following priorities to obtain sales data:
 
-### 1. 🥇 Keepa真实数据 (boughtInPastMonth) - 最准确
+### 1. 🥇 Keepa real data (boughtInPastMonth) - most accurate
 ```python
-# Keepa API直接提供的过去30天购买量
+# Purchase volume for the past 30 days provided directly by the Keepa API
 boughtInPastMonth = product.get('boughtInPastMonth', 0)
 ```
 
-**优点**:
-- ✅ 亚马逊官方追踪的真实购买数据
-- ✅ 准确度最高
-- ✅ 包含实际成交的订单数
+**advantage**:
+- ✅ Real purchase data officially tracked by Amazon
+- ✅ Highest accuracy
+- ✅Includes the number of actual completed orders
 
-**局限性**:
-- ❌ 部分产品可能没有此数据（新品、销量极低的产品）
-- ❌ 数据有1-3天延迟
+**limitations**:
+- ❌ Some products may not have this data (new products, products with very low sales)
+- ❌ The data has 1-3 days delay
 
 ---
 
-### 2. 🥈 BSR排名估算 - 备用方法
+### 2. 🥈 BSR ranking estimation - Alternate method
 
-当没有 `boughtInPastMonth` 时，使用BSR（销售排名）估算：
+When there is no `boughtInPastMonth` When, use BSR (Sales Rank) estimation:
 
 ```python
 def _estimate_monthly_sales(avg_rank: int) -> int:
@@ -39,143 +39,143 @@ def _estimate_monthly_sales(avg_rank: int) -> int:
         return int(50 * (100000 / avg_rank) ** 0.5)
 ```
 
-**估算示例**:
+**Estimate example**:
 
-| BSR | 估算月销量 | 说明 |
+| BSR | Estimated monthly sales | Description |
 |-----|-----------|------|
-| 100 | 4,743 | 顶级畅销品 |
-| 1,000 | 1,500 | 非常畅销 |
-| 5,000 | 1,131 | 畅销 |
-| 10,000 | 800 | 中等销量 |
-| 50,000 | 300 | 普通销量 |
-| 100,000 | 100 | 较低销量 |
+| 100 | 4,743 | Top sellers |
+| 1,000 | 1,500 | Very popular |
+| 5,000 | 1,131 | best seller |
+| 10,000 | 800 | medium sales |
+| 50,000 | 300 | Ordinary sales |
+| 100,000 | 100 | lower sales volume |
 
 ---
 
-## 🧮 B0BW93MP74 实例对比
+## 🧮 B0BW93MP74 example comparison
 
-### BSR估算方法
+### BSR estimation method
 ```
 BSR: ~9,800
-计算公式: 800 × (10000 / 9800)^0.5 ≈ 808单/月/变体
-9个变体总计: ~7,272单/月
+Calculation formula: 800 × (10000 / 9800)^0.5 ≈ 808 orders/month/Variants
+9 variants total: ~7,272 orders/month
 ```
 
-### boughtInPastMonth 真实数据
+### boughtInPastMonth real data
 ```
-如果Keepa提供的boughtInPastMonth = 616
-则9个变体总计: 616 × 9 = 5,544单/月
+If Keepa provides boughtInPastMonth = 616
+Then the total of 9 variants: 616 × 9 = 5,544 orders/month
 ```
 
-### 差异分析
-- BSR估算: ~7,272单
-- 真实数据: ~5,544单
-- 差异: ~31% (BSR估算偏高)
+### Difference analysis
+- BSR estimate: ~7,272 orders
+- real data: ~5,544 orders
+- difference: ~31% (BSR estimate is too high)
 
-**原因**: 
-- BSR是排名，反映的是相对销量
-- 不同类目BSR-销量关系不同
-- 估算模型使用平均值，特定产品可能有偏差
+**Reason**: 
+- BSR is ranking, which reflects relative sales volume.
+- Different categories of BSR-Sales volume relationship is different
+- Estimation models use averages and may be biased for specific products
 
 ---
 
-## 📈 准确性对比
+## 📈 Accuracy comparison
 
-| 方法 | 准确度 | 适用场景 |
+| method | Accuracy | Applicable scenarios |
 |------|--------|----------|
-| `boughtInPastMonth` | ⭐⭐⭐⭐⭐ 90%+ | 有数据时的首选 |
-| BSR估算 | ⭐⭐⭐ 60-80% | 无真实数据时的备用 |
+| `boughtInPastMonth` | ⭐⭐⭐⭐⭐ 90%+ | First choice when you have data |
+| BSR estimate | ⭐⭐⭐ 60-80% | Backup when no real data is available |
 
 ---
 
-## 💡 最佳实践建议
+## 💡 Best Practice Advice
 
-### 1. 校准估算模型
+### 1. Calibrate the estimation model
 ```python
-# 用自己的产品对比实际销量和估算值
+# Use your own products to compare actual sales with estimates
 def calibrate_model(actual_sales: int, estimated_sales: int) -> float:
     calibration_factor = actual_sales / estimated_sales
     return calibration_factor
 
-# 例：实际500单，估算625单
+# Example: Actual 500 orders, estimated 625 orders
 calibration_factor = 500 / 625 = 0.8
 
-# 后续估算时乘以校准系数
+# Multiply the calibration factor for subsequent estimates
 adjusted_estimate = raw_estimate * 0.8
 ```
 
-### 2. 多维度验证
+### 2. Multi-dimensional verification
 ```python
-# 结合多个指标交叉验证
+# Combine multiple indicators for cross-validation
 def validate_sales_estimate(asin: str):
-    # 方法1: boughtInPastMonth
+    # Method 1: boughtInPastMonth
     real_sales = get_bought_in_past_month(asin)
     
-    # 方法2: BSR估算
+    # Method 2: BSR estimate
     bsr_estimate = estimate_from_bsr(asin)
     
-    # 方法3: 评论增长
+    # Method 3: Comment growth
     review_growth = estimate_from_reviews(asin)
     
-    # 方法4: 库存变化
+    # Method 4: Inventory changes
     inventory_change = estimate_from_inventory(asin)
     
-    # 综合分析
+    # comprehensive analysis
     return weighted_average([real_sales, bsr_estimate, review_growth, inventory_change])
 ```
 
-### 3. 分品类调整
-不同品类的BSR-销量关系差异很大：
+### 3. Adjustment by category
+Different categories of BSR-Sales volume relationships vary widely:
 
-| 品类 | 特点 | 调整系数 |
+| Category | Features | Adjustment factor |
 |------|------|---------|
-| Electronics | 竞争激烈，BSR变化快 | 0.7-0.8 |
-| Home & Kitchen | 中等竞争 | 0.9-1.0 |
-| Clothing | 季节性强 | 0.8-0.9 |
-| Toys | 节日波动大 | 0.7-0.9 |
+| Electronics | Competition is fierce and BSR changes rapidly | 0.7-0.8 |
+| Home & Kitchen | Moderate competition | 0.9-1.0 |
+| Clothing | Strong seasonality | 0.8-0.9 |
+| Toys | Holidays fluctuate greatly | 0.7-0.9 |
 
 ---
 
-## 🔍 代码实现
+## 🔍 Code implementation
 
-### 当前实现 (优先真实数据)
+### Current implementation (Prioritize real data)
 ```python
 def _get_bought_in_past_month(self, product: Dict) -> int:
     """
-    获取过去一个月购买量
-    优先使用Keepa真实数据，如果没有则用BSR估算
+    Get the purchase volume in the past month
+    Prioritize using Keepa real data, if not, use BSR estimation
     """
-    # 1. 尝试获取Keepa真实数据
+    # 1. Try to obtain Keepa real data
     bought = product.get('boughtInPastMonth', 0)
     if isinstance(bought, (int, float)) and bought > 0:
         return int(bought)
     
-    # 2. 回退到BSR估算
+    # 2. Fall back to BSR estimation
     data = product.get('data', {})
     return self._estimate_monthly_sales(data)
 ```
 
 ---
 
-## ⚠️ 重要提示
+## ⚠️ IMPORTANT NOTE
 
-1. **数据延迟**: `boughtInPastMonth` 通常有1-3天延迟
-2. **新品无数据**: 上架少于30天的产品可能没有此数据
-3. **极低销量**: 月销量<10的产品可能没有准确数据
-4. **变体合并**: 某些变体可能共享销量数据
+1. **data delay**: `boughtInPastMonth` Usually there is 1-3 days delay
+2. **New product no data**: Products that have been on the shelf for less than 30 days may not have this data
+3. **Very low sales**: monthly sales<10 products may not have accurate data
+4. **Variant merging**: Some variants may share sales data
 
 ---
 
-## 📊 总结
+## 📊 Summary
 
-| 场景 | 推荐方法 |
+| scene | Recommended method |
 |------|---------|
-| 有 `boughtInPastMonth` | 使用真实数据 |
-| 无真实数据 | BSR估算 + 校准系数 |
-| 竞品分析 | BSR估算 |
-| 自身产品优化 | 使用亚马逊后台真实数据 |
+| have `boughtInPastMonth` | Use real data |
+| No real data | BSR estimate + Calibration coefficient |
+| Competitive product analysis | BSR estimate |
+| Own product optimization | Use Amazon backend real data |
 
-**核心原则**: 
-> 能用真实数据就不用估算，
-> 必须估算时要知晓误差范围，
-> 重要决策要结合多个维度验证。
+**core principles**: 
+> If you can use real data, there is no need to estimate.
+> When estimates must be made, the error range must be known.
+> Important decisions need to be verified in multiple dimensions.

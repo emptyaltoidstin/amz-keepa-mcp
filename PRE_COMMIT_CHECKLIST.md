@@ -1,103 +1,103 @@
-# GitHub 提交前检查清单
+# GitHub pre-commit checklist
 
-## ✅ 已完成的检查
+## ✅ Completed inspections
 
-### 1. 敏感信息安全
-- [x] `.env` 文件已添加到 `.gitignore`，不会被提交
-- [x] `.env.example` 作为模板文件保留，使用占位符
-- [x] `claude_desktop_config.json` 等含真实API密钥的配置文件已添加到 `.gitignore`
-- [x] 代码中所有API key/token都从环境变量读取
-- [x] `cn_1688_crawler.py` 中的 `API_KEY` 和 `APP_KEY` 是1688公共H5 API参数，非敏感信息
+### 1. Security of Sensitive Information
+- [x] `.env` File added to `.gitignore`, will not be submitted
+- [x] `.env.example` Reserved as a template file, using placeholders
+- [x] `claude_desktop_config.json` Wait until the configuration file containing the real API key has been added to `.gitignore`
+- [x] All API keys in the code/Tokens are read from environment variables
+- [x] `cn_1688_crawler.py` in `API_KEY` and `APP_KEY` It is a 1688 public H5 API parameter, non-sensitive information
 
-### 2. .gitignore 配置
-已排除以下内容：
+### 2. .gitignore configuration
+The following have been excluded:
 - Python: `__pycache__/`, `*.pyc`, `venv/`
-- 环境变量: `.env`, `.env.*.local`
-- 缓存: `cache/`, `*.db`
-- 系统文件: `.DS_Store`
-- 测试文件: `test_*.py`, `demo_*.py`, `run_analysis_*.py`
-- 数据文件: `*.csv`, `*.xlsx`, `*.pdf`
-- 配置文件: `claude_desktop_config*.json`, `.claude-mcp.json`
-- 归档: `archive/`
+- environment variables: `.env`, `.env.*.local`
+- cache: `cache/`, `*.db`
+- System files: `.DS_Store`
+- test file: `test_*.py`, `demo_*.py`, `run_analysis_*.py`
+- data file: `*.csv`, `*.xlsx`, `*.pdf`
+- Configuration file: `claude_desktop_config*.json`, `.claude-mcp.json`
+- Archive: `archive/`
 
-### 3. 核心文件完整性
-- [x] `README.md` - 完整的项目文档
-- [x] `LICENSE` - MIT 许可证
-- [x] `requirements.txt` - 所有依赖（添加了 requests）
-- [x] `.env.example` - 环境变量模板
-- [x] `generate_report.py` - 标准流程入口
-- [x] `server.py` - MCP 服务器
-- [x] `src/` - 核心源代码
-- [x] `examples/` - 使用示例
-- [x] `docs/` - 文档
+### 3. Core file integrity
+- [x] `README.md` - Complete project documentation
+- [x] `LICENSE` - MIT license
+- [x] `requirements.txt` - All dependencies (requests added)
+- [x] `.env.example` - Environment variable template
+- [x] `generate_report.py` - Standard process entry
+- [x] `server.py` - MCP server
+- [x] `src/` - core source code
+- [x] `examples/` - Usage example
+- [x] `docs/` - document
 
-### 4. 代码质量
-- [x] 语法检查通过
-- [x] 无硬编码敏感信息
-- [x] print语句均为用户友好的输出信息
-- [x] 动态30-60-90天行动计划（非硬编码）
+### 4. Code quality
+- [x] Grammar check passed
+- [x] No hard-coded sensitive information
+- [x] print statements are user-friendly output information
+- [x] Dynamic 30-60-90-day action plan (not hard-coded)
 
 ### 5. GitHub Actions
-- [x] 添加了 `.github/workflows/python-check.yml` 用于CI检查
+- [x] added `.github/workflows/python-check.yml` for CI checks
 
-## 📋 提交文件列表
+## 📋 Submit file list
 
 ```bash
-# 查看将被提交的文件
+# View documents to be submitted
 git add -n .
 
-# 核心文件
+# core file
 git add README.md LICENSE requirements.txt .gitignore .env.example
 git add generate_report.py server.py
 
-# 源代码
+# source code
 git add src/
 
-# 示例和文档
+# Examples and documentation
 git add examples/ docs/
 
-# 配置文件示例
+# Configuration file example
 git add mcp_config_example.json
 
 # GitHub Actions
 git add .github/
 ```
 
-## ⚠️ 重要提醒
+## ⚠️ Important reminder
 
-1. **首次提交前确认**:
+1. **Confirm before first submission**:
    ```bash
-   # 确保 .env 不会被提交
+   # Make sure .env is not committed
    git check-ignore -v .env
    
-   # 应该显示: .env 被 .gitignore 第37行忽略
+   # should show: .env is ignored by .gitignore line 37
    ```
 
-2. **本地配置**:
+2. **local configuration**:
    ```bash
-   # 复制环境变量模板
+   # Copy environment variable template
    cp .env.example .env
-   # 编辑 .env 填入你的真实API密钥
+   # Edit .env and fill in your real API key
    ```
 
-3. **安全建议**:
-   - 定期更换 Keepa API Key
-   - 不要将真实密钥分享给他人
-   - 使用 GitHub Secrets 进行 CI/CD
+3. **Security advice**:
+   - Change the Keepa API Key regularly
+   - Do not share your real key with others
+   - Using GitHub Secrets for CI/CD
 
-## 🚀 提交命令
+## 🚀 Submit command
 
 ```bash
-# 初始化仓库（如果是新项目）
+# Initialize the warehouse (if it is a new project)
 git init
 
-# 添加文件
+# Add files
 git add .
 
-# 检查将要提交的内容
+# Check what will be submitted
 git status
 
-# 提交
+# Submit
 git commit -m "Initial commit: Amz-Keepa-MCP v3.0
 
 - Amazon FBA actuary analysis system
@@ -107,7 +107,7 @@ git commit -m "Initial commit: Amz-Keepa-MCP v3.0
 - Dynamic 30-60-90 day action plans
 - MCP server for Claude Code integration"
 
-# 推送到GitHub
+# Push to GitHub
 git remote add origin https://github.com/yourusername/amz-keepa-mcp.git
 git push -u origin main
 ```

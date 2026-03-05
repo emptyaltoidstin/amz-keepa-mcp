@@ -1,44 +1,44 @@
-# GitHub 推送指南
+# GitHub push guide
 
-## 方法一: 使用 Git 命令 (最简单)
+## Method one: Using Git commands (The simplest)
 
 ```bash
 cd /Users/blobeats/Downloads/amz-keepa-mcp
 git push -u origin main
 ```
 
-按提示输入:
+Enter as prompted:
 - Username: `itnewlife`
-- Password: `你的 Personal Access Token`
+- Password: `Your Personal Access Token`
 
-> 注意: 密码处输入的是 Token，不是 GitHub 登录密码
+> Note: The password entered is Token, not the GitHub login password.
 
-## 方法二: 使用 GitHub CLI
+## Method two: Using the GitHub CLI
 
 ```bash
-# 1. 登录 (浏览器方式)
+# 1. Login (Browser mode)
 gh auth login
 
-# 按提示选择:
+# Follow the prompts to select:
 # - GitHub.com
 # - HTTPS
 # - Yes
 # - Login with a web browser
 
-# 2. 推送
+# 2. Push
 git push -u origin main
 ```
 
-## 生成 Personal Access Token
+## Generate Personal Access Token
 
-1. 访问: https://github.com/settings/tokens/new
-2. 输入名称: `amz-keepa-mcp`
-3. 勾选: `repo` 权限
-4. 点击 Generate token
-5. 复制生成的 token
+1. Visit: https://github.com/settings/tokens/new
+2. Enter the name: `amz-keepa-mcp`
+3. Check: `repo` Permissions
+4. Click Generate token
+5. Copy the generated token
 
-## 当前状态
+## Current status
 
-- ✅ 本地提交: 2 commits
-- ✅ 远程仓库: `https://github.com/itnewlife/amz-keepa-mcp.git`
-- ✅ GitHub CLI: 已安装 v2.86.0
+- ✅ Submit locally: 2 commits
+- ✅Remote warehouse: `https://github.com/itnewlife/amz-keepa-mcp.git`
+- ✅ GitHub CLI: v2.86.0 installed

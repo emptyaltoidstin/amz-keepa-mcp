@@ -1,36 +1,36 @@
 # SIF Playwright MCP Server
 
-> 使用 Playwright 替代 Selenium，更好的反检测能力和稳定性
+> Use Playwright instead of Selenium for better anti-detection capabilities and stability
 
-## 🚀 为什么使用 Playwright?
+## 🚀 Why use Playwright?
 
-| 特性 | Selenium | Playwright |
+| characteristic | Selenium | Playwright |
 |------|----------|------------|
-| 反检测能力 | 一般 | **优秀** |
-| 自动等待 | 需手动 | **内置** |
-| 异步支持 | 弱 | **原生** |
-| 浏览器支持 | 多但复杂 | Chromium/Firefox/WebKit |
-| 稳定性 | 一般 | **更好** |
-| 执行速度 | 较慢 | **更快** |
+| Anti-detection capabilities | Average | **Excellent** |
+| automatically wait | Need manual | **Built-in** |
+| Asynchronous support | weak | **Native** |
+| Browser support | Many but complex | Chromium/Firefox/WebKit |
+| stability | Average | **better** |
+| Execution speed | slower | **faster** |
 
-## 📦 安装
+## 📦 Installation
 
-### 1. 安装 Playwright
+### 1. Install Playwright
 
 ```bash
-# 安装 Python 包
+# Install Python packages
 pip install playwright
 
-# 安装浏览器 (首次运行必需)
+# Install browser (Required for first run)
 playwright install
 
-# 如果只安装 Chromium (更快)
+# If you only install Chromium (faster)
 playwright install chromium
 ```
 
-### 2. 配置 Claude Desktop
+### 2. Configure Claude Desktop
 
-编辑 `claude_desktop_config.json`：
+Edit `claude_desktop_config.json`：
 
 ```json
 {
@@ -49,54 +49,54 @@ playwright install chromium
 }
 ```
 
-## 🎯 使用示例
+## 🎯 Usage examples
 
-### 测试登录
-
-```
-测试 SIF Playwright 登录
-```
-
-### 分析 ASIN
+### Test login
 
 ```
-用 Playwright 分析 B08N5WRWNW 的流量词
+Test SIF Playwright Login
 ```
 
-### 一键全维度分析
+### Analyze ASINs
 
 ```
-分析 B08N5WRWNW 的全维度数据
+Use Playwright to analyze the traffic words of B08N5WRWNW
+```
+
+### One-click full-dimensional analysis
+
+```
+Analyze the full-dimensional data of B08N5WRWNW
 ```
 
 ---
 
-## 🔧 可用工具
+## 🔧 Available tools
 
-| Tool | 功能 |
+| Tool | Function |
 |------|------|
-| `test_sif_login_playwright` | 测试登录状态 |
-| `analyze_asin_sif_playwright` | 全维度分析（含下载） |
+| `test_sif_login_playwright` | Test login status |
+| `analyze_asin_sif_playwright` | Full-dimensional analysis (including download) |
 
 ---
 
 ## 🆚 Playwright vs Selenium
 
-### Selenium 的问题
-1. 容易被检测（`navigator.webdriver` 标志）
-2. 需要手动等待元素
-3. 下载文件处理复杂
-4. 页面重定向难处理
+### Selenium problem
+1. Easily detectable (`navigator.webdriver` logo)
+2. Need to wait for elements manually
+3. Downloading files is complicated
+4. Page redirection is difficult to handle
 
-### Playwright 的改进
-1. **Stealth 模式**: 自动隐藏自动化特征
-2. **自动等待**: 智能等待元素出现
-3. **下载监听**: 原生支持下载事件监听
-4. **更稳定**: 更好的错误处理和重试机制
+### Playwright improvements
+1. **Stealth mode**: Automatically hide automation features
+2. **automatically wait**: Smart waiting for elements to appear
+3. **Download monitoring**: Native support for download event monitoring
+4. **more stable**: Better error handling and retry mechanism
 
 ---
 
-## 🧪 测试
+## 🧪 Test
 
 ```bash
 cd /Users/blobeats/Downloads/amz-keepa-mcp
@@ -105,12 +105,12 @@ python test_playwright.py
 
 ---
 
-## 📝 技术细节
+## 📝 Technical details
 
-### Stealth 注入
+### Stealth injection
 
 ```python
-# 隐藏 webdriver 标志
+# Hide webdriver flag
 await context.add_init_script("""
     Object.defineProperty(navigator, 'webdriver', {
         get: () => undefined
@@ -118,64 +118,64 @@ await context.add_init_script("""
 """)
 ```
 
-### 下载监听
+### Download monitoring
 
 ```python
-# 原生下载事件
-page.on("download", lambda download: print(f"下载: {download.suggested_filename}"))
+# Native download event
+page.on("download", lambda download: print(f"Download: {download.suggested_filename}"))
 ```
 
-### 智能等待
+### Smart waiting
 
 ```python
-# 自动等待元素可见
-await page.click('button:has-text("下载")')
+# Automatically wait for element to be visible
+await page.click('button:has-text("Download")')
 ```
 
 ---
 
-## 🐛 故障排查
+## 🐛 Troubleshooting
 
-### 问题 1: `playwright install` 失败
+### Question 1: `playwright install` failed
 
-**解决:**
+**solve:**
 ```bash
-# 使用国内镜像
+# Use domestic mirroring
 PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium
 
-# 或手动下载
-# 访问 https://playwright.dev/docs/browsers
+# Or download manually
+# access https://playwright.dev/docs/browsers
 ```
 
-### 问题 2: 浏览器启动失败
+### Question 2: Browser startup failed
 
-**解决:**
+**solve:**
 ```bash
-# 检查系统依赖
+# Check system dependencies
 playwright install-deps chromium
 ```
 
-### 问题 3: Cookie 仍然无效
+### Question 3: Cookie still invalid
 
-**原因:**
-- SIF 可能检测到了更严格的验证
-- 可能需要额外的请求头
-- 可能需要特定的浏览器指纹
+**Reason:**
+- SIF may have detected stricter validation
+- Additional request headers may be required
+- May require specific browser fingerprinting
 
-**解决:**
-1. 尝试在 Playwright 中使用 `--disable-features=IsolateOrigins` 等参数
-2. 使用更真实的 User-Agent
-3. 添加更多的浏览器特征模拟
+**solve:**
+1. Try using it in Playwright `--disable-features=IsolateOrigins` and other parameters
+2. Use a more realistic User-Agent
+3. Add more browser feature simulations
 
 ---
 
-## 🎉 优势总结
+## 🎉 Summary of advantages
 
-Playwright 版本相比 Selenium：
-- ✅ 更好的反检测能力
-- ✅ 更快的执行速度
-- ✅ 更简单的异步代码
-- ✅ 更稳定的下载处理
-- ✅ 更好的错误恢复
+Playwright version compared to Selenium:
+- ✅ Better anti-detection capabilities
+- ✅ Faster execution speed
+- ✅ Simpler asynchronous code
+- ✅ More stable download processing
+- ✅ Better error recovery
 
-如果 Selenium 版本无法登录，强烈推荐尝试 Playwright 版本！
+If the Selenium version fails to log in, it is highly recommended to try the Playwright version!

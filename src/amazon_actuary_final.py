@@ -1,11 +1,11 @@
 """
-亚马逊运营精算师 - 最终版 (Final Edition)
+Amazon Operations Actuary - final version (Final Edition)
 ==============================================
-整合163个Keepa指标 + 真实COGS + 订单来源分析
-所有决策基于数据支撑
+Integrated 163 Keepa indicators + Real COGS + Order source analysis
+All decisions are based on data support
 
-作者: Amazon FBA Actuary System v3.0
-日期: 2026-02-15
+Author: Amazon FBA Actuary System v3.0
+Date: 2026-02-15
 """
 
 import json
@@ -21,13 +21,13 @@ warnings.filterwarnings('ignore')
 
 
 # ============================================================================
-# 数据模型定义
+# Data model definition
 # ============================================================================
 
 @dataclass
 class KeepaMetrics163:
-    """Keepa 163个指标数据结构"""
-    # 基础信息 (18个)
+    """Keepa 163 indicator data structures"""
+    # Basic information (18)
     asin: str = ""
     locale: str = "com"
     title: str = ""
@@ -37,7 +37,7 @@ class KeepaMetrics163:
     description: str = ""
     features: List[str] = field(default_factory=list)
     
-    # 销售表现 (8个)
+    # sales performance (8)
     sales_rank_current: int = 0
     sales_rank_avg_90d: int = 0
     sales_rank_drops_90d: int = 0
@@ -45,13 +45,13 @@ class KeepaMetrics163:
     bought_in_past_month: int = 0
     sales_change_90d_pct: float = 0.0
     
-    # 评论与退货 (5个)
+    # Reviews and Returns (5)
     return_rate: float = 0.0
     rating: float = 0.0
     review_count: int = 0
     last_price_change: str = ""
     
-    # Buy Box (15个)
+    # Buy Box (15)
     buy_box_seller: str = ""
     buy_box_price: float = 0.0
     amazon_buybox_pct_90d: float = 0.0
@@ -60,7 +60,7 @@ class KeepaMetrics163:
     is_fba: bool = True
     is_prime: bool = True
     
-    # 价格数据 (Amazon/New/Used)
+    # price data (Amazon/New/Used)
     price_amazon_current: float = 0.0
     price_amazon_avg_30d: float = 0.0
     price_amazon_avg_90d: float = 0.0
@@ -75,17 +75,17 @@ class KeepaMetrics163:
     
     price_used_current: float = 0.0
     
-    # 库存 (8个)
+    # Inventory (8)
     amazon_oos_rate_90d: float = 0.0
     amazon_oos_count_30d: int = 0
     amazon_availability: str = ""
     
-    # 费用 (6个)
+    # cost (6)
     fba_fee: float = 0.0
     referral_fee_pct: float = 15.0
     referral_fee_amount: float = 0.0
     
-    # 竞争 (10个)
+    # compete (10)
     total_offer_count: int = 0
     new_offer_count: int = 0
     fba_offer_count: int = 0
@@ -93,12 +93,12 @@ class KeepaMetrics163:
     tracking_since: str = ""
     listed_since: str = ""
     
-    # 类目 (5个)
+    # Category (5)
     category_root: str = ""
     category_sub: str = ""
     category_tree: str = ""
     
-    # 产品属性 (20个)
+    # Product attributes (20)
     brand: str = ""
     manufacturer: str = ""
     product_group: str = ""
@@ -107,40 +107,40 @@ class KeepaMetrics163:
     material: str = ""
     style: str = ""
     
-    # 包装规格 (9个)
+    # Packaging specifications (9)
     package_length_cm: float = 0.0
     package_width_cm: float = 0.0
     package_height_cm: float = 0.0
     package_weight_g: float = 0.0
     package_volume_cm3: float = 0.0
     
-    # 内容 (8个)
+    # content (8)
     has_video: bool = False
     video_count: int = 0
     has_aplus: bool = False
     
-    # 原始CSV数据存储
+    # Raw CSV data storage
     raw_data: Dict = field(default_factory=dict)
 
 
 @dataclass
 class VariantFinancials:
-    """变体财务数据 (用户输入)"""
+    """Variant financial data (user input)"""
     asin: str
-    cogs: float  # 真实采购成本 (含头程)
-    organic_order_pct: float  # 自然订单占比
-    ad_order_pct: float  # 广告订单占比
+    cogs: float  # true purchase cost (Including the first step)
+    organic_order_pct: float  # Proportion of natural orders
+    ad_order_pct: float  # Insertion order proportion
     
-    # 可选的详细成本分解
-    product_cost: float = 0.0  # 产品本身成本
-    shipping_cost: float = 0.0  # 头程运费
-    tariff_cost: float = 0.0  # 关税
-    other_cost: float = 0.0  # 其他成本
+    # Optional detailed cost breakdown
+    product_cost: float = 0.0  # Product cost
+    shipping_cost: float = 0.0  # First leg freight
+    tariff_cost: float = 0.0  # tariff
+    other_cost: float = 0.0  # other costs
 
 
 @dataclass
 class ActuaryDecision:
-    """精算师决策 (基于数据)"""
+    """actuary decision making (Based on data)"""
     decision: str  # proceed / caution / avoid
     confidence: float  # 0-100
     expected_monthly_profit: float
@@ -148,75 +148,75 @@ class ActuaryDecision:
     payback_period_months: float
     risk_factors: List[str]
     opportunity_factors: List[str]
-    data_quality_score: float  # 数据完整度 0-100
+    data_quality_score: float  # Data completeness 0-100
 
 
 @dataclass
 class VariantAnalysisResult:
-    """单个变体分析结果"""
-    # 基础信息
+    """Single variant analysis results"""
+    # Basic information
     asin: str
     parent_asin: str
     metrics: KeepaMetrics163
     financials: VariantFinancials
     
-    # 销售估算
+    # sales estimate
     estimated_monthly_sales: int
     estimated_monthly_revenue: float
     
-    # 成本结构 (基于163指标)
-    operating_cost_per_unit: float  # 运营成本 (FBA+佣金+退货+仓储)
-    ad_cost_per_unit: float  # 单位广告成本 (基于TACOS)
-    total_cost_per_unit: float  # 总成本
+    # cost structure (Based on 163 indicators)
+    operating_cost_per_unit: float  # operating costs (FBA+Commission+Return+warehousing)
+    ad_cost_per_unit: float  # unit advertising cost (Based on TACOS)
+    total_cost_per_unit: float  # total cost
     
-    # 利润分析
-    contribution_margin_organic: float  # 自然订单贡献毛利
-    contribution_margin_ad: float  # 广告订单贡献毛利
-    blended_margin_pct: float  # 混合利润率
+    # profit analysis
+    contribution_margin_organic: float  # Natural orders contribute to gross profit
+    contribution_margin_ad: float  # Insertion order contribution margin
+    blended_margin_pct: float  # mixed profit margin
     
-    # 月度利润
+    # monthly profit
     monthly_profit_organic: float
     monthly_profit_ad: float
     monthly_total_profit: float
     
-    # 数据质量
+    # Data quality
     data_completeness_pct: float
     
-    # 基于数据的决策
+    # Data-Based Decisions
     decision: ActuaryDecision
 
 
 @dataclass
 class LinkPortfolioAnalysis:
-    """链接组合分析结果"""
+    """Link combination analysis results"""
     parent_asin: str
     variants: List[VariantAnalysisResult]
     
-    # 组合级指标
+    # Portfolio level indicators
     total_monthly_sales: int
     total_monthly_revenue: float
     total_monthly_profit: float
     blended_portfolio_margin_pct: float
     
-    # 帕累托分析
-    pareto_variants: List[VariantAnalysisResult]  # 贡献80%的变体
-    tail_variants: List[VariantAnalysisResult]  # 长尾变体
+    # Pareto analysis
+    pareto_variants: List[VariantAnalysisResult]  # Contribute 80%Variants of
+    tail_variants: List[VariantAnalysisResult]  # long tail variant
     
-    # 风险分布
-    high_ad_dependency: List[str]  # 高广告依赖ASIN
-    loss_making_variants: List[str]  # 亏损变体
-    high_return_variants: List[str]  # 高退货率变体
+    # risk distribution
+    high_ad_dependency: List[str]  # High advertising dependence on ASIN
+    loss_making_variants: List[str]  # loss variant
+    high_return_variants: List[str]  # High return rate variant
     
-    # 整体决策
+    # overall decision making
     overall_decision: ActuaryDecision
 
 
 # ============================================================================
-# 163指标采集器
+# 163 indicator collector
 # ============================================================================
 
 class Metrics163Collector:
-    """从Keepa产品数据中提取163个指标"""
+    """Extract 163 metrics from Keepa product data"""
     
     def __init__(self):
         self.required_fields = {
@@ -225,7 +225,7 @@ class Metrics163Collector:
         }
     
     def collect_from_product(self, product: Dict) -> KeepaMetrics163:
-        """从Keepa API产品数据中提取163个指标"""
+        """Extract 163 metrics from Keepa API product data"""
         data = product.get('data', {})
         
         metrics = KeepaMetrics163(
@@ -237,14 +237,14 @@ class Metrics163Collector:
             description=(product.get('description') or '')[:500],
             features=self._extract_features(product),
             
-            # 销售表现
+            # sales performance
             sales_rank_current=self._get_current_rank(data),
             sales_rank_avg_90d=self._get_avg_rank_90d(data),
             sales_rank_drops_90d=self._count_rank_drops(data),
             bought_in_past_month=self._get_bought_in_past_month(product),
             sales_change_90d_pct=self._calc_sales_change_90d(data),
             
-            # 评论
+            # Comment
             rating=self._get_rating_safe(product),
             review_count=self._get_review_count_safe(product),
             return_rate=self._estimate_return_rate(product),
@@ -255,18 +255,18 @@ class Metrics163Collector:
             amazon_buybox_pct_90d=self._calc_amazon_buybox_share(data),
             is_fba=self._is_fba(product, data),
             
-            # 价格
+            # price
             price_new_current=self._get_price_new_current(data),
             price_new_avg_30d=self._get_price_new_avg(data, 30),
             price_new_avg_90d=self._get_price_new_avg(data, 90),
             price_new_lowest=self._get_price_new_lowest(data),
             price_new_highest=self._get_price_new_highest(data),
             
-            # 竞争
+            # compete
             total_offer_count=self._get_offer_count(data),
             new_offer_count=self._get_new_offer_count(data),
             
-            # 类目
+            # Category
             brand=product.get('brand', ''),
             manufacturer=product.get('manufacturer', ''),
             product_group=product.get('productGroup', ''),
@@ -275,13 +275,13 @@ class Metrics163Collector:
             category_root=self._get_category_root(product),
             category_sub=self._get_category_sub(product),
             
-            # 包装
+            # packaging
             package_length_cm=product.get('packageLength', 0) or 0,
             package_width_cm=product.get('packageWidth', 0) or 0,
             package_height_cm=product.get('packageHeight', 0) or 0,
             package_weight_g=product.get('packageWeight', 0) or 0,
             
-            # 费用估算
+            # cost estimate
             fba_fee=self._estimate_fba_fee(product),
             referral_fee_pct=15.0,
             referral_fee_amount=self._calc_referral_fee(data),
@@ -289,7 +289,7 @@ class Metrics163Collector:
             raw_data=product
         )
         
-        # 计算体积
+        # Calculate volume
         if metrics.package_length_cm and metrics.package_width_cm and metrics.package_height_cm:
             metrics.package_volume_cm3 = (
                 metrics.package_length_cm * 
@@ -300,19 +300,19 @@ class Metrics163Collector:
         return metrics
     
     def _extract_features(self, product: Dict) -> List[str]:
-        """提取产品特性"""
+        """Extract product features"""
         features = product.get('features', [])
         return features[:10] if features else []
     
     def _get_current_rank(self, data: Dict) -> int:
-        """获取当前BSR"""
+        """Get the current BSR"""
         df = data.get('df_SALES')
         if df is not None and not df.empty:
             return int(df['value'].iloc[-1]) if len(df) > 0 else 0
         return 0
     
     def _get_avg_rank_90d(self, data: Dict) -> int:
-        """获取90天平均BSR"""
+        """Get the 90-day average BSR"""
         df = data.get('df_SALES')
         if df is not None and not df.empty:
             valid = df[df['value'] > 0]['value']
@@ -322,7 +322,7 @@ class Metrics163Collector:
         return 0
     
     def _count_rank_drops(self, data: Dict) -> int:
-        """计算90天内BSR下降次数"""
+        """Calculate the number of BSR drops within 90 days"""
         df = data.get('df_SALES')
         if df is not None and not df.empty:
             values = df['value'].tail(90).tolist()
@@ -333,58 +333,58 @@ class Metrics163Collector:
     def _get_bought_in_past_month(self, product: Dict, is_shared_data: bool = False, 
                                    total_sales: int = 0, all_variants_bsr: List[int] = None) -> int:
         """
-        获取过去一个月购买量
+        Get the purchase volume in the past month
         
-        智能处理三种情况:
-        1. 变体有独立的boughtInPastMonth -> 直接使用
-        2. 所有变体共享父ASIN总销量 -> 按BSR比例分配
-        3. 没有数据 -> 使用BSR估算
+        Intelligent handling of three situations:
+        1. Variants have independent boughtInPastMonth -> Use directly
+        2. All variants share the total sales volume of the parent ASIN -> Distributed according to BSR proportion
+        3. No data -> Use BSR estimation
         
         Args:
-            product: 产品数据
-            is_shared_data: 是否是共享的父ASIN数据
-            total_sales: 父ASIN总销量(如果是共享数据)
-            all_variants_bsr: 所有变体的BSR列表(用于分配比例计算)
+            product: product data
+            is_shared_data: Whether it is shared parent ASIN data
+            total_sales: Parent ASIN total sales(If it is shared data)
+            all_variants_bsr: List of BSRs for all variants(Used for allocation ratio calculations)
         """
-        # 获取原始数据
+        # Get raw data
         bought = product.get('boughtInPastMonth', 0)
         
-        # 情况1: 有独立的真实数据
+        # Case 1: Have independent real data
         if isinstance(bought, (int, float)) and bought > 0 and not is_shared_data:
             return int(bought)
         
-        # 情况2: 共享的父ASIN总销量，需要按比例分配
+        # Case 2: The total sales volume of the shared parent ASIN needs to be allocated proportionally
         if is_shared_data and total_sales > 0 and all_variants_bsr:
             current_bsr = self._get_avg_rank_90d(product.get('data', {}))
             return self._allocate_sales_by_bsr(current_bsr, total_sales, all_variants_bsr)
         
-        # 情况3: 回退到BSR估算
+        # Case 3: Fallback to BSR estimation
         data = product.get('data', {})
         return self._estimate_monthly_sales(data)
     
     def _allocate_sales_by_bsr(self, current_bsr: int, total_sales: int, all_variants_bsr: List[int]) -> int:
         """
-        根据BSR排名按比例分配总销量
+        Prorate total sales based on BSR ranking
         
-        原理: BSR越低，销量越高。使用反比关系计算权重。
+        principle: The lower the BSR, the higher the sales volume. Calculate weights using an inverse relationship.
         
         Args:
-            current_bsr: 当前变体的BSR
-            total_sales: 父ASIN总销量
-            all_variants_bsr: 所有变体的BSR列表
+            current_bsr: BSR for current variant
+            total_sales: Parent ASIN total sales
+            all_variants_bsr: List of BSRs for all variants
             
         Returns:
-            分配给当前变体的销量
+            Sales volume allocated to the current variant
         """
         if not all_variants_bsr or current_bsr == 0:
             return 0
         
-        # 计算每个变体的权重 (BSR的倒数，越小的BSR权重越大)
-        # 使用平方根平滑极端值
+        # Calculate the weight of each variant (The reciprocal of BSR, the smaller the BSR, the greater the weight.)
+        # Smooth out extreme values using square roots
         weights = []
         for bsr in all_variants_bsr:
             if bsr > 0:
-                weight = 1 / (bsr ** 0.5)  # 平方根反比
+                weight = 1 / (bsr ** 0.5)  # inverse square root
                 weights.append(weight)
             else:
                 weights.append(0)
@@ -393,19 +393,19 @@ class Metrics163Collector:
         if total_weight == 0:
             return 0
         
-        # 计算当前变体的权重占比
+        # Calculate the weight proportion of the current variant
         current_weight = 1 / (current_bsr ** 0.5) if current_bsr > 0 else 0
         ratio = current_weight / total_weight
         
-        # 分配销量
+        # Allocate sales volume
         allocated_sales = int(total_sales * ratio)
         
-        return max(allocated_sales, 1)  # 至少1单
+        return max(allocated_sales, 1)  # At least 1 order
     
     def _estimate_monthly_sales(self, data: Dict) -> int:
-        """基于BSR估算月销量 (当没有真实数据时的备用方法)"""
+        """Estimated monthly sales based on BSR (A fallback method when real data is not available)"""
         avg_rank = self._get_avg_rank_90d(data)
-        # 简化的BSR-销量映射
+        # Simplified BSR-sales mapping
         if avg_rank == 0:
             return 0
         elif avg_rank < 1000:
@@ -420,7 +420,7 @@ class Metrics163Collector:
             return int(50 * (100000 / avg_rank) ** 0.5)
     
     def _calc_sales_change_90d(self, data: Dict) -> float:
-        """计算90天销量变化率"""
+        """Calculate 90-day sales change rate"""
         df = data.get('df_SALES')
         if df is not None and len(df) >= 180:
             recent = df['value'].tail(90).mean()
@@ -430,7 +430,7 @@ class Metrics163Collector:
         return 0.0
     
     def _get_rating_from_data(self, data: Dict) -> float:
-        """从数据中获取评分"""
+        """Get ratings from data"""
         df = data.get('df_RATING')
         if df is not None and not df.empty:
             try:
@@ -440,10 +440,10 @@ class Metrics163Collector:
         return 0.0
     
     def _get_rating_safe(self, product: Dict) -> float:
-        """安全获取评分 (处理各种数据类型)"""
+        """Get ratings securely (Handle various data types)"""
         stars = product.get('stars', 0)
         
-        # 处理不同数据类型
+        # Handle different data types
         if isinstance(stars, (int, float)):
             return float(stars)
         elif isinstance(stars, str):
@@ -459,12 +459,12 @@ class Metrics163Collector:
                     except:
                         continue
         
-        # 回退到从DataFrame获取
+        # Fallback to getting from DataFrame
         data = product.get('data', {})
         return self._get_rating_from_data(data)
     
     def _get_review_count(self, data: Dict) -> int:
-        """获取评论数"""
+        """Get the number of comments"""
         df = data.get('df_COUNT_REVIEWS')
         if df is not None and not df.empty:
             try:
@@ -474,10 +474,10 @@ class Metrics163Collector:
         return 0
     
     def _get_review_count_safe(self, product: Dict) -> int:
-        """安全获取评论数 (处理各种数据类型)"""
+        """Safely get the number of comments (Handle various data types)"""
         reviews = product.get('reviews', 0)
         
-        # 处理不同数据类型
+        # Handle different data types
         if isinstance(reviews, int):
             return reviews
         elif isinstance(reviews, float):
@@ -488,7 +488,7 @@ class Metrics163Collector:
             except:
                 return 0
         elif isinstance(reviews, dict):
-            # 如果是dict，尝试获取其中的值
+            # If it is a dict, try to get the value in it
             for key in ['count', 'total', 'value', 'reviews']:
                 if key in reviews:
                     try:
@@ -497,14 +497,14 @@ class Metrics163Collector:
                         continue
             return 0
         else:
-            # 尝试从DataFrame获取
+            # Try to get from DataFrame
             data = product.get('data', {})
             return self._get_review_count(data)
     
     def _estimate_return_rate(self, product: Dict) -> float:
-        """基于类目估算退货率"""
+        """Estimating return rates based on category"""
         category = self._get_category_root(product).lower()
-        # 类目退货率参考
+        # Category return rate reference
         rates = {
             'clothing': 0.15,
             'shoes': 0.18,
@@ -518,88 +518,88 @@ class Metrics163Collector:
         for key, rate in rates.items():
             if key in category:
                 return rate
-        return 0.08  # 默认8%
+        return 0.08  # Default 8%
     
     def _get_buybox_seller(self, product: Dict) -> str:
-        """获取Buy Box卖家"""
+        """Get Buy Box Seller"""
         history = product.get('buyBoxSellerIdHistory', [])
         return history[-1] if history else 'Unknown'
     
     def _get_buybox_price(self, data: Dict) -> float:
-        """获取Buy Box价格"""
+        """Get Buy Box price"""
         df = data.get('df_BUY_BOX_SHIPPING')
         if df is not None and not df.empty:
             return float(df['value'].iloc[-1])
         return 0.0
     
     def _calc_amazon_buybox_share(self, data: Dict) -> float:
-        """计算Amazon自营Buy Box占比"""
+        """Calculate the proportion of Amazon’s self-operated Buy Box"""
         df = data.get('df_BUY_BOX_SHIPPING')
         amazon_df = data.get('df_AMAZON')
         if df is not None and amazon_df is not None and not df.empty:
-            # 简化的计算
-            return 0.0  # 需要更复杂的逻辑
+            # Simplified calculations
+            return 0.0  # Requires more complex logic
         return 0.0
     
     def _is_fba(self, product: Dict, data: Dict) -> bool:
-        """判断是否为FBA"""
-        # 通过卖家历史判断
-        return True  # 默认假设FBA
+        """Determine whether it is FBA"""
+        # Judging by seller history
+        return True  # Default assumes FBA
     
     def _get_price_new_current(self, data: Dict) -> float:
-        """获取当前新品价格"""
+        """Get the current new product price"""
         df = data.get('df_NEW')
         if df is not None and not df.empty:
             return float(df['value'].iloc[-1])
         return self._get_buybox_price(data)
     
     def _get_price_new_avg(self, data: Dict, days: int) -> float:
-        """获取新品均价"""
+        """Get the average price of new products"""
         df = data.get('df_NEW')
         if df is not None and not df.empty:
             return float(df['value'].tail(days).mean())
         return 0.0
     
     def _get_price_new_lowest(self, data: Dict) -> float:
-        """获取新品最低价"""
+        """Get the lowest price on new products"""
         df = data.get('df_NEW')
         if df is not None and not df.empty:
             return float(df['value'].min())
         return 0.0
     
     def _get_price_new_highest(self, data: Dict) -> float:
-        """获取新品最高价"""
+        """Get the highest price for new products"""
         df = data.get('df_NEW')
         if df is not None and not df.empty:
             return float(df['value'].max())
         return 0.0
     
     def _get_offer_count(self, data: Dict) -> int:
-        """获取卖家数量"""
+        """Get the number of sellers"""
         df = data.get('df_COUNT_NEW')
         if df is not None and not df.empty:
             return int(df['value'].iloc[-1])
         return 1
     
     def _get_new_offer_count(self, data: Dict) -> int:
-        """获取新品卖家数量"""
+        """Get the number of new product sellers"""
         return self._get_offer_count(data)
     
     def _get_category_root(self, product: Dict) -> str:
-        """获取根类目"""
+        """Get root category"""
         tree = product.get('categoryTree', [])
         return tree[0].get('name', '') if tree else ''
     
     def _get_category_sub(self, product: Dict) -> str:
-        """获取子类目"""
+        """Get subcategory"""
         tree = product.get('categoryTree', [])
         return tree[1].get('name', '') if len(tree) > 1 else ''
     
     def _get_fba_fee(self, product: Dict) -> float:
         """
-        获取FBA费用
+        Get FBA fees
         
-        优先从Keepa API获取真实数据，如果没有则基于尺寸估算
+        Prioritize getting real data from Keepa API, if not then estimate based on size
         """
         from keepa_fee_extractor import KeepaFeeExtractor
         
@@ -607,35 +607,35 @@ class Metrics163Collector:
         if fba_fee is not None:
             return fba_fee
         
-        # 回退到估算
+        # fallback to estimate
         return KeepaFeeExtractor._estimate_fba_fee_from_dimensions(product)
     
     def _get_referral_fee_rate(self, product: Dict) -> float:
         """
-        获取佣金比例
+        Get commission ratio
         
-        基于类目确定真实的佣金比例
+        Determine the true commission ratio based on category
         """
         from keepa_fee_extractor import KeepaFeeExtractor
         return KeepaFeeExtractor.extract_referral_fee_rate(product)
     
     def _calc_referral_fee(self, product: Dict, price: float) -> float:
-        """计算佣金"""
+        """Calculate commission"""
         rate = self._get_referral_fee_rate(product)
         return price * rate
     
     def _calc_operating_cost(self, product: Dict, data: Dict) -> float:
-        """计算单位运营成本 (不含COGS和广告)"""
+        """Calculate unit operating costs (Free of COGS and ads)"""
         from keepa_fee_extractor import KeepaFeeExtractor
         
         price = self._get_buybox_price(data)
         
-        # 使用Keepa API真实费用数据
+        # Using Keepa API real expense data
         fees = KeepaFeeExtractor.extract_all_fees(product, price)
         fba = fees['fba_fee']
         referral = fees['referral_fee']
         
-        # 其他运营成本
+        # Other operating costs
         return_rate = self._estimate_return_rate(product)
         return_cost = price * return_rate * 0.30
         storage = 0.06
@@ -643,7 +643,7 @@ class Metrics163Collector:
         return fba + referral + return_cost + storage
     
     def calculate_data_completeness(self, metrics: KeepaMetrics163) -> float:
-        """计算数据完整度"""
+        """Calculate data completeness"""
         required = {
             'asin': metrics.asin,
             'title': metrics.title,
@@ -661,19 +661,19 @@ class Metrics163Collector:
 
 
 # ============================================================================
-# TACOS广告成本计算器
+# TACOS Advertising Cost Calculator
 # ============================================================================
 
 class TacosCalculator:
     """
-    TACOS (Total ACOS) 广告成本计算器
+    TACOS (Total ACOS) Advertising cost calculator
     
-    TACOS = 广告总花费 / 总销售额
+    TACOS = total advertising spend / total sales
     
-    与ACOS不同，TACOS反映广告对整体业务的影响
+    Unlike ACOS, TACOS reflects the impact of advertising on the overall business
     """
     
-    DEFAULT_TACOS_RATE = 0.15  # 默认15% TACOS
+    DEFAULT_TACOS_RATE = 0.15  # Default 15% TACOS
     
     def __init__(self, tacos_rate: float = DEFAULT_TACOS_RATE):
         self.tacos_rate = tacos_rate
@@ -684,18 +684,18 @@ class TacosCalculator:
         monthly_ad_orders: float
     ) -> float:
         """
-        计算单位广告成本
+        Calculate unit advertising costs
         
-        公式:
-        - 月广告预算 = 月销售额 × TACOS
-        - 单位广告成本 = 月广告预算 / 月广告订单数
+        formula:
+        - monthly advertising budget = Monthly Sales × TACOS
+        - unit advertising cost = monthly advertising budget / Monthly advertising orders
         
         Args:
-            monthly_revenue: 月销售额
-            monthly_ad_orders: 月广告订单数
+            monthly_revenue: monthly sales
+            monthly_ad_orders: Monthly advertising orders
             
         Returns:
-            每个广告订单的广告成本
+            Advertising cost per insertion order
         """
         if monthly_ad_orders <= 0:
             return 0.0
@@ -709,19 +709,19 @@ class TacosCalculator:
         ad_order_pct: float
     ) -> float:
         """
-        计算混合单位广告成本 (分摊到所有订单)
+        Calculate mixed unit advertising costs (Distributed to all orders)
         
-        这用于理解广告成本对所有订单的影响
+        This is used to understand the impact of advertising costs on all orders
         """
         return price * self.tacos_rate * ad_order_pct
 
 
 # ============================================================================
-# 变体利润分析器
+# Variant Profit Analyzer
 # ============================================================================
 
 class VariantProfitAnalyzer:
-    """基于163指标的真实COGS变体利润分析"""
+    """Real COGS variant profit analysis based on 163 indicators"""
     
     def __init__(self, tacos_rate: float = 0.15):
         self.tacos_calc = TacosCalculator(tacos_rate)
@@ -732,21 +732,21 @@ class VariantProfitAnalyzer:
         product: Dict,
         financials: VariantFinancials
     ) -> VariantAnalysisResult:
-        """分析单个变体"""
+        """Analyze a single variant"""
         
-        # 1. 采集163个指标
+        # 1. Collect 163 indicators
         metrics = self.metrics_collector.collect_from_product(product)
         data_completeness = self.metrics_collector.calculate_data_completeness(metrics)
         
-        # 2. 销售估算
+        # 2. Sales estimation
         estimated_sales = metrics.bought_in_past_month
         estimated_revenue = estimated_sales * metrics.price_new_current
         
-        # 3. 成本结构 (基于163指标计算)
-        # 运营费用 = FBA费 + 佣金 + 退货成本 + 仓储费
+        # 3. Cost structure (Calculated based on 163 indicators)
+        # operating expenses = FBA fee + Commission + return cost + Storage fee
         referral_fee = metrics.price_new_current * metrics.referral_fee_pct / 100
         return_cost = metrics.price_new_current * metrics.return_rate * 0.30
-        storage_fee = 0.06  # 默认仓储费
+        storage_fee = 0.06  # Default storage fee
         operating_cost = metrics.fba_fee + referral_fee + return_cost + storage_fee
         
         monthly_ad_orders = estimated_sales * financials.ad_order_pct
@@ -761,7 +761,7 @@ class VariantProfitAnalyzer:
             ad_cost_per_unit * financials.ad_order_pct
         )
         
-        # 4. 利润计算
+        # 4. Profit calculation
         contribution_organic = metrics.price_new_current - financials.cogs - operating_cost
         contribution_ad = contribution_organic - ad_cost_per_unit
         
@@ -770,12 +770,12 @@ class VariantProfitAnalyzer:
             contribution_ad * financials.ad_order_pct
         ) / metrics.price_new_current * 100 if metrics.price_new_current > 0 else 0
         
-        # 5. 月度利润
+        # 5. Monthly profit
         monthly_organic_profit = contribution_organic * (estimated_sales * financials.organic_order_pct)
         monthly_ad_profit = contribution_ad * (estimated_sales * financials.ad_order_pct)
         monthly_total = monthly_organic_profit + monthly_ad_profit
         
-        # 6. 基于数据的决策
+        # 6. Data-Based Decisions
         decision = self._make_decision(
             metrics, financials, blended_margin, 
             monthly_total, data_completeness
@@ -809,43 +809,43 @@ class VariantProfitAnalyzer:
         monthly_profit: float,
         data_completeness: float
     ) -> ActuaryDecision:
-        """基于数据做出决策"""
+        """Make decisions based on data"""
         
         risk_factors = []
         opportunity_factors = []
         
-        # 风险评估
+        # risk assessment
         if blended_margin < 0:
-            risk_factors.append(f"亏损变体: 混合利润率 {blended_margin:.1f}%")
+            risk_factors.append(f"loss variant: mixed profit margin {blended_margin:.1f}%")
         elif blended_margin < 10:
-            risk_factors.append(f"低利润率: {blended_margin:.1f}%")
+            risk_factors.append(f"low profit margin: {blended_margin:.1f}%")
         
         if financials.ad_order_pct > 0.6:
-            risk_factors.append(f"高广告依赖: {financials.ad_order_pct*100:.0f}%")
+            risk_factors.append(f"High advertising dependence: {financials.ad_order_pct*100:.0f}%")
         
         if metrics.return_rate > 0.12:
-            risk_factors.append(f"高退货率: {metrics.return_rate*100:.0f}%")
+            risk_factors.append(f"High return rate: {metrics.return_rate*100:.0f}%")
         
         if metrics.rating < 4.0:
-            risk_factors.append(f"低评分: {metrics.rating:.1f}")
+            risk_factors.append(f"low rating: {metrics.rating:.1f}")
         
         if metrics.total_offer_count > 10:
-            risk_factors.append(f"竞争激烈: {metrics.total_offer_count}个卖家")
+            risk_factors.append(f"Competition is fierce: {metrics.total_offer_count}sellers")
         
-        # 机会评估
+        # opportunity assessment
         if blended_margin > 25:
-            opportunity_factors.append(f"高利润率: {blended_margin:.1f}%")
+            opportunity_factors.append(f"high profit margin: {blended_margin:.1f}%")
         
         if financials.organic_order_pct > 0.7:
-            opportunity_factors.append(f"高自然流量占比: {financials.organic_order_pct*100:.0f}%")
+            opportunity_factors.append(f"High proportion of natural traffic: {financials.organic_order_pct*100:.0f}%")
         
         if metrics.rating >= 4.5 and metrics.review_count > 500:
-            opportunity_factors.append("优质评价基础")
+            opportunity_factors.append("Quality evaluation basis")
         
         if metrics.sales_change_90d_pct > 20:
-            opportunity_factors.append(f"增长趋势: +{metrics.sales_change_90d_pct:.0f}%")
+            opportunity_factors.append(f"growing trend: +{metrics.sales_change_90d_pct:.0f}%")
         
-        # 决策逻辑
+        # decision logic
         if blended_margin < 0:
             decision = "avoid"
             confidence = min(90, 50 + len(risk_factors) * 10)
@@ -856,11 +856,11 @@ class VariantProfitAnalyzer:
             decision = "proceed"
             confidence = min(95, 60 + len(opportunity_factors) * 8)
         
-        # ROI计算 (简化)
+        # ROI calculation (Simplify)
         monthly_investment = financials.cogs * metrics.bought_in_past_month
         roi = (monthly_profit / monthly_investment * 100) if monthly_investment > 0 else 0
         
-        # 回本周期
+        # Payback cycle
         payback = (financials.cogs * 100 / monthly_profit) if monthly_profit > 0 else 999
         
         return ActuaryDecision(
@@ -876,11 +876,11 @@ class VariantProfitAnalyzer:
 
 
 # ============================================================================
-# 链接组合分析器
+# link combination analyzer
 # ============================================================================
 
 class LinkPortfolioAnalyzer:
-    """分析整个链接组合 (所有变体)"""
+    """Analyze the entire link portfolio (All variations)"""
     
     def __init__(self, tacos_rate: float = 0.15):
         self.variant_analyzer = VariantProfitAnalyzer(tacos_rate)
@@ -892,9 +892,9 @@ class LinkPortfolioAnalyzer:
         products: List[Dict],
         financials_map: Dict[str, VariantFinancials]
     ) -> LinkPortfolioAnalysis:
-        """分析整个链接组合"""
+        """Analyze the entire link portfolio"""
         
-        # 分析所有变体
+        # Analyze all variants
         variants = []
         for product in products:
             asin = product.get('asin', '')
@@ -905,12 +905,12 @@ class LinkPortfolioAnalyzer:
                 variants.append(result)
         
         if not variants:
-            raise ValueError("没有可分析的变体")
+            raise ValueError("No analyzable variants")
         
-        # 按销量排序 (帕累托分析)
+        # Sort by sales (Pareto analysis)
         variants_sorted = sorted(variants, key=lambda x: x.estimated_monthly_sales, reverse=True)
         
-        # 计算累计销量占比
+        # Calculate cumulative sales proportion
         total_sales = sum(v.estimated_monthly_sales for v in variants)
         cumulative = 0
         pareto_cutoff = 0
@@ -923,17 +923,17 @@ class LinkPortfolioAnalyzer:
         pareto_variants = variants_sorted[:pareto_cutoff]
         tail_variants = variants_sorted[pareto_cutoff:]
         
-        # 组合级指标
+        # Portfolio level indicators
         total_revenue = sum(v.estimated_monthly_revenue for v in variants)
         total_profit = sum(v.monthly_total_profit for v in variants)
         blended_margin = (total_profit / total_revenue * 100) if total_revenue > 0 else 0
         
-        # 风险识别
+        # Risk identification
         high_ad_dep = [v.asin for v in variants if v.financials.ad_order_pct > 0.6]
         loss_variants = [v.asin for v in variants if v.blended_margin_pct < 0]
         high_return = [v.asin for v in variants if v.metrics.return_rate > 0.12]
         
-        # 整体决策
+        # overall decision making
         overall_decision = self._make_portfolio_decision(
             variants, total_profit, blended_margin
         )
@@ -959,19 +959,19 @@ class LinkPortfolioAnalyzer:
         total_profit: float,
         blended_margin: float
     ) -> ActuaryDecision:
-        """做出组合级决策"""
+        """Make portfolio-level decisions"""
         
         risk_factors = []
         opportunity_factors = []
         
-        # 组合风险评估
+        # Portfolio Risk Assessment
         loss_count = sum(1 for v in variants if v.blended_margin_pct < 0)
         if loss_count > 0:
-            risk_factors.append(f"{loss_count}个亏损变体")
+            risk_factors.append(f"{loss_count}loss variant")
         
         high_ad_count = sum(1 for v in variants if v.financials.ad_order_pct > 0.6)
         if high_ad_count > len(variants) / 2:
-            risk_factors.append("多数变体高广告依赖")
+            risk_factors.append("Most variants are highly ad dependent")
         
         avg_confidence = np.mean([v.decision.confidence for v in variants])
         
@@ -984,9 +984,9 @@ class LinkPortfolioAnalyzer:
         else:
             decision = "proceed"
             confidence = min(90, avg_confidence + 10)
-            opportunity_factors.append(f"健康利润率: {blended_margin:.1f}%")
+            opportunity_factors.append(f"healthy profit margins: {blended_margin:.1f}%")
         
-        # 计算组合ROI
+        # Calculate portfolio ROI
         total_cogs = sum(v.financials.cogs * v.estimated_monthly_sales for v in variants)
         roi = (total_profit / total_cogs * 100) if total_cogs > 0 else 0
         
@@ -995,7 +995,7 @@ class LinkPortfolioAnalyzer:
             confidence=confidence,
             expected_monthly_profit=total_profit,
             expected_roi_pct=roi,
-            payback_period_months=3.0,  # 简化计算
+            payback_period_months=3.0,  # Simplify calculations
             risk_factors=risk_factors,
             opportunity_factors=opportunity_factors,
             data_quality_score=avg_confidence
@@ -1003,11 +1003,11 @@ class LinkPortfolioAnalyzer:
 
 
 # ============================================================================
-# HTML报告生成器
+# HTML report generator
 # ============================================================================
 
 class FinalReportGenerator:
-    """最终版HTML报告生成器"""
+    """Final version of HTML report generator"""
     
     def __init__(self):
         self.template = self._create_template()
@@ -1017,7 +1017,7 @@ class FinalReportGenerator:
         analysis: LinkPortfolioAnalysis,
         output_path: str
     ) -> str:
-        """生成HTML报告"""
+        """Generate HTML report"""
         
         html = self._render_html(analysis)
         
@@ -1027,30 +1027,30 @@ class FinalReportGenerator:
         return output_path
     
     def _render_html(self, analysis: LinkPortfolioAnalysis) -> str:
-        """渲染HTML"""
+        """Render HTML"""
         
-        # 决策颜色
+        # decision color
         decision_colors = {
             'proceed': '#22c55e',
             'caution': '#f59e0b', 
             'avoid': '#ef4444'
         }
         decision_text = {
-            'proceed': '✅ 建议进行',
-            'caution': '⚠️ 谨慎考虑',
-            'avoid': '❌ 建议避免'
+            'proceed': '✅ Recommended',
+            'caution': '⚠️ Consider carefully',
+            'avoid': '❌ Recommended to avoid'
         }
         
-        # 生成变体行
+        # Generate variant rows
         variant_rows = self._generate_variant_rows(analysis.variants)
         
-        # 生成指标卡片
+        # Generate indicator cards
         metrics_cards = self._generate_metrics_cards(analysis)
         
-        # 生成决策依据
+        # Generate decision basis
         decision_basis = self._generate_decision_basis(analysis)
         
-        # 生成163指标详情
+        # Generate 163 indicator details
         metrics_163_section = self._generate_163_metrics_section(analysis.variants)
         
         html = f'''<!DOCTYPE html>
@@ -1058,7 +1058,7 @@ class FinalReportGenerator:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亚马逊运营精算师报告 - {analysis.parent_asin}</title>
+    <title>Amazon Operations Actuary Report - {analysis.parent_asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -1363,28 +1363,28 @@ class FinalReportGenerator:
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                 <div>
-                    <span class="header-badge">🏆 精算师级分析</span>
-                    <span class="header-badge">📊 163指标完整版</span>
-                    <span class="header-badge">✅ 真实COGS</span>
-                    <span class="header-badge">🎯 TACOS模型</span>
+                    <span class="header-badge">🏆 Actuary-level analysis</span>
+                    <span class="header-badge">📊 Full version of 163 indicators</span>
+                    <span class="header-badge">✅ Real COGS</span>
+                    <span class="header-badge">🎯 TACOS model</span>
                 </div>
                 <span style="opacity: 0.8; font-size: 0.95em;">{datetime.now().strftime('%Y-%m-%d')}</span>
             </div>
-            <h1>亚马逊链接运营精算师报告</h1>
+            <h1>Amazon Link Operations Actuary Report</h1>
             <div style="font-size: 1.2em; opacity: 0.95;">
-                父ASIN: <strong>{analysis.parent_asin}</strong> | 
-                变体数: <strong>{len(analysis.variants)}</strong> | 
-                数据完整度: <strong>{np.mean([v.data_completeness_pct for v in analysis.variants]):.0f}%</strong>
+                Parent ASIN: <strong>{analysis.parent_asin}</strong> | 
+                number of variants: <strong>{len(analysis.variants)}</strong> | 
+                Data integrity: <strong>{np.mean([v.data_completeness_pct for v in analysis.variants]):.0f}%</strong>
             </div>
         </div>
         
         <!-- Executive Summary -->
         <div class="exec-summary">
-            <h2 style="font-size: 1.8em; margin-bottom: 10px;">💼 执行摘要与投资决策</h2>
+            <h2 style="font-size: 1.8em; margin-bottom: 10px;">💼 Executive Summary and Investment Decisions</h2>
             <div class="verdict">{decision_text[analysis.overall_decision.decision]}</div>
             <p style="font-size: 1.2em; margin-bottom: 40px;">
-                置信度: {analysis.overall_decision.confidence:.0f}% | 
-                数据支撑决策
+                Confidence: {analysis.overall_decision.confidence:.0f}% | 
+                Data supports decision-making
             </p>
             
             {metrics_cards}
@@ -1392,50 +1392,50 @@ class FinalReportGenerator:
         
         <!-- Decision Basis -->
         <div class="card">
-            <h2 class="card-title">📊 决策依据 (基于数据分析)</h2>
+            <h2 class="card-title">📊 Basis for decision-making (Based on data analysis)</h2>
             {decision_basis}
         </div>
         
         <!-- Organic vs Ad Analysis -->
         <div class="card">
-            <h2 class="card-title">🌿🎯 自然订单 vs 广告订单对比</h2>
+            <h2 class="card-title">🌿🎯 Organic order vs insertion order comparison</h2>
             {self._generate_order_comparison(analysis)}
         </div>
         
         <!-- Pareto Analysis -->
         <div class="card">
-            <h2 class="card-title">📈 帕累托分析 (80/20法则)</h2>
+            <h2 class="card-title">📈 Pareto analysis (80/Rule of 20)</h2>
             {self._generate_pareto_section(analysis)}
         </div>
         
         <!-- Variant Details Table -->
         <div class="card">
-            <h2 class="card-title">📋 全变体详细指标表</h2>
+            <h2 class="card-title">📋 Full variant detailed indicator table</h2>
             
             <div class="legend">
-                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>🔥 Top变体</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>📊 帕累托变体</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div>⚠️ 高广告依赖</div>
-                <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>🔴 亏损变体</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>🔥 Top Variations</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>📊 Pareto variant</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div>⚠️ High advertising dependence</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>🔴 Loss variant</div>
             </div>
             
             <div class="variant-section">
                 <table class="variant-table">
                     <thead>
                         <tr>
-                            <th>排名</th>
+                            <th>Ranking</th>
                             <th>ASIN</th>
                             <th>BSR</th>
-                            <th>价格</th>
-                            <th>月销量</th>
-                            <th>销售额</th>
-                            <th>订单来源</th>
+                            <th>price</th>
+                            <th>monthly sales</th>
+                            <th>sales</th>
+                            <th>Order source</th>
                             <th>COGS</th>
-                            <th>运营费</th>
-                            <th>广告费</th>
-                            <th>混合利润率</th>
-                            <th>月净利润</th>
-                            <th>决策</th>
+                            <th>operating expenses</th>
+                            <th>Advertising fees</th>
+                            <th>mixed profit margin</th>
+                            <th>monthly net profit</th>
+                            <th>decision making</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1447,48 +1447,48 @@ class FinalReportGenerator:
         
         <!-- 163 Metrics Detail -->
         <div class="card">
-            <h2 class="card-title">🔍 163个Keepa指标详情</h2>
+            <h2 class="card-title">🔍 163 Keepa indicator details</h2>
             <p style="opacity: 0.8; margin-bottom: 20px;">
-                每个ASIN的完整指标数据，所有决策均基于以下指标计算得出
+                Complete metric data for each ASIN, all decisions are calculated based on the following metrics
             </p>
             {metrics_163_section}
         </div>
         
         <!-- Risk Assessment -->
         <div class="card">
-            <h2 class="card-title">⚠️ 风险评估</h2>
+            <h2 class="card-title">⚠️Risk Assessment</h2>
             {self._generate_risk_section(analysis)}
         </div>
         
         <!-- Action Plan -->
         <div class="card">
-            <h2 class="card-title">🎯 行动计划</h2>
+            <h2 class="card-title">🎯 Action Plan</h2>
             {self._generate_action_plan(analysis)}
         </div>
         
         <!-- Data Source Note -->
         <div class="card" style="background: rgba(251, 191, 36, 0.05); border: 2px solid rgba(251, 191, 36, 0.3);">
-            <h2 class="card-title" style="color: #fbbf24;">📊 数据来源与方法论</h2>
+            <h2 class="card-title" style="color: #fbbf24;">📊 Data sources and methodology</h2>
             <div style="line-height: 2;">
-                <p><strong>Keepa 163指标:</strong> 完整采集Product Viewer CSV格式所有字段</p>
-                <p><strong>销量估算:</strong> 基于BSR历史数据的回归模型</p>
-                <p><strong>COGS数据:</strong> <span style="color: #fbbf24; font-weight: 600;">用户提供真实数据</span>，包含采购价、头程运费、关税</p>
-                <p><strong>订单来源:</strong> <span style="color: #fbbf24; font-weight: 600;">用户提供真实数据</span>，来自亚马逊广告后台报表</p>
-                <p><strong>FBA费用:</strong> 基于包装规格(长×宽×高×重量)计算</p>
-                <p><strong>退货率:</strong> 基于类目历史数据的统计模型</p>
-                <p><strong>广告成本:</strong> TACOS (Total ACOS) 15%，即广告总花费占整体销售额的15%</p>
-                <p><strong>决策模型:</strong> 基于利润率、广告依赖度、退货率、评分、竞争度等多维度加权</p>
+                <p><strong>Keepa 163 indicator:</strong> Complete collection of all fields in Product Viewer CSV format</p>
+                <p><strong>sales estimate:</strong> Regression model based on BSR historical data</p>
+                <p><strong>COGS data:</strong> <span style="color: #fbbf24; font-weight: 600;">Users provide real data</span>, including purchase price, first-way freight and tariffs</p>
+                <p><strong>Order source:</strong> <span style="color: #fbbf24; font-weight: 600;">Users provide real data</span>, from Amazon Advertising backend report</p>
+                <p><strong>FBA fees:</strong> Based on packaging specifications(Length×width×height×weight)Calculate</p>
+                <p><strong>return rate:</strong> Statistical model based on category historical data</p>
+                <p><strong>advertising cost:</strong> TACOS (Total ACOS) 15%, that is, the total advertising expenditure accounts for 15% of the overall sales%</p>
+                <p><strong>decision model:</strong> Weighted based on multiple dimensions such as profit margin, advertising dependence, return rate, rating, competition, etc.</p>
             </div>
         </div>
         
         <!-- Footer -->
         <div class="footer">
             <p style="font-size: 1.1em; margin-bottom: 15px;">
-                基于163个Keepa指标 + 真实COGS + TACOS模型 | 数据驱动决策
+                Based on 163 Keepa indicators + Real COGS + TACOS model | data driven decision making
             </p>
             <p style="opacity: 0.7;">
-                © 2026 亚马逊运营精算师系统 v3.0 Final Edition<br>
-                报告仅供参考，实际盈利受市场波动、竞争变化等因素影响
+                © 2026 Amazon Operations Actuary System v3.0 Final Edition<br>
+                The report is for reference only. Actual profits are affected by market fluctuations, competition changes and other factors.
             </p>
         </div>
     </div>
@@ -1498,10 +1498,10 @@ class FinalReportGenerator:
         return html
     
     def _generate_variant_rows(self, variants: List[VariantAnalysisResult]) -> str:
-        """生成变体表格行"""
+        """Generate variant table rows"""
         rows = []
         for i, v in enumerate(variants, 1):
-            # 行样式
+            # row style
             classes = []
             if i <= 3:
                 classes.append("row-top")
@@ -1514,7 +1514,7 @@ class FinalReportGenerator:
             
             class_str = " ".join(classes)
             
-            # 利润率颜色
+            # profit margin color
             if v.blended_margin_pct >= 25:
                 margin_class = "profit-excellent"
             elif v.blended_margin_pct >= 15:
@@ -1524,7 +1524,7 @@ class FinalReportGenerator:
             else:
                 margin_class = "profit-loss"
             
-            # 决策文本
+            # decision text
             decision_icons = {
                 'proceed': '✅',
                 'caution': '⚠️',
@@ -1562,9 +1562,9 @@ class FinalReportGenerator:
         return "".join(rows)
     
     def _generate_metrics_cards(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成指标卡片"""
+        """Generate indicator cards"""
         
-        # 计算有机vs广告占比
+        # Calculating organic vs ad ratio
         total_organic_sales = sum(
             v.estimated_monthly_sales * v.financials.organic_order_pct 
             for v in analysis.variants
@@ -1579,43 +1579,43 @@ class FinalReportGenerator:
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-value" style="color: #60a5fa;">{analysis.total_monthly_sales:,}</div>
-                    <div class="metric-label">预估月总销量</div>
-                    <div class="metric-sublabel">全变体合计</div>
+                    <div class="metric-label">Estimated total monthly sales</div>
+                    <div class="metric-sublabel">Total of all variants</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #a78bfa;">${analysis.total_monthly_revenue:,.0f}</div>
-                    <div class="metric-label">预估月销售额</div>
+                    <div class="metric-label">Estimated monthly sales</div>
                     <div class="metric-sublabel">Gross Revenue</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #4ade80;">${analysis.total_monthly_profit:,.0f}</div>
-                    <div class="metric-label">预估月净利润</div>
-                    <div class="metric-sublabel">扣除所有成本</div>
+                    <div class="metric-label">Estimated monthly net profit</div>
+                    <div class="metric-sublabel">deduct all costs</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: {'#4ade80' if analysis.blended_portfolio_margin_pct >= 20 else '#fbbf24' if analysis.blended_portfolio_margin_pct >= 10 else '#f87171'};">
                         {analysis.blended_portfolio_margin_pct:.1f}%
                     </div>
-                    <div class="metric-label">混合净利率</div>
-                    <div class="metric-sublabel">TACOS模型</div>
+                    <div class="metric-label">Mixed net profit margin</div>
+                    <div class="metric-sublabel">TACOS model</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #22c55e;">{organic_pct:.0f}%</div>
-                    <div class="metric-label">自然订单占比</div>
-                    <div class="metric-sublabel">无需广告费</div>
+                    <div class="metric-label">Proportion of natural orders</div>
+                    <div class="metric-sublabel">No advertising fee</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-value" style="color: #f59e0b;">{len(analysis.pareto_variants)}</div>
-                    <div class="metric-label">核心变体数</div>
-                    <div class="metric-sublabel">贡献80%销量</div>
+                    <div class="metric-label">Number of core variants</div>
+                    <div class="metric-sublabel">Contribute 80%Sales volume</div>
                 </div>
             </div>
         '''
     
     def _generate_decision_basis(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成决策依据"""
+        """Generate decision basis"""
         
-        # 正面因素
+        # Positive factors
         positive_factors = []
         negative_factors = []
         
@@ -1625,48 +1625,48 @@ class FinalReportGenerator:
             for factor in v.decision.risk_factors:
                 negative_factors.append(f"{v.asin}: {factor}")
         
-        # 添加组合级因素
+        # Add combination-level factors
         if analysis.blended_portfolio_margin_pct > 20:
-            positive_factors.insert(0, f"组合健康利润率: {analysis.blended_portfolio_margin_pct:.1f}%")
+            positive_factors.insert(0, f"Portfolio Health Profit Margin: {analysis.blended_portfolio_margin_pct:.1f}%")
         elif analysis.blended_portfolio_margin_pct < 15:
-            negative_factors.insert(0, f"组合低利润率: {analysis.blended_portfolio_margin_pct:.1f}%")
+            negative_factors.insert(0, f"Portfolio low profit margin: {analysis.blended_portfolio_margin_pct:.1f}%")
         
         if len(analysis.loss_making_variants) == 0:
-            positive_factors.append("无亏损变体")
+            positive_factors.append("No loss variant")
         else:
-            negative_factors.append(f"{len(analysis.loss_making_variants)}个亏损变体")
+            negative_factors.append(f"{len(analysis.loss_making_variants)}loss variant")
         
         positive_html = "".join([
             f'<div class="decision-item decision-positive">✓ {f}</div>' 
             for f in positive_factors[:8]
-        ]) if positive_factors else '<div class="decision-item decision-neutral">暂无显著正面因素</div>'
+        ]) if positive_factors else '<div class="decision-item decision-neutral">No significant positive factors yet</div>'
         
         negative_html = "".join([
             f'<div class="decision-item decision-negative">✗ {f}</div>' 
             for f in negative_factors[:8]
-        ]) if negative_factors else '<div class="decision-item decision-neutral">暂无显著风险因素</div>'
+        ]) if negative_factors else '<div class="decision-item decision-neutral">No significant risk factors yet</div>'
         
         return f'''
             <div class="decision-grid">
                 <div class="decision-card">
-                    <h4>🟢 支持决策 ({len(positive_factors)}个因素)</h4>
+                    <h4>🟢 Support decision-making ({len(positive_factors)}factors)</h4>
                     {positive_html}
                 </div>
                 <div class="decision-card">
-                    <h4>🔴 风险因素 ({len(negative_factors)}个因素)</h4>
+                    <h4>🔴Risk factors ({len(negative_factors)}factors)</h4>
                     {negative_html}
                 </div>
             </div>
             <div style="margin-top: 20px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px;">
-                <h4 style="color: #60a5fa; margin-bottom: 10px;">📝 数据支撑总结</h4>
-                <p>基于{len(analysis.variants)}个变体的163个Keepa指标分析，综合考虑了销售表现、价格趋势、竞争态势、评论质量、成本结构等维度。决策置信度为{analysis.overall_decision.confidence:.0f}%，预期月ROI为{analysis.overall_decision.expected_roi_pct:.1f}%。</p>
+                <h4 style="color: #60a5fa; margin-bottom: 10px;">📝 Summary of data support</h4>
+                <p>Based on{len(analysis.variants)}The analysis of 163 Keepa indicators for each variant takes into account sales performance, price trends, competitive situation, review quality, cost structure and other dimensions. The decision confidence is{analysis.overall_decision.confidence:.0f}%, the expected monthly ROI is{analysis.overall_decision.expected_roi_pct:.1f}%。</p>
             </div>
         '''
     
     def _generate_order_comparison(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成订单来源对比"""
+        """Generate order source comparison"""
         
-        # 计算整体有机vs广告数据
+        # Calculating Overall Organic vs Advertising Data
         organic_profit = sum(v.monthly_profit_organic for v in analysis.variants)
         ad_profit = sum(v.monthly_profit_ad for v in analysis.variants)
         
@@ -1694,63 +1694,63 @@ class FinalReportGenerator:
         return f'''
             <div class="comparison-grid">
                 <div class="comp-card comp-organic">
-                    <h3 style="font-size: 1.4em; color: #4ade80; margin-bottom: 25px;">🌿 自然订单</h3>
+                    <h3 style="font-size: 1.4em; color: #4ade80; margin-bottom: 25px;">🌿 Natural order</h3>
                     <div style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>订单占比</span>
+                            <span>Order proportion</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">{(total_organic_sales/analysis.total_monthly_sales*100) if analysis.total_monthly_sales > 0 else 0:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>月利润贡献</span>
+                            <span>Monthly profit contribution</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">${organic_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>平均利润率</span>
+                            <span>average profit margin</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #4ade80;">{organic_margin:.1f}%</span>
                         </div>
                     </div>
                     <p style="opacity: 0.9; line-height: 1.8;">
-                        自然订单无需支付广告费，利润率显著高于广告订单。
+                        There is no need to pay advertising fees for organic orders, and the profit margin is significantly higher than that of advertising orders.
                     </p>
                 </div>
                 
                 <div class="comp-card comp-ad">
-                    <h3 style="font-size: 1.4em; color: #fbbf24; margin-bottom: 25px;">🎯 广告订单</h3>
+                    <h3 style="font-size: 1.4em; color: #fbbf24; margin-bottom: 25px;">🎯 Insertion Order</h3>
                     <div style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>订单占比</span>
+                            <span>Order proportion</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: #fbbf24;">{(total_ad_sales/analysis.total_monthly_sales*100) if analysis.total_monthly_sales > 0 else 0:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>月利润贡献</span>
+                            <span>Monthly profit contribution</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: {'#f87171' if ad_profit < 0 else '#fbbf24'};">${ad_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>平均利润率</span>
+                            <span>average profit margin</span>
                             <span style="font-size: 1.3em; font-weight: 700; color: {'#f87171' if ad_margin < 0 else '#fbbf24'};">{ad_margin:.1f}%</span>
                         </div>
                     </div>
                     <p style="opacity: 0.9; line-height: 1.8;">
-                        广告订单需要分摊广告费(TACOS 15%)，利润率较低。
-                        {"⚠️ 当前广告订单亏损，需优化TACOS。" if ad_profit < 0 else ""}
+                        Insertion orders need to allocate advertising costs(TACOS 15%), the profit margin is lower.
+                        {"⚠️ The current advertising order is losing money and TACOS needs to be optimized." if ad_profit < 0 else ""}
                     </p>
                 </div>
             </div>
             
             <div class="insight-box">
-                <h4>💡 订单来源洞察</h4>
+                <h4>💡 Order source insights</h4>
                 <p>
-                    自然订单利润率 ({organic_margin:.1f}%) 
-                    比广告订单 ({ad_margin:.1f}%) 高 
-                    <strong>{organic_margin - ad_margin:.1f}个百分点</strong>。
-                    每提升1%的自然订单占比，月利润可增加约 
+                    Natural order profit margin ({organic_margin:.1f}%) 
+                    Than insertion order ({ad_margin:.1f}%) high 
+                    <strong>{organic_margin - ad_margin:.1f}percentage points</strong>。
+                    Every increase of 1%proportion of natural orders, the monthly profit can be increased by approximately 
                     <strong>${abs(organic_profit - ad_profit) / analysis.total_monthly_sales * 100 if analysis.total_monthly_sales > 0 else 0:.0f}</strong>。
                 </p>
             </div>
         '''
     
     def _generate_pareto_section(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成帕累托分析部分"""
+        """Generate Pareto analysis section"""
         
         pareto_asins = [v.asin for v in analysis.pareto_variants]
         tail_count = len(analysis.tail_variants)
@@ -1759,38 +1759,38 @@ class FinalReportGenerator:
             <div class="metrics-grid" style="margin-bottom: 25px;">
                 <div class="metric-card" style="background: rgba(59, 130, 246, 0.15); border: 2px solid rgba(59, 130, 246, 0.3);">
                     <div class="metric-value" style="color: #60a5fa;">{len(analysis.pareto_variants)}</div>
-                    <div class="metric-label">核心变体</div>
-                    <div class="metric-sublabel">贡献80%销量</div>
+                    <div class="metric-label">core variant</div>
+                    <div class="metric-sublabel">Contribute 80%Sales volume</div>
                 </div>
                 <div class="metric-card" style="background: rgba(245, 158, 11, 0.15); border: 2px solid rgba(245, 158, 11, 0.3);">
                     <div class="metric-value" style="color: #fbbf24;">{len(analysis.high_ad_dependency)}</div>
-                    <div class="metric-label">高广告依赖</div>
-                    <div class="metric-sublabel">广告占比&gt;60%</div>
+                    <div class="metric-label">High advertising dependence</div>
+                    <div class="metric-sublabel">Advertising proportion&gt;60%</div>
                 </div>
                 <div class="metric-card" style="background: rgba(239, 68, 68, 0.15); border: 2px solid rgba(239, 68, 68, 0.3);">
                     <div class="metric-value" style="color: #f87171;">{len(analysis.loss_making_variants)}</div>
-                    <div class="metric-label">亏损变体</div>
-                    <div class="metric-sublabel">需立即处理</div>
+                    <div class="metric-label">loss variant</div>
+                    <div class="metric-sublabel">Need immediate attention</div>
                 </div>
                 <div class="metric-card" style="background: rgba(34, 197, 94, 0.15); border: 2px solid rgba(34, 197, 94, 0.3);">
                     <div class="metric-value" style="color: #4ade80;">{tail_count}</div>
-                    <div class="metric-label">长尾变体</div>
-                    <div class="metric-sublabel">贡献剩余20%</div>
+                    <div class="metric-label">long tail variant</div>
+                    <div class="metric-sublabel">Contribute the remaining 20%</div>
                 </div>
             </div>
             
             <p style="opacity: 0.9; line-height: 1.8;">
-                <strong>核心发现:</strong> 前{len(analysis.pareto_variants)}个变体({', '.join(pareto_asins[:3])}...) 
-                贡献了链接80%的销量。应优先保证这些变体的库存充足，并持续优化其自然排名。
-                {f"同时关注 {len(analysis.high_ad_dependency)}个高广告依赖变体，考虑通过站外推广提升自然占比。" if analysis.high_ad_dependency else ""}
+                <strong>Core findings:</strong> before{len(analysis.pareto_variants)}variants({', '.join(pareto_asins[:3])}...) 
+                Contributed links 80%of sales. Priority should be given to keeping these variants fully stocked and continually optimizing their organic rankings.
+                {f"Follow at the same time {len(analysis.high_ad_dependency)}If you have a high advertising dependency variant, consider increasing the organic proportion through off-site promotion." if analysis.high_ad_dependency else ""}
             </p>
         '''
     
     def _generate_163_metrics_section(self, variants: List[VariantAnalysisResult]) -> str:
-        """生成163指标详情部分"""
+        """Generate 163 indicator details section"""
         
         sections = []
-        for v in variants[:5]:  # 只显示前5个变体
+        for v in variants[:5]:  # Show only first 5 variations
             metrics = v.metrics
             
             section = f'''
@@ -1853,15 +1853,15 @@ class FinalReportGenerator:
         return "".join(sections)
     
     def _generate_risk_section(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成风险分析部分"""
+        """Generate risk analysis section"""
         
         risks = []
         
         if analysis.loss_making_variants:
             risks.append(f'''
                 <div class="alert-box">
-                    <h4>🔴 亏损变体 ({len(analysis.loss_making_variants)}个)</h4>
-                    <p>以下变体当前处于亏损状态，需立即优化或考虑停售：</p>
+                    <h4>🔴 Loss variant ({len(analysis.loss_making_variants)}a)</h4>
+                    <p>The following variants are currently losing money and need to be optimized immediately or considered discontinued:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(analysis.loss_making_variants)}</p>
                 </div>
             ''')
@@ -1869,8 +1869,8 @@ class FinalReportGenerator:
         if analysis.high_ad_dependency:
             risks.append(f'''
                 <div class="insight-box">
-                    <h4>⚠️ 高广告依赖 ({len(analysis.high_ad_dependency)}个)</h4>
-                    <p>以下变体广告订单占比超过60%，一旦广告成本上升或竞争加剧，利润将显著下滑：</p>
+                    <h4>⚠️ High advertising dependence ({len(analysis.high_ad_dependency)}a)</h4>
+                    <p>The following variant insertion orders account for more than 60%, once advertising costs rise or competition intensifies, profits will decline significantly:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(analysis.high_ad_dependency)}</p>
                 </div>
             ''')
@@ -1878,8 +1878,8 @@ class FinalReportGenerator:
         if analysis.high_return_variants:
             risks.append(f'''
                 <div class="insight-box">
-                    <h4>📦 高退货率 ({len(analysis.high_return_variants)}个)</h4>
-                    <p>以下变体退货率超过12%，影响整体利润：</p>
+                    <h4>📦 High return rate ({len(analysis.high_return_variants)}a)</h4>
+                    <p>The following variants have a return rate of more than 12%, affecting overall profits:</p>
                     <p style="margin-top: 10px; font-weight: 600;">ASIN: {', '.join(analysis.high_return_variants)}</p>
                 </div>
             ''')
@@ -1887,57 +1887,57 @@ class FinalReportGenerator:
         if not risks:
             risks.append('''
                 <div class="success-box">
-                    <h4>🌟 风险评估</h4>
-                    <p>当前链接整体风险可控，未发现显著风险因素。</p>
+                    <h4>🌟 Risk assessment</h4>
+                    <p>The overall risk of the current link is controllable, and no significant risk factors have been found.</p>
                 </div>
             ''')
         
         return "".join(risks)
     
     def _generate_action_plan(self, analysis: LinkPortfolioAnalysis) -> str:
-        """生成行动计划"""
+        """Generate action plan"""
         
         return f'''
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
                 <div style="background: rgba(239, 68, 68, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(239, 68, 68, 0.3);">
-                    <h4 style="color: #f87171; margin-bottom: 20px; font-size: 1.2em;">🚨 立即行动 (0-30天)</h4>
+                    <h4 style="color: #f87171; margin-bottom: 20px; font-size: 1.2em;">🚨 Act now (0-30 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>• 确保{len(analysis.pareto_variants)}个核心变体库存充足(60天+)</li>
-                        <li>• 优化高销量变体的主图和标题，提升自然转化</li>
-                        {f'<li>• 检查{len(analysis.high_ad_dependency)}个高广告依赖变体的TACOS</li>' if analysis.high_ad_dependency else ''}
-                        {f'<li>• 处理{len(analysis.loss_making_variants)}个亏损变体(提价或降本)</li>' if analysis.loss_making_variants else ''}
+                        <li>• Ensure{len(analysis.pareto_variants)}Full inventory of core variants(60 days+)</li>
+                        <li>• Optimize the main image and title of high-selling variants to increase natural conversions</li>
+                        {f'<li>• Check{len(analysis.high_ad_dependency)}TACOS for high ad-dependent variants</li>' if analysis.high_ad_dependency else ''}
+                        {f'<li>• processing{len(analysis.loss_making_variants)}loss variant(Increase price or reduce cost)</li>' if analysis.loss_making_variants else ''}
                     </ul>
                 </div>
                 
                 <div style="background: rgba(245, 158, 11, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(245, 158, 11, 0.3);">
-                    <h4 style="color: #fbbf24; margin-bottom: 20px; font-size: 1.2em;">📈 短期优化 (30-60天)</h4>
+                    <h4 style="color: #fbbf24; margin-bottom: 20px; font-size: 1.2em;">📈 Short-term optimization (30-60 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        {f'<li>• 针对高广告依赖变体，开展站外推广降低TACOS</li>' if analysis.high_ad_dependency else ''}
-                        <li>• 测试价格弹性，寻找最优定价点</li>
-                        <li>• 收集并分析退货原因，降低退货率</li>
-                        <li>• 优化广告投放策略，加大高利润变体预算</li>
+                        {f'<li>• Carry out off-site promotion to reduce TACOS for highly advertising-dependent variants</li>' if analysis.high_ad_dependency else ''}
+                        <li>• Test price elasticity and find the optimal pricing point</li>
+                        <li>• Collect and analyze reasons for returns to reduce return rates</li>
+                        <li>• Optimize advertising strategy and increase budget for high-profit variants</li>
                     </ul>
                 </div>
                 
                 <div style="background: rgba(34, 197, 94, 0.1); border-radius: 16px; padding: 25px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                    <h4 style="color: #4ade80; margin-bottom: 20px; font-size: 1.2em;">🚀 长期策略 (60-90天)</h4>
+                    <h4 style="color: #4ade80; margin-bottom: 20px; font-size: 1.2em;">🚀 Long-term strategy (60-90 days)</h4>
                     <ul style="list-style: none; padding: 0; line-height: 2;">
-                        <li>• 开发新颜色/尺寸变体，复制成功模式</li>
-                        <li>• 建立供应链议价能力，降低COGS 5-10%</li>
-                        <li>• 构建品牌护城河，提升自然流量占比至70%+</li>
-                        <li>• 建立月度利润监控体系，及时发现问题变体</li>
+                        <li>• Develop new colors/Size variations, copy success patterns</li>
+                        <li>• Build supply chain bargaining power and reduce COGS 5-10%</li>
+                        <li>• Build a brand moat and increase the proportion of natural traffic to 70%+</li>
+                        <li>• Establish a monthly profit monitoring system to detect problem variants in a timely manner</li>
                     </ul>
                 </div>
             </div>
         '''
     
     def _create_template(self) -> str:
-        """创建HTML模板 (已内联在_render_html中)"""
+        """Create HTML template (Already inline in_render_html in)"""
         return ""
 
 
 # ============================================================================
-# 主入口
+# main entrance
 # ============================================================================
 
 def generate_final_report(
@@ -1948,20 +1948,20 @@ def generate_final_report(
     tacos_rate: float = 0.15
 ) -> Tuple[str, LinkPortfolioAnalysis]:
     """
-    生成最终版精算师报告
+    Generate final actuary report
     
     Args:
-        parent_asin: 父ASIN
-        products: Keepa API返回的产品列表
-        financials_map: ASIN到财务数据的映射
-        output_path: 输出路径
-        tacos_rate: TACOS比例 (默认15%)
+        parent_asin: Parent ASIN
+        products: Product list returned by Keepa API
+        financials_map: ASIN to financial data mapping
+        output_path: Output path
+        tacos_rate: TACOS ratio (Default 15%)
         
     Returns:
-        (报告路径, 分析结果)
+        (Report path, Analyze results)
     """
     
-    # 转换财务数据
+    # Transform financial data
     financials = {}
     for asin, data in financials_map.items():
         financials[asin] = VariantFinancials(
@@ -1975,11 +1975,11 @@ def generate_final_report(
             other_cost=data.get('other_cost', 0)
         )
     
-    # 分析组合
+    # analysis portfolio
     analyzer = LinkPortfolioAnalyzer(tacos_rate)
     analysis = analyzer.analyze_portfolio(parent_asin, products, financials)
     
-    # 生成报告
+    # Generate report
     if output_path is None:
         output_path = f"cache/reports/{parent_asin}_ACTUARY_FINAL_v3.html"
     
@@ -1990,7 +1990,7 @@ def generate_final_report(
 
 
 # ============================================================================
-# 自动变体采集功能
+# Automatic variant collection function
 # ============================================================================
 
 def generate_actuary_report_auto(
@@ -2002,30 +2002,30 @@ def generate_actuary_report_auto(
     auto_collect_variants: bool = True
 ) -> Tuple[str, LinkPortfolioAnalysis, Dict]:
     """
-    生成精算师报告 (支持自动变体采集)
+    Generate actuary report (Support automatic variant collection)
     
-    这是推荐的入口函数！它会自动：
-    1. 从Keepa API获取指定ASIN的数据
-    2. 如果auto_collect_variants=True，自动发现并采集所有变体
-    3. 生成完整的精算师分析报告
+    This is the recommended entry function! It will automatically:
+    1. Get data of specified ASIN from Keepa API
+    2. If auto_collect_variants=True, automatically discovers and collects all variants
+    3. Generate a complete actuarial analysis report
     
     Args:
-        asin: 任意一个变体的ASIN (或父ASIN)
-        financials_map: ASIN到财务数据的映射 {asin: {'cogs': 9.5, 'organic_pct': 0.7, 'ad_pct': 0.3}}
-                       如果不提供，会使用默认COGS=0和平均订单来源比例
-        api_key: Keepa API Key，如果不提供则从环境变量KEEPA_KEY获取
-        output_path: 报告输出路径
-        tacos_rate: TACOS比例 (默认15%)
-        auto_collect_variants: 是否自动采集变体数据
+        asin: Any variant of the ASIN (or parent ASIN)
+        financials_map: ASIN to financial data mapping {asin: {'cogs': 9.5, 'organic_pct': 0.7, 'ad_pct': 0.3}}
+                       If not provided, the default COGS will be used=0 and average order source ratio
+        api_key: Keepa API Key, if not provided then from the environment variable KEEPA_KEY acquisition
+        output_path: Report output path
+        tacos_rate: TACOS ratio (Default 15%)
+        auto_collect_variants: Whether to automatically collect variant data
         
     Returns:
-        (报告路径, 分析结果, 变体信息)
+        (Report path, Analyze results, Variant information)
         
     Example:
-        >>> # 最简单用法：只输入一个ASIN，自动采集所有变体
+        >>> # The simplest usage: just enter one ASIN and automatically collect all variants
         >>> report_path, analysis, info = generate_actuary_report_auto("B0F6B5R47Q")
         >>> 
-        >>> # 提供真实COGS数据
+        >>> # Provide real COGS data
         >>> financials = {
         ...     'B0F6B5R47Q': {'cogs': 9.50, 'organic_pct': 0.70, 'ad_pct': 0.30},
         ...     'B0F6B5R47R': {'cogs': 9.50, 'organic_pct': 0.55, 'ad_pct': 0.45},
@@ -2037,68 +2037,68 @@ def generate_actuary_report_auto(
     """
     import os
     
-    # 获取API Key
+    # Get API Key
     api_key = api_key or os.getenv("KEEPA_KEY", "")
     if not api_key:
-        raise ValueError("需要提供Keepa API Key或设置KEEPA_KEY环境变量")
+        raise ValueError("Need to provide Keepa API Key or set KEEPA_KEY environment variable")
     
-    # 导入变体采集器
+    # Import variant collector
     from .variant_auto_collector import VariantAutoCollector
     
     print("=" * 80)
-    print(f"🚀 亚马逊运营精算师 - 自动变体采集模式")
+    print(f"🚀Amazon Operations Actuary - Automatic variant acquisition mode")
     print("=" * 80)
     
-    # 第1步: 采集变体数据
-    print(f"\n📦 步骤1: 采集ASIN {asin} 及其变体数据...")
+    # Step 1: Collect variant data
+    print(f"\n📦 Step 1: Collect ASIN {asin} and its variant data...")
     collector = VariantAutoCollector(api_key)
     products, parent_info = collector.collect_variants(asin)
     
-    print(f"\n✅ 采集完成!")
-    print(f"   父ASIN: {parent_info['parent_asin']}")
-    print(f"   变体数量: {parent_info['total_variations']}")
-    print(f"   品牌: {parent_info.get('brand', 'N/A')}")
-    print(f"   类目: {parent_info.get('category', 'N/A')}")
+    print(f"\n✅ Collection completed!")
+    print(f"   Parent ASIN: {parent_info['parent_asin']}")
+    print(f"   Number of variants: {parent_info['total_variations']}")
+    print(f"   brand: {parent_info.get('brand', 'N/A')}")
+    print(f"   Category: {parent_info.get('category', 'N/A')}")
     
-    # 打印变体摘要
+    # Print variant summary
     print(collector.format_variants_summary(products))
     
-    # 第2步: 准备财务数据
-    print(f"\n💰 步骤2: 准备财务数据...")
+    # Step 2: Prepare financial data
+    print(f"\n💰 Step 2: Prepare financial data...")
     
-    # 如果没有提供财务数据，使用默认值并提示用户
+    # If no financial data is provided, use default values and prompt the user
     if financials_map is None:
-        print("   ⚠️ 未提供COGS数据，使用默认值(成本=0，需手动更新)")
+        print("   ⚠️ COGS data is not provided, use default value(cost=0, need to update manually)")
         financials_map = {}
         for p in products:
             asin_code = p.get('asin', '')
             attrs = collector.get_variation_attributes(p)
             color = attrs.get('color', 'Unknown')
             
-            # 使用默认值
+            # Use default value
             financials_map[asin_code] = {
-                'cogs': 0.0,  # 用户需要更新
-                'organic_pct': 0.60,  # 默认值
+                'cogs': 0.0,  # User needs to update
+                'organic_pct': 0.60,  # Default value
                 'ad_pct': 0.40,
-                'note': f'请更新{color}的真实COGS和订单来源数据'
+                'note': f'please update{color}Real COGS and order source data'
             }
     
-    # 检查是否所有变体都有财务数据
+    # Check if all variants have financial data
     for p in products:
         asin_code = p.get('asin', '')
         if asin_code not in financials_map:
-            print(f"   ⚠️ ASIN {asin_code} 没有财务数据，使用默认值")
+            print(f"   ⚠️ ASIN {asin_code} No financial data, use default values")
             attrs = collector.get_variation_attributes(p)
             color = attrs.get('color', 'Unknown')
             financials_map[asin_code] = {
                 'cogs': 0.0,
                 'organic_pct': 0.60,
                 'ad_pct': 0.40,
-                'note': f'请更新{color}的真实COGS'
+                'note': f'please update{color}The real COGS'
             }
     
-    # 第3步: 生成报告
-    print(f"\n📊 步骤3: 生成精算师分析报告...")
+    # Step 3: Generate report
+    print(f"\n📊 Step 3: Generate actuarial analysis report...")
     
     parent_asin = parent_info['parent_asin']
     report_path, analysis = generate_final_report(
@@ -2109,38 +2109,38 @@ def generate_actuary_report_auto(
         tacos_rate=tacos_rate
     )
     
-    # 生成交互式All-in-One报告
+    # Generate interactive All-in-One report
     try:
         from allinone_interactive_report import generate_allinone_report
         allinone_path = generate_allinone_report(parent_asin, products, 
             {'variants': analysis.variants})
-        print(f"\n   🧮 All-in-One交互式报告: {allinone_path}")
-        print(f"      └─ 只需填入采购成本(RMB)，自动计算完整利润分析")
+        print(f"\n   🧮 All-in-Oneinteractive report: {allinone_path}")
+        print(f"      └─ Just fill in the purchase cost(RMB), automatically calculates complete profit analysis")
     except Exception as e:
-        print(f"\n   ⚠️ 交互式报告生成失败: {e}")
+        print(f"\n ⚠️ Interactive report generation failed: {e}")
     
-    print(f"\n✅ 报告生成完成!")
-    print(f"   主报告: {report_path}")
-    print(f"   整体决策: {analysis.overall_decision.decision.upper()}")
-    print(f"   置信度: {analysis.overall_decision.confidence}%")
-    print(f"   预期月利润: ${analysis.total_monthly_profit:,.2f}")
+    print(f"\n✅ Report generation completed!")
+    print(f"   main report: {report_path}")
+    print(f"   overall decision making: {analysis.overall_decision.decision.upper()}")
+    print(f"   Confidence: {analysis.overall_decision.confidence}%")
+    print(f"   Expected monthly profit: ${analysis.total_monthly_profit:,.2f}")
     
     return report_path, analysis, parent_info
 
 
-# 便捷别名
+# Convenience alias
 auto_analyze = generate_actuary_report_auto
 
 
 # ============================================================================
-# 向后兼容
+# backwards compatible
 # ============================================================================
 
 if __name__ == "__main__":
     print("Amazon Actuary System v3.0 - Final Edition")
     print("=" * 60)
-    print("\n推荐函数:")
-    print("  1. generate_actuary_report_auto(asin) - 自动采集变体并分析")
-    print("  2. generate_final_report(...) - 使用已有数据生成报告")
-    print("\n示例:")
+    print("\nrecommended function:")
+    print("  1. generate_actuary_report_auto(asin) - Automatically collect variants and analyze them")
+    print("  2. generate_final_report(...) - Generate reports using existing data")
+    print("\nExample:")
     print('  report, analysis, info = generate_actuary_report_auto("B0F6B5R47Q")')

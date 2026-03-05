@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-标准流程: 基于ASIN生成完整All-in-One HTML报告
+standard process: Generate complete All based on ASIN-in-One HTML report
 ================================================
-使用方法: python generate_report.py <ASIN>
+How to use: python generate_report.py <ASIN>
 
-示例: python generate_report.py B0F6B5R47Q
+Example: python generate_report.py B0F6B5R47Q
 """
 
 import sys
@@ -12,7 +12,7 @@ import os
 import argparse
 from pathlib import Path
 
-# 添加src到路径
+# Add src to path
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
 from dotenv import load_dotenv
@@ -20,47 +20,47 @@ load_dotenv()
 
 
 def print_banner():
-    """打印欢迎横幅"""
+    """Print welcome banner"""
     print("=" * 80)
-    print("🚀 Amz-Keepa-MCP v3.0 - All-in-One 报告生成器")
+    print("🚀 Amz-Keepa-MCP v3.0 - All-in-One report generator")
     print("=" * 80)
     print()
 
 
 def validate_environment():
-    """验证环境配置"""
+    """Verify environment configuration"""
     keepa_key = os.getenv("KEEPA_KEY")
     if not keepa_key:
-        print("❌ 错误: 未设置 KEEPA_KEY 环境变量")
-        print("   请在 .env 文件中添加: KEEPA_KEY=your_api_key")
-        print("   或在命令行设置: export KEEPA_KEY=your_api_key")
+        print("❌ Error: KEEPA not set_KEY environment variable")
+        print("   Please add in .env file: KEEPA_KEY=your_api_key")
+        print("   Or set it on the command line: export KEEPA_KEY=your_api_key")
         return False
     return True
 
 
 def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int = 8):
     """
-    生成完整的All-in-One HTML报告
+    Generate complete All-in-One HTML report
     
-    标准流程:
-    1. 从Keepa API获取产品数据
-    2. 自动发现所有变体
-    3. 提取真实FBA费用和佣金
-    4. 生成交互式HTML报告
+    standard process:
+    1. Get product data from Keepa API
+    2. Automatically discover all variants
+    3. Withdraw real FBA fees and commissions
+    4. Generate interactive HTML reports
     
     Args:
-        asin: 产品ASIN
-        target_moq: 目标采购量(用于1688采购参考)
-        max_variants: 最大采集变体数量(默认8个，节省API配额)
+        asin: Product ASIN
+        target_moq: Target purchase quantity(Used for 1688 purchasing reference)
+        max_variants: Maximum number of collected variants(Default is 8, saving API quota)
     """
     
     print(f"📦 ASIN: {asin}")
-    print(f"🎯 目标MOQ: {target_moq}")
-    print(f"🔢 最大变体数: {max_variants}")
+    print(f"🎯 Target MOQ: {target_moq}")
+    print(f"🔢 Maximum number of variations: {max_variants}")
     print()
     
-    # 步骤1: 采集产品数据
-    print("步骤 1/4: 从Keepa API采集产品数据...")
+    # Step 1: Collect product data
+    print("Step 1/4: Collect product data from Keepa API...")
     print("-" * 80)
     
     try:
@@ -72,26 +72,26 @@ def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int
         products, parent_info = collector.collect_variants(asin, max_variants=max_variants)
         parent_asin = parent_info['parent_asin']
         
-        print(f"   ✅ 采集完成")
-        print(f"   • 父ASIN: {parent_asin}")
-        print(f"   • 变体数量: {len(products)}")
-        print(f"   • 品牌: {parent_info.get('brand', 'N/A')}")
-        print(f"   • 类目: {parent_info.get('category', 'N/A')}")
+        print(f"   ✅ Collection completed")
+        print(f"   • Parent ASIN: {parent_asin}")
+        print(f"   • Number of variants: {len(products)}")
+        print(f"   • Brand: {parent_info.get('brand', 'N/A')}")
+        print(f"   • Category: {parent_info.get('category', 'N/A')}")
         
     except Exception as e:
-        print(f"   ❌ 采集失败: {e}")
+        print(f"   ❌ Collection failed: {e}")
         return None
     
-    # 步骤2: 提取费用数据
+    # Step 2: Extract cost data
     print()
-    print("步骤 2/4: 提取真实FBA费用和佣金...")
+    print("Step 2/4: Withdraw real FBA fees and commissions...")
     print("-" * 80)
     
     try:
         from keepa_fee_extractor import KeepaFeeExtractor
         
         total_fees = 0
-        for product in products[:3]:  # 显示前3个变体
+        for product in products[:3]:  # Show first 3 variations
             data = product.get('data', {})
             price = product.get('stats', {}).get('buyBoxPrice', 2999) / 100
             
@@ -99,25 +99,25 @@ def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int
             total_fees += fees['total_fees']
             
             asin_code = product.get('asin', '')
-            print(f"   {asin_code}: FBA ${fees['fba_fee']:.2f} + 佣金 {fees['referral_rate']*100:.0f}%")
+            print(f"   {asin_code}: FBA ${fees['fba_fee']:.2f} + Commission {fees['referral_rate']*100:.0f}%")
         
         if len(products) > 3:
-            print(f"   ... 还有 {len(products)-3} 个变体")
+            print(f"   ...and {len(products)-3} variants")
         
-        print(f"   ✅ 费用提取完成")
+        print(f"   ✅ Fee withdrawal completed")
         
     except Exception as e:
-        print(f"   ⚠️  费用提取警告: {e}")
+        print(f"   ⚠️ Fee withdrawal warning: {e}")
     
-    # 步骤3: 生成统一精算师报告 v2 (包含完整Keepa指标)
+    # Step 3: Generate Uniform Actuarial Report v2 (Contains full Keepa indicators)
     print()
-    print("步骤 3/3: 生成统一精算师报告 v2 (完整Keepa指标 + 精算师分析)...")
+    print("Step 3/3: Generate Uniform Actuarial Report v2 (Complete Keepa Indicators + Actuary analysis)...")
     print("-" * 80)
     
     try:
         from unified_report_v2 import generate_unified_report_v2
         
-        # 准备分析数据
+        # Prepare data for analysis
         analysis_data = {
             'parent_info': parent_info,
             'variants': products
@@ -129,18 +129,18 @@ def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int
             analysis_data=analysis_data
         )
         
-        print(f"   ✅ 统一报告生成完成")
-        print(f"   • 路径: {unified_path}")
-        print(f"   • 包含:")
-        print(f"     - 产品信息 (总销量/评论/评分等)")
-        print(f"     - 交互式成本计算器")
-        print(f"     - 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)")
-        print(f"     - 帕累托分析 (80/20)")
-        print(f"     - 风险评估")
-        print(f"     - 行动计划")
+        print(f"   ✅ Unified report generation completed")
+        print(f"   • path: {unified_path}")
+        print(f"   • Contains:")
+        print(f"     - product information (total sales/Comment/Rating etc.)")
+        print(f"     - Interactive cost calculator")
+        print(f"     - Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)")
+        print(f"     - Pareto analysis (80/20)")
+        print(f"     - risk assessment")
+        print(f"     - action plan")
         
     except Exception as e:
-        print(f"   ❌ 报告生成失败: {e}")
+        print(f"   ❌ Report generation failed: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -153,81 +153,81 @@ def generate_complete_report(asin: str, target_moq: int = 100, max_variants: int
 
 
 def print_results(results):
-    """打印结果摘要"""
+    """Print result summary"""
     if not results:
         return
     
     print()
     print("=" * 80)
-    print("✅ 统一精算师报告 v2 生成完成!")
+    print("✅ The unified actuary report v2 is generated!")
     print("=" * 80)
     print()
-    print(f"📊 分析摘要:")
-    print(f"   • 父ASIN: {results['parent_asin']}")
-    print(f"   • 变体数量: {results['variants_count']}")
+    print(f"📊 Analysis summary:")
+    print(f"   • Parent ASIN: {results['parent_asin']}")
+    print(f"   • Number of variants: {results['variants_count']}")
     print()
-    print("📁 生成的报告:")
+    print("📁 Generated reports:")
     print(f"   {results['unified_report']}")
     print()
-    print("📋 报告包含:")
-    print("   ✅ 产品信息 (品牌/类目/总销量/评论数/评分)")
-    print("   ✅ 交互式成本计算器 (填入1688采购价即计算)")
-    print("   ✅ 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)")
-    print("   ✅ 帕累托分析 (80/20核心变体识别)")
-    print("   ✅ 风险评估")
-    print("   ✅ 投资建议与行动计划")
+    print("📋 Report contains:")
+    print("   ✅ Product information (brand/Category/total sales/Number of comments/score)")
+    print("   ✅Interactive cost calculator (Fill in the 1688 purchase price and it will be calculated.)")
+    print("   ✅ Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)")
+    print("   ✅ Pareto analysis (80/20 core variant identification)")
+    print("   ✅Risk assessment")
+    print("   ✅ Investment advice and action plan")
     print()
-    print("📝 使用说明:")
-    print("   1. 打开报告: open " + results['unified_report'])
-    print("   2. 在'采购成本'输入框填入从1688找到的采购价")
-    print("   3. 查看完整变体分析表 (包含所有Keepa指标)")
-    print("   4. 向下滚动查看帕累托分析、风险评估、行动计划")
+    print("📝 Instructions for use:")
+    print("   1. Open the report: open " + results['unified_report'])
+    print("   2. in'Procurement cost'Fill in the input box with the purchase price found from 1688")
+    print("   3. View the complete variant analysis table (Contains all Keepa metrics)")
+    print("   4. Scroll down for Pareto Analysis, Risk Assessment, Action Plan")
     print()
-    print("💡 提示:")
-    print("   • 变体分析表包含: 销量、BSR、评分、评论数、退货率、FBA费、佣金")
-    print("   • 可以实时调整采购价，查看不同成本下的利润")
-    print("   • 所有数据基于Keepa API真实数据")
+    print("💡 Tips:")
+    print("   • Variant analysis table contains: Sales volume, BSR, ratings, number of reviews, return rate, FBA fees, commission")
+    print("   • You can adjust purchase prices in real time and view profits under different costs")
+    print("   • All data are based on Keepa API real data")
     print()
 
 
 def main():
-    """主函数"""
+    """main function"""
     parser = argparse.ArgumentParser(
-        description='基于ASIN生成完整All-in-One HTML报告',
+        description='Generate complete All based on ASIN-in-One HTML report',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
+Example:
   python generate_report.py B0F6B5R47Q
   python generate_report.py B0F6B5R47Q --moq 200
   python generate_report.py B0F6B5R47Q --max-variants 8
         """
     )
     
-    parser.add_argument('asin', help='Amazon产品ASIN')
+    parser.add_argument('asin', help='Amazon product ASIN')
     parser.add_argument('--moq', type=int, default=100, 
-                        help='目标采购量 (默认: 100)')
+                        help='Target purchase quantity (Default: 100)')
     parser.add_argument('--max-variants', type=int, default=8,
-                        help='最大采集变体数量 (默认: 8，0表示不限制)')
+                        help='Maximum number of collected variants (Default: 8, 0 means no limit)')
     
     args = parser.parse_args()
     
-    # 打印横幅
+    # Print banner
     print_banner()
     
-    # 验证环境
+    # Verification environment
     if not validate_environment():
         sys.exit(1)
     
-    # 生成报告
+    # Generate report
     max_variants = None if args.max_variants == 0 else args.max_variants
     results = generate_complete_report(args.asin, args.moq, max_variants)
     
-    # 打印结果
+    # Print results
     if results:
         print_results(results)
-        print("✨ 标准流程执行完毕!")
+        print("✨ The standard process is completed!")
     else:
-        print("\n❌ 报告生成失败，请检查错误信息")
+        print("\n❌ Report generation failed, please check the error message")
         sys.exit(1)
 
 

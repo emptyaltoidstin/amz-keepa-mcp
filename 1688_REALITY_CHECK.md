@@ -1,204 +1,204 @@
-# 1688 采购价格采集 - 真实状况报告
+# 1688 Purchase price collection - true condition report
 
-## 当前状态
+## Current status
 
-### ⚠️ 开源爬虫方案 (cn_1688_crawler.py)
+### ⚠️ Open source crawler solution (cn_1688_crawler.py)
 
-**技术可行性**: ✅ 可行，但存在限制
+**technical feasibility**: ✅ It works, but there are limitations
 
-**实测结果**:
-- 代码实现完整 ✅
-- 能正确提取Keepa图片URL ✅
-- 1688 API调用存在网络/SSL问题 ⚠️
-- 需要实际环境测试
+**Actual measurement results**:
+- The code is fully implemented ✅
+- Can correctly extract Keepa image URL ✅
+- 1688 API call exists on the network/SSL issue ⚠️
+- Need actual environment testing
 
-**主要问题**:
-1. **SSL连接问题**: 某些环境可能遇到SSL握手失败
-2. **IP限制**: 1688可能有IP访问频率限制
-3. **接口变更**: 1688内部API可能随时变更
-4. **图片跨域**: Amazon图片可能需要代理才能被1688识别
+**Main questions**:
+1. **SSL connection issues**: Some environments may experience SSL handshake failure
+2. **IP restrictions**: 1688 may have IP access frequency restrictions
+3. **Interface changes**: 1688 internal API may change at any time
+4. **Picture cross-domain**: Amazon images may require a proxy to be recognized by 1688
 
 ---
 
-## 推荐方案对比
+## Comparison of recommended solutions
 
-| 方案 | 成功率 | 成本 | 实施难度 | 推荐度 |
+| plan | success rate | cost | Difficulty of implementation | Recommendation |
 |------|--------|------|----------|--------|
-| **手动输入** | 100% | 免费 | 低 | ⭐⭐⭐⭐⭐ |
-| **TMAPI** | 95%+ | ~¥0.1-0.5/次 | 低 | ⭐⭐⭐⭐ |
-| **开源爬虫** | 60-80% | 免费 | 中 | ⭐⭐⭐ |
-| **Oxylabs** | 95%+ | ~$0.02-0.1/次 | 低 | ⭐⭐⭐⭐ |
+| **Manual entry** | 100% | free | Low | ⭐⭐⭐⭐⭐ |
+| **TMAPI** | 95%+ | ~¥0.1-0.5/Second-rate | Low | ⭐⭐⭐⭐ |
+| **Open source crawler** | 60-80% | free | middle | ⭐⭐⭐ |
+| **Oxylabs** | 95%+ | ~$0.02-0.1/Second-rate | Low | ⭐⭐⭐⭐ |
 
 ---
 
-## 最实用的方案: 手动输入 + 自动计算
+## The most practical solution: Manual entry + Automatic calculation
 
-既然自动采集存在不确定性，推荐以下务实方案：
+Since there are uncertainties in automatic collection, the following pragmatic solutions are recommended:
 
-### 方案: 交互式报告 + 手动填入
+### plan: Interactive reporting + Fill in manually
 
 ```python
-# 1. 生成包含重量数据的交互式报告
+# 1. Generate interactive reports containing weight data
 from allinone_interactive_report import generate_allinone_report
 
 report_path = generate_allinone_report(asin, products, analysis_data)
 ```
 
 ```html
-<!-- 生成的HTML报告包含 -->
-1. 自动计算头程运费 (基于Keepa重量数据)
-2. 只需手动填入采购成本 (RMB)
-3. 实时计算完整COGS和利润分析
+<!-- The generated HTML report contains -->
+1. Automatically calculate first-trip freight (Based on Keepa weight data)
+2. Just fill in the purchase cost manually (RMB)
+3. Real-time calculation of complete COGS and profit analysis
 ```
 
-### 操作流程
+### Operation process
 
-1. **从Keepa获取产品数据** (自动)
-   - 重量、尺寸、价格、销量等163个指标
+1. **Get product data from Keepa** (automatic)
+   - 163 indicators such as weight, size, price, sales volume, etc.
    
-2. **从1688手动搜索采购价** (手动，5-10分钟)
-   - 打开1688.com
-   - 使用"以图搜货"功能
-   - 找到合适供应商，记录价格
+2. **Manually search purchase price from 1688** (Manual, 5-10 minutes)
+   - Open 1688.com
+   - use"Search for goods by picture"Function
+   - Find the right supplier and record the price
 
-3. **填入交互式报告** (手动，1分钟)
-   - 打开HTML报告
-   - 在"采购成本"输入框填入价格
-   - 自动计算完整分析
+3. **Fill in an interactive report** (Manual, 1 minute)
+   - Open HTML report
+   - exist"Procurement cost"Fill in the price in the input box
+   - Automatic calculation of complete analysis
 
 ---
 
-## 1688手动搜索指南
+## 1688 Manual Search Guide
 
-### 步骤1: 获取产品图片
+### Step 1: Get product pictures
 
-从Keepa CSV导出文件复制`Image`列的第一个URL：
+Copy from Keepa CSV export file`Image`The first URL of the column:
 ```
 https://m.media-amazon.com/images/I/71h2vMaS4bL.jpg
 ```
 
-### 步骤2: 1688以图搜货
+### Step 2: 1688 Search for goods by picture
 
-1. 打开 https://www.1688.com
-2. 点击搜索框右侧的"相机"图标
-3. 粘贴Amazon图片URL或上传图片
-4. 查看搜索结果
+1. Open https://www.1688.com
+2. Click on the right side of the search box"camera"icon
+3. Paste the Amazon image URL or upload the image
+4. View search results
 
-### 步骤3: 选择供应商
+### Step 3: Select supplier
 
-建议关注以下指标：
-- **价格**: 对比3-5家供应商
-- **MOQ**: 是否符合采购计划
-- **诚信通年限**: 3年以上更可靠
-- **回头率**: >30%说明质量好
-- **标签**: "源头工厂"、"深度验厂"
+It is recommended to pay attention to the following indicators:
+- **price**: Contrast 3-5 suppliers
+- **MOQ**: Does it comply with the purchasing plan?
+- **Credit Pass Period**: More than 3 years more reliable
+- **return rate**: >30%Description of good quality
+- **Label**: "Source factory"、"In-depth factory inspection"
 
-### 步骤4: 填入报告
+### Step 4: Fill in the report
 
-打开生成的HTML报告，在"采购成本"输入框填入：
+Open the generated HTML report in"Procurement cost"Fill in the input box:
 ```
-采购成本: ¥35.50
+Procurement cost: ¥35.50
 ```
 
-系统自动计算：
+The system automatically calculates:
 ```
-头程运费: ¥5.40 (450g × 12RMB/kg)
-关税: ¥6.14 (15%)
+First leg freight: ¥5.40 (450g × 12RMB/kg)
+tariff: ¥6.14 (15%)
 COGS: $6.45 USD
 ```
 
 ---
 
-## 如果一定要自动采集
+## If automatic collection is necessary
 
-### 选项1: TMAPI (推荐)
+### Option 1: TMAPI (recommend)
 
 ```python
 from procurement_analyzer import SmartProcurementAnalyzer
 
-# 需要注册获取API Token
+# Need to register to obtain API Token
 # https://tmapi.top
 
 analyzer = SmartProcurementAnalyzer(tmapi_token="your_token")
 result = analyzer.analyze_product(keepa_product)
 ```
 
-**优点**: 稳定、有技术支持  
-**缺点**: 收费 (~$0.01-0.05/次)  
-**适用**: 批量分析、商业使用
+**advantage**: Stable and technically supported  
+**shortcoming**: TOLL (~$0.01-0.05/Second-rate)  
+**Applicable**: Batch analysis, commercial use
 
-### 选项2: 自建爬虫池
+### Option 2: Self-built reptile pool
 
-如果技术团队能力强，可以：
-1. 搭建代理IP池
-2. 实现请求频率控制
-3. 添加重试机制
-4. 监控接口变更
+If the technical team is strong, they can:
+1. Build a proxy IP pool
+2. Implement request frequency control
+3. Add retry mechanism
+4. Monitoring interface changes
 
-**投入**: 高 (开发+维护)  
-**产出**: 免费使用
-
----
-
-## 诚实建议
-
-### 对于个人用户/小规模运营
-
-👉 **推荐**: 手动搜索 + 交互式报告
-- 成本低 (免费)
-- 准确性高 (人工确认)
-- 时间投入合理 (每个产品5-10分钟)
-
-### 对于批量分析需求
-
-👉 **推荐**: TMAPI或Oxylabs
-- 稳定性高
-- 可自动化
-- 成本可控
-
-### 对于技术团队
-
-👉 **可以尝试**: 自建爬虫
-- 基于开源代码优化
-- 处理反爬机制
-- 长期ROI可能更好
+**invest**: high (develop+maintain)  
+**output**: free to use
 
 ---
 
-## 当前已实现的稳定功能
+## Honest advice
 
-✅ **Keepa数据自动采集**
-- 163个指标完整采集
-- 自动变体发现
-- 智能销量分配
+### For individual users/small scale operation
 
-✅ **自动成本计算**
-- 基于真实重量数据
-- 头程运费自动计算
-- COGS完整计算链
+👉 **recommend**: Manual search + Interactive reporting
+- low cost (free)
+- High accuracy (Manual confirmation)
+- Reasonable time investment (5 per product-10 minutes)
 
-✅ **交互式报告**
-- 只需填入采购成本
-- 实时利润分析
-- 多方案对比
+### For batch analysis needs
 
-✅ **TACOS模型**
-- 广告成本精确计算
-- 自然/广告订单分离
-- ROI准确估算
+👉 **recommend**: TMAPI or Oxylabs
+- High stability
+- Can be automated
+- Cost controllable
+
+### For the technical team
+
+👉 **can try**: Self-built crawler
+- Optimized based on open source code
+- Handle anti-crawling mechanism
+- Long term ROI could be better
 
 ---
 
-## 结论
+## Stable features currently implemented
 
-**开源1688爬虫**是一个技术可行的方案，但在实际生产环境中可能面临：
-- 网络/SSL问题
-- 反爬限制
-- 接口变更
+✅ **Keepa data automatic collection**
+- Complete collection of 163 indicators
+- Automatic variant discovery
+- Intelligent sales volume allocation
 
-**最务实的方案**是：
-1. 保持当前的自动数据采集 (Keepa)
-2. 手动填入采购价格 (1688搜索)
-3. 自动完成后续分析
+✅ **Automatic cost calculation**
+- Based on real weight data
+- Automatic calculation of first-haul freight
+- COGS complete calculation chain
 
-这样既保证了数据准确性，又控制了实施复杂度。
+✅ **Interactive reporting**
+- Just fill in the purchase cost
+- Real-time profit analysis
+- Comparison of multiple solutions
+
+✅ **TACOS model**
+- Accurate calculation of advertising costs
+- nature/Insertion order separation
+- Accurate ROI estimation
+
+---
+
+## in conclusion
+
+**Open source 1688 crawler**It is a technically feasible solution, but in actual production environment you may face:
+- network/SSL issues
+- Anti-crawling restrictions
+- Interface changes
+
+**The most pragmatic solution**yes:
+1. Maintain current automated data collection (Keepa)
+2. Manually fill in the purchase price (1688 searches)
+3. Automatically complete subsequent analysis
+
+This not only ensures data accuracy, but also controls implementation complexity.

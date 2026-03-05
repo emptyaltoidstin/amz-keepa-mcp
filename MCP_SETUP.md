@@ -1,31 +1,31 @@
-# Amz-Keepa-MCP 设置指南
+# Amz-Keepa-MCP Setup Guide
 
-## Claude Code 中使用
+## Used in Claude Code
 
-### 方式1: 项目内直接使用 (推荐)
+### Way 1: Used directly within the project (recommend)
 
-在 Claude Code 中进入项目目录，然后：
+Go to the project directory in Claude Code, then:
 
 ```bash
-# 在项目目录内启动 Claude Code
+# Start Claude Code in the project directory
 claude
 
-# 然后使用
-@amz-keepa 分析 ASIN B0F6B5R47Q
+# and then use
+@amz-keepa analysis ASIN B0F6B5R47Q
 ```
 
-### 方式2: 配置到 Claude Code 设置
+### Way 2: Configure to Claude Code settings
 
-编辑 Claude Code 配置文件：
+Edit the Claude Code configuration file:
 
 ```bash
-# 编辑配置文件
+# Edit configuration file
 claude config set mcpServers.amz-keepa.command "python3"
 claude config set mcpServers.amz-keepa.args '["server.py"]'
 claude config set mcpServers.amz-keepa.cwd "/Users/blobeats/Downloads/amz-keepa-mcp"
 ```
 
-或手动编辑 `~/.claude/settings.json`：
+or edit manually `~/.claude/settings.json`：
 
 ```json
 {
@@ -42,128 +42,128 @@ claude config set mcpServers.amz-keepa.cwd "/Users/blobeats/Downloads/amz-keepa-
 }
 ```
 
-### 方式3: 使用 MCP 配置文件
+### Way 3: Using MCP profiles
 
 ```bash
-# 启动时指定配置文件
+# Specify configuration file at startup
 claude --mcp-config .claude-mcp.json
 ```
 
-## 使用示例
+## Usage example
 
-### 1. 分析ASIN (标准流程)
+### 1. Analyze ASINs (standard process)
 
 ```
-@amz-keepa 分析 ASIN B0F6B5R47Q
+@amz-keepa analysis ASIN B0F6B5R47Q
 ```
 
-输出：
+Output:
 ```
-✅ 统一精算师报告生成完成!
+✅ The unified actuary report is generated!
 
 📦 ASIN: B0F6B5R47Q
-📊 变体数量: 9
+📊Number of variants: 9
 
-📁 报告路径:
+📁 Report path:
    cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
 
-📋 报告内容:
-   ✓ 产品信息 (品牌/类目/总销量/评论/评分)
-   ✓ 交互式成本计算器
-   ✓ 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)
-   ✓ 帕累托分析
-   ✓ 风险评估
-   ✓ 投资建议与行动计划
+📋 Report content:
+   ✓ Product information (brand/Category/total sales/Comment/score)
+   ✓ Interactive cost calculator
+   ✓ Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)
+   ✓ Pareto analysis
+   ✓ Risk assessment
+   ✓ Investment advice and action plan
 
-📝 使用方法:
-   1. 打开报告查看完整分析
-   2. 在"采购成本"输入框填入1688采购价
-   3. 系统自动计算完整利润分析
+📝 How to use:
+   1. Open the report to view the complete analysis
+   2. in"Procurement cost"Fill in the input box with the purchase price of 1688
+   3. The system automatically calculates complete profit analysis
 ```
 
-### 2. 带参数分析
+### 2. Analysis with parameters
 
 ```
-@amz-keepa 分析 ASIN B0F6B5R47Q，目标采购量 200
+@amz-keepa analyzes ASIN B0F6B5R47Q, target purchase quantity 200
 ```
 
-### 3. 快速查询产品信息
+### 3. Quickly query product information
 
 ```
-@amz-keepa 获取产品 B0F6B5R47Q 的基本信息
+@amz-keepa Get basic information about product B0F6B5R47Q
 ```
 
-### 4. 计算COGS
+### 4. Calculate COGS
 
 ```
-@amz-keepa 计算COGS，采购价35.5元，重量0.45kg
+@amz-keepa calculates COGS, purchase price is 35.5 yuan, weight is 0.45kg
 ```
 
-## 环境变量设置
+## Environment variable settings
 
-确保设置了 Keepa API Key：
+Make sure the Keepa API Key is set:
 
 ```bash
-# 在项目目录创建 .env 文件
+# Create an .env file in the project directory
 echo "KEEPA_KEY=your_api_key_here" > .env
 
-# 或在启动 claude 前设置
+# Or set before starting claude
 export KEEPA_KEY=your_api_key_here
 claude
 ```
 
-## 工具说明
+## Tool description
 
-| 工具 | 功能 | 示例 |
+| Tools | Function | Example |
 |------|------|------|
-| `analyze_asin` | 生成完整精算师报告 | `@amz-keepa 分析 ASIN B0F6B5R47Q` |
-| `get_product_info` | 快速查询产品信息 | `@amz-keepa 获取产品 B0F6B5R47Q 信息` |
-| `calculate_cogs` | 计算COGS成本 | `@amz-keepa 计算COGS，采购价35.5，重量0.45` |
+| `analyze_asin` | Generate full actuarial report | `@amz-keepa analysis ASIN B0F6B5R47Q` |
+| `get_product_info` | Quickly query product information | `@amz-keepa Get product B0F6B5R47Q information` |
+| `calculate_cogs` | Calculate COGS cost | `@amz-keepa calculates COGS, purchase price 35.5, weight 0.45` |
 
-## 故障排除
+## troubleshooting
 
-### 1. MCP 工具未显示
+### 1. MCP tool not displayed
 
-检查 server.py 是否有错误：
+Check server.py for errors:
 
 ```bash
 cd /Users/blobeats/Downloads/amz-keepa-mcp
 python3 server.py
 ```
 
-### 2. Keepa API Key 错误
+### 2. Keepa API Key error
 
-确认 .env 文件中 KEEPA_KEY 已设置：
+Confirm KEEPA in .env file_KEY is set:
 
 ```bash
 cat .env
 ```
 
-### 3. 依赖缺失
+### 3. Missing dependencies
 
-安装所需依赖：
+Install required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 文件结构
+## File structure
 
 ```
 amz-keepa-mcp/
-├── server.py              # MCP server 主文件
-├── .claude-mcp.json       # Claude Code MCP 配置
-├── mcp-config.json        # 通用 MCP 配置
-├── MCP_SETUP.md           # 本文件
+├── server.py              # MCP server main file
+├── .claude-mcp.json       # Claude Code MCP configuration
+├── mcp-config.json        # Generic MCP configuration
+├── MCP_SETUP.md           # this document
 └── src/
-    ├── unified_report_v2.py   # 报告生成器
+    ├── unified_report_v2.py   # report generator
     └── ...
 ```
 
-## 更新日志
+## Change log
 
 ### v3.0 (2026-02-16)
-- ✅ 新增 MCP server 支持
-- ✅ 支持 Claude Code 直接调用
-- ✅ 提供 3 个 MCP 工具
-- ✅ 统一报告包含完整 Keepa 指标
+- ✅ Added MCP server support
+- ✅Support Claude Code direct call
+- ✅ Provides 3 MCP tools
+- ✅ Unified reporting includes complete Keepa indicators

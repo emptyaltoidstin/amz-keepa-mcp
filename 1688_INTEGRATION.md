@@ -1,96 +1,96 @@
-# 1688 以图搜图采购价格集成
+# 1688 Integration of searching pictures and purchasing prices
 
-本系统支持通过1688 API自动获取采购价格，实现从Amazon产品图片直接搜索1688供应商报价。
+This system supports automatic acquisition of purchase prices through the 1688 API, allowing direct search for 1688 supplier quotes from Amazon product images.
 
-## 功能特性
+## Features
 
-✅ **以图搜图**: 使用Amazon产品图片在1688搜索相似商品  
-✅ **自动计算**: 根据重量自动计算头程运费  
-✅ **成本估算**: 自动计算完整COGS(含关税、汇率转换)  
-✅ **智能排序**: 综合考虑价格、匹配度、供应商等级  
-✅ **一键报告**: 自动生成包含采购价格的精算师报告  
+✅ **Search pictures by pictures**: Use Amazon product images to search for similar products on 1688  
+✅ **Automatic calculation**: Automatically calculate first-way freight based on weight  
+✅ **cost estimate**: Automatic calculation of complete COGS(Including tariffs and exchange rate conversion)  
+✅ **Smart sorting**: Comprehensive consideration of price, matching degree, and supplier level  
+✅ **One-click reporting**: Automatically generate actuarial reports including purchase prices  
 
-## 快速开始
+## quick start
 
-### 1. 获取TMAPI Token
+### 1. Obtain TMAPI Token
 
-访问 [TMAPI官网](https://tmapi.top) 注册并获取API Token。
+access [TMAPI official website](https://tmapi.top) Register and get API Token.
 
-### 2. 配置环境变量
+### 2. Configure environment variables
 
 ```bash
-# .env 文件
+# .env file
 TMAPI_TOKEN=your_tmapi_token_here
 KEEPA_KEY=your_keepa_key_here
 ```
 
-### 3. 运行分析
+### 3. Run the analysis
 
 ```python
 from src.procurement_analyzer import generate_auto_procurement_report
 
-# 一键生成带采购价格的完整报告
+# Generate a complete report with purchase prices in one click
 report_path, analyses = generate_auto_procurement_report('B0F6B5R47Q')
 ```
 
-## 详细用法
+## Detailed usage
 
-### 基础采购价格搜索
+### Basic purchase price search
 
 ```python
 from src.procurement_analyzer import SmartProcurementAnalyzer
 
-# 创建分析器
+# Create analyzer
 analyzer = SmartProcurementAnalyzer.from_env()
 
-# 分析单个产品
+# Analyze individual products
 result = analyzer.analyze_product(keepa_product, target_moq=100)
 
 if result.found:
-    print(f"采购价格: ¥{result.price_rmb}")
-    print(f"总COGS: ${result.total_cogs_usd}")
+    print(f"purchase price: ¥{result.price_rmb}")
+    print(f"Total COGS: ${result.total_cogs_usd}")
 ```
 
-### 批量分析
+### Batch analysis
 
 ```python
-# 分析整个变体组合
+# Analyze the entire variant portfolio
 analyses = analyzer.analyze_portfolio(products, target_moq=100)
 
-# 转换为财务数据
+# Convert to financial data
 financials_map = analyzer.to_financials_map(analyses)
 ```
 
-### 不使用API时
+### When not using API
 
-如果没有1688 API，可以使用交互式报告手动填入：
+If there is no 1688 API, you can fill it in manually using interactive reporting:
 
 ```python
-# 生成报告时会自动创建交互式版本
-# 打开 *_ALLINONE_INTERACTIVE.html
-# 在"采购成本"输入框填入价格即可自动计算
+# An interactive version is automatically created when a report is generated
+# Open *_ALLINONE_INTERACTIVE.html
+# exist"Procurement cost"Fill in the price in the input box and it will be automatically calculated.
 ```
 
-## API方案对比
+## Comparison of API solutions
 
-| 方案 | 优点 | 缺点 | 适用场景 |
+| plan | advantage | shortcoming | Applicable scenarios |
 |------|------|------|----------|
-| **TMAPI** | 简单快速 | 收费 (~$0.01-0.05/次) | 推荐方案 |
-| **1688官方** | 免费 | 需企业资质 | 有资质企业 |
-| **手动输入** | 准确 | 耗时 | 小规模使用 |
+| **TMAPI** | Simple and fast | TOLL (~$0.01-0.05/Second-rate) | Recommended plan |
+| **1688 official** | free | Requires enterprise qualifications | Qualified enterprises |
+| **Manual entry** | precise | time consuming | small scale use |
 
-## 成本计算公式
+## cost calculation formula
 
 ```
-总COGS (USD) = [采购价(RMB) + 头程运费(RMB)] × 1.15(关税) ÷ 汇率
+Total COGS (USD) = [purchase price(RMB) + First leg freight(RMB)] × 1.15(tariff) ÷ exchange rate
 
-其中:
-- 头程运费 = 重量(kg) × 12 RMB/kg
-- 汇率 = 7.2 RMB/USD (可配置)
-- 关税 = 15% (可配置)
+in:
+- First leg freight = weight(kg) × 12 RMB/kg
+- exchange rate = 7.2 RMB/USD (Configurable)
+- tariff = 15% (Configurable)
 ```
 
-## 数据结构
+## data structure
 
 ### ProcurementAnalysis
 
@@ -98,84 +98,84 @@ financials_map = analyzer.to_financials_map(analyses)
 {
     "asin": "B0F6B5R47Q",
     "found": True,
-    "price_rmb": 35.50,          # 采购价格(人民币)
-    "moq": 100,                   # 最小起订量
-    "supplier": "XX工厂",         # 供应商名称
-    "source_url": "https://...",  # 1688链接
-    "match_score": 0.85,          # 图片匹配度
-    "confidence": "high",         # 置信度
-    "shipping_cost_rmb": 4.80,    # 头程运费
-    "total_cogs_usd": 6.45        # 总COGS(美元)
+    "price_rmb": 35.50,          # purchase price(RMB)
+    "moq": 100,                   # MOQ
+    "supplier": "XX factory",         # Supplier name
+    "source_url": "https://...",  # 1688 link
+    "match_score": 0.85,          # Image matching
+    "confidence": "high",         # Confidence
+    "shipping_cost_rmb": 4.80,    # First leg freight
+    "total_cogs_usd": 6.45        # Total COGS(Dollar)
 }
 ```
 
-## 注意事项
+## Things to note
 
-⚠️ **图片限制**: 
-- 1688以图搜图主要支持阿里系平台图片
-- Amazon图片可能需要转换
+⚠️ **Image restrictions**: 
+- 1688’s image search mainly supports Alibaba platform images
+- Amazon images may need to be converted
 
-⚠️ **准确度**: 
-- 建议人工确认关键产品价格
-- 以图搜图可能返回相似但不完全相同的商品
+⚠️ **Accuracy**: 
+- It is recommended to manually confirm the price of key products
+- Searching for images may return similar but not identical products
 
-⚠️ **MOQ考量**: 
-- 注意MOQ是否适合您的采购量
-- 系统会标注MOQ过高的情况
+⚠️ **MOQ considerations**: 
+- Pay attention to whether the MOQ is suitable for your purchasing volume
+- The system will mark the case where the MOQ is too high.
 
-## 配置文件
+## Configuration file
 
 ```env
-# 必需
+# required
 KEEPA_KEY=your_keepa_api_key
 
-# 1688 API (推荐TMAPI)
+# 1688 API (Recommend TMAPI)
 TMAPI_TOKEN=your_tmapi_token
 
-# 可选 - 成本计算参数
+# Optional - Costing parameters
 SHIPPING_RATE=12          # RMB/kg
 EXCHANGE_RATE=7.2         # RMB/USD
 TARIFF_RATE=0.15          # 15%
 ```
 
-## 示例代码
+## Sample code
 
-见 `examples/1688_procurement_example.py`
+See `examples/1688_procurement_example.py`
 
 ```bash
 cd examples
 python 1688_procurement_example.py
 ```
 
-## 故障排除
+## troubleshooting
 
-### 找不到采购价格
+### Purchase price not found
 
-- 检查TMAPI_TOKEN是否正确设置
-- 确认产品图片是否可访问
-- 尝试调整target_moq参数
+- Check TMAPI_Is TOKEN set correctly?
+- Confirm if product images are accessible
+- Try adjusting the target_moq parameters
 
-### 价格不准确
+### Price is not accurate
 
-- 人工确认1688搜索结果
-- 考虑MOQ和供应商等级
-- 检查重量数据是否正确
+- Manually confirm 1688 search results
+- Consider MOQ and supplier level
+- Check if the weight data is correct
 
-### API调用失败
+### API call failed
 
-- 检查网络连接
-- 确认API Token余额
-- 查看TMAPI服务状态
+- Check network connection
+- Confirm API Token balance
+- Check TMAPI service status
 
-## 相关文件
+## Related documents
 
-- `src/cn_1688_api.py` - 1688 API客户端
-- `src/procurement_analyzer.py` - 智能采购分析器
-- `src/allinone_interactive_report.py` - 交互式报告
+- `src/cn_1688_api.py` - 1688 API client
+- `src/procurement_analyzer.py` - Smart Procurement Analyzer
+- `src/allinone_interactive_report.py` - Interactive reporting
 
-## 更新计划
+## Update plan
 
-- [ ] 支持1688官方API
-- [ ] 图片自动转换到阿里图床
-- [ ] 历史价格趋势分析
-- [ ] 多供应商比价功能
+- [ ] Support 1688 official API
+- [ ] Pictures are automatically converted to Alibaba Pictures
+- [ ] Historical price trend analysis
+- [ ] Multi-supplier price comparison function

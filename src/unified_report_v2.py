@@ -1,7 +1,7 @@
 """
-统一精算师报告生成器 v2
+Unified Actuarial Report Generator v2
 ======================
-包含完整的 Keepa 指标和精算师分析维度
+Contains complete Keepa indicators and actuarial analysis dimensions
 """
 
 import json
@@ -12,16 +12,16 @@ from dataclasses import asdict
 
 class UnifiedActuaryReportV2:
     """
-    统一精算师报告 v2 - 包含完整 Keepa 指标
+    Unified Actuarial Report v2 - Contains full Keepa indicators
     
-    报告结构:
-    1. 交互式成本计算器
-    2. 执行摘要 (核心指标)
-    3. 帕累托分析 (80/20)
-    4. 完整变体分析表 (含所有 Keepa 指标)
-    5. 风险评估
-    6. 投资建议
-    7. 行动计划
+    Report structure:
+    1. Interactive cost calculator
+    2. Executive summary (core indicators)
+    3. Pareto analysis (80/20)
+    4. Complete variant analysis table (Includes all Keepa indicators)
+    5. Risk assessment
+    6. Investment advice
+    7. Action Plan
     """
     
     def __init__(self):
@@ -31,17 +31,17 @@ class UnifiedActuaryReportV2:
         
     def generate(self, asin: str, products: List[Dict], 
                  analysis_data: Dict, output_path: str = None) -> str:
-        """生成统一报告"""
+        """Generate unified reports"""
         
         if output_path is None:
             output_path = f'cache/reports/{asin}_UNIFIED_ACTUARY.html'
         
-        # 准备完整数据
+        # Prepare complete data
         variants = self._prepare_full_variants(products)
         metrics_163 = self._collect_163_metrics(products)
         parent_info = analysis_data.get('parent_info', {})
         
-        # 生成HTML
+        # Generate HTML
         html = self._build_html(asin, variants, metrics_163, parent_info, analysis_data)
         
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -50,20 +50,20 @@ class UnifiedActuaryReportV2:
         return output_path
     
     def _prepare_full_variants(self, products: List[Dict]) -> List[Dict]:
-        """准备完整的变体数据，包含所有 Keepa 指标"""
+        """Prepare complete variant data including all Keepa metrics"""
         variants = []
         
         for product in products:
             asin = product.get('asin', '')
             
-            # 基础信息
+            # Basic information
             weight_g = product.get('packageWeight', 0) or product.get('itemWeight', 0) or 300
             
-            # 价格
+            # price
             stats = product.get('stats', {})
             price = stats.get('buyBoxPrice', 2999) / 100 if stats and 'buyBoxPrice' in stats else 29.99
             
-            # 销量
+            # Sales volume
             bought = product.get('boughtInPastMonth', 0)
             sales = bought[1] if isinstance(bought, list) and len(bought) > 1 else (bought if isinstance(bought, (int, float)) else 500)
             
@@ -71,20 +71,20 @@ class UnifiedActuaryReportV2:
             bsr_data = product.get('salesRank', [0, 999999])
             bsr = bsr_data[1] if isinstance(bsr_data, list) and len(bsr_data) > 1 else bsr_data
             
-            # 评论
+            # Comment
             reviews = product.get('reviews', [])
             review_count = len(reviews) if isinstance(reviews, list) else product.get('reviewCount', 0)
             rating = product.get('stars', 0) or product.get('rating', 0)
             
-            # 属性
+            # Properties
             attrs = product.get('attributes', [])
-            color = self._get_attr(attrs, 'Color') or '默认'
-            size = self._get_attr(attrs, 'Size') or '标准'
+            color = self._get_attr(attrs, 'Color') or 'Default'
+            size = self._get_attr(attrs, 'Size') or 'standard'
             
-            # 退货率估算
+            # Return rate estimate
             return_rate = self._estimate_return_rate(product)
             
-            # 费用
+            # cost
             from keepa_fee_extractor import KeepaFeeExtractor
             fees = KeepaFeeExtractor.extract_all_fees(product, price)
             
@@ -108,7 +108,7 @@ class UnifiedActuaryReportV2:
         return variants
     
     def _collect_163_metrics(self, products: List[Dict]) -> Dict:
-        """收集163指标摘要"""
+        """Collect 163 indicator summaries"""
         if not products:
             return {}
         
@@ -129,21 +129,21 @@ class UnifiedActuaryReportV2:
         }
     
     def _get_category(self, product: Dict) -> str:
-        """获取类目"""
+        """Get category"""
         tree = product.get('categoryTree', [])
         if tree:
             return ' > '.join([c.get('name', '') for c in tree[:3]])
         return product.get('rootCategory', '')
     
     def _get_attr(self, attrs: List, name: str) -> str:
-        """获取属性"""
+        """Get properties"""
         for attr in attrs:
             if isinstance(attr, dict) and attr.get('name') == name:
                 return attr.get('value', '')
         return ''
     
     def _estimate_return_rate(self, product: Dict) -> float:
-        """估算退货率"""
+        """Estimated return rate"""
         category = self._get_category(product).lower()
         if 'clothing' in category or 'shoes' in category:
             return 0.12
@@ -155,21 +155,21 @@ class UnifiedActuaryReportV2:
     
     def _build_html(self, asin: str, variants: List[Dict], 
                     metrics_163: Dict, parent_info: Dict, analysis_data: Dict) -> str:
-        """构建完整HTML报告"""
+        """Build a full HTML report"""
         
         variants_json = json.dumps(variants, ensure_ascii=False)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # 汇总数据
+        # Aggregate data
         total_sales = sum(v['sales'] for v in variants)
         avg_price = sum(v['price'] for v in variants) / len(variants) if variants else 30
         total_reviews = sum(v['review_count'] for v in variants)
         avg_rating = sum(v['rating'] for v in variants) / len(variants) if variants else 0
         
-        # 帕累托分析
+        # Pareto analysis
         pareto_data = self._calculate_pareto(variants)
         
-        # 风险评估
+        # risk assessment
         risks = self._assess_risks(variants, metrics_163)
         
         html = f'''<!DOCTYPE html>
@@ -177,7 +177,7 @@ class UnifiedActuaryReportV2:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>统一精算师分析报告 | {asin}</title>
+    <title>Uniform Actuary Analysis Report | {asin}</title>
     <style>
         :root {{
             --bg: #0a0a0a;
@@ -540,13 +540,13 @@ class UnifiedActuaryReportV2:
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>统一精算师分析报告</h1>
-            <div class="subtitle">All-in-One 交互式分析 · 基于Keepa真实数据</div>
+            <h1>Uniform Actuary Analysis Report</h1>
+            <div class="subtitle">All-in-One Interactive Analysis · Based on Keepa real data</div>
             <div class="meta">
                 ASIN: {asin} | 
-                品牌: {metrics_163.get('brand', 'N/A')} | 
-                类目: {metrics_163.get('category', 'N/A')} | 
-                生成时间: {timestamp}
+                brand: {metrics_163.get('brand', 'N/A')} | 
+                Category: {metrics_163.get('category', 'N/A')} | 
+                Generation time: {timestamp}
             </div>
         </header>
         
@@ -554,7 +554,7 @@ class UnifiedActuaryReportV2:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📦</span>
-                <h2>产品信息</h2>
+                <h2>product information</h2>
             </div>
             <div class="product-info">
                 <div style="font-size: 1.1em; margin-bottom: 20px; line-height: 1.8;">
@@ -563,29 +563,29 @@ class UnifiedActuaryReportV2:
                 <div class="info-grid">
                     <div>
                         <div class="info-item">
-                            <span class="info-label">总变体数</span>
+                            <span class="info-label">Total number of variants</span>
                             <span class="info-value">{len(variants)}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">月均总销量</span>
+                            <span class="info-label">Average monthly total sales</span>
                             <span class="info-value">{total_sales:,}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">总评论数</span>
+                            <span class="info-label">Total comments</span>
                             <span class="info-value">{total_reviews:,}</span>
                         </div>
                     </div>
                     <div>
                         <div class="info-item">
-                            <span class="info-label">平均售价</span>
+                            <span class="info-label">average selling price</span>
                             <span class="info-value">${avg_price:.2f}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">平均评分</span>
+                            <span class="info-label">average rating</span>
                             <span class="info-value">{avg_rating:.1f} ⭐</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">包装重量</span>
+                            <span class="info-label">Packing weight</span>
                             <span class="info-value">{metrics_163.get('package', {}).get('weight', 0)}g</span>
                         </div>
                     </div>
@@ -597,26 +597,26 @@ class UnifiedActuaryReportV2:
         <div class="section calculator-section">
             <div class="section-header">
                 <span class="icon">🔧</span>
-                <h2>成本计算器 · 填入1688采购价</h2>
+                <h2>Cost Calculator · Fill in the 1688 purchase price</h2>
             </div>
             
             <div class="main-input">
-                <label>采购成本 (RMB)</label>
+                <label>Procurement cost (RMB)</label>
                 <input type="number" class="input-large" id="procurementCost" 
                        placeholder="0" oninput="calculateAll()">
             </div>
             
             <div class="settings-grid">
                 <div class="setting-box">
-                    <label>船运价格</label>
+                    <label>shipping price</label>
                     <input type="number" id="shippingRate" value="{self.shipping_rate}" oninput="calculateAll()">
                 </div>
                 <div class="setting-box">
-                    <label>关税率</label>
+                    <label>tariff rate</label>
                     <div style="font-size: 1.4em; color: var(--text-secondary); font-family: monospace;">15%</div>
                 </div>
                 <div class="setting-box">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <input type="number" id="exchangeRate" value="{self.exchange_rate}" step="0.1" oninput="calculateAll()">
                 </div>
                 <div class="setting-box">
@@ -627,26 +627,26 @@ class UnifiedActuaryReportV2:
             
             <div class="cost-flow">
                 <div class="flow-item">
-                    <label>采购成本</label>
+                    <label>Procurement cost</label>
                     <div class="value" id="costProcurement">-</div>
                 </div>
                 <div class="flow-op">+</div>
                 <div class="flow-item">
-                    <label>头程运费</label>
+                    <label>First leg freight</label>
                     <div class="value" id="costShipping">-</div>
                 </div>
                 <div class="flow-op">×</div>
                 <div class="flow-item">
-                    <label>关税15%</label>
+                    <label>Tariff 15%</label>
                     <div class="value">1.15</div>
                 </div>
                 <div class="flow-op">÷</div>
                 <div class="flow-item">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <div class="value" id="costExchange">7.2</div>
                 </div>
                 <div class="flow-item highlight">
-                    <label>总COGS</label>
+                    <label>Total COGS</label>
                     <div class="value" id="costTotal">-</div>
                 </div>
             </div>
@@ -655,26 +655,26 @@ class UnifiedActuaryReportV2:
         <!-- Section 3: Dashboard -->
         <div class="dashboard-grid" id="dashboardSection" style="display: none;">
             <div class="metric-card highlight">
-                <label>月度总利润</label>
+                <label>Total monthly profit</label>
                 <div class="value" id="totalProfit">$0</div>
             </div>
             <div class="metric-card">
-                <label>月度总销量</label>
+                <label>Total monthly sales</label>
                 <div class="value" id="totalSales">0</div>
             </div>
             <div class="metric-card">
-                <label>平均利润率</label>
+                <label>average profit margin</label>
                 <div class="value" id="avgMargin">0%</div>
             </div>
             <div class="metric-card">
-                <label>平均ROI</label>
+                <label>average ROI</label>
                 <div class="value" id="roiEstimate">0%</div>
             </div>
         </div>
         
         <!-- Section 4: Verdict -->
         <div class="verdict-section" id="verdictSection" style="display: none;">
-            <div class="verdict-label">投资建议</div>
+            <div class="verdict-label">investment advice</div>
             <div class="verdict-value" id="verdictValue">-</div>
             <div style="color: var(--text-muted);" id="verdictConfidence">-</div>
         </div>
@@ -683,23 +683,23 @@ class UnifiedActuaryReportV2:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📊</span>
-                <h2>变体详细分析 · 完整Keepa指标</h2>
+                <h2>Detailed analysis of variants · Complete Keepa metrics</h2>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>变体</th>
-                        <th>重量</th>
-                        <th>价格</th>
-                        <th>月销量</th>
+                        <th>Variants</th>
+                        <th>weight</th>
+                        <th>price</th>
+                        <th>monthly sales</th>
                         <th>BSR</th>
-                        <th>评分</th>
-                        <th>评论</th>
-                        <th>退货率</th>
-                        <th>FBA费</th>
-                        <th>佣金</th>
+                        <th>score</th>
+                        <th>Comment</th>
+                        <th>return rate</th>
+                        <th>FBA fee</th>
+                        <th>Commission</th>
                         <th>COGS</th>
-                        <th>利润</th>
+                        <th>profit</th>
                     </tr>
                 </thead>
                 <tbody id="variantsTableBody">
@@ -712,10 +712,10 @@ class UnifiedActuaryReportV2:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📈</span>
-                <h2>帕累托分析 · 80/20核心变体</h2>
+                <h2>Pareto Analysis · 80/20 core variants</h2>
             </div>
             <div style="margin-bottom: 20px; color: var(--text-muted);">
-                识别贡献80%销量的核心变体 (绿色标记)
+                Recognize contribution 80%core variant of sales volume (green mark)
             </div>
             {self._generate_pareto_bars(variants)}
         </div>
@@ -724,7 +724,7 @@ class UnifiedActuaryReportV2:
         <div class="section">
             <div class="section-header">
                 <span class="icon">⚠️</span>
-                <h2>风险评估</h2>
+                <h2>risk assessment</h2>
             </div>
             <div class="item-list">
                 {self._generate_risk_items(risks)}
@@ -735,7 +735,7 @@ class UnifiedActuaryReportV2:
         <div class="section">
             <div class="section-header">
                 <span class="icon">🎯</span>
-                <h2>行动计划</h2>
+                <h2>action plan</h2>
             </div>
             <div class="item-list">
                 {self._generate_action_items(variants)}
@@ -837,22 +837,22 @@ class UnifiedActuaryReportV2:
             const confidenceEl = document.getElementById('verdictConfidence');
             const sectionEl = document.getElementById('verdictSection');
             
-            let verdict = 'avoid', text = '建议避免', confidence = 60;
+            let verdict = 'avoid', text = 'Recommended to avoid', confidence = 60;
             
             if (margin > 15 && roi > 50) {{
                 verdict = 'proceed';
-                text = '建议投资';
+                text = 'Recommended investment';
                 confidence = 85;
             }} else if (margin > 10 && roi > 20) {{
                 verdict = 'caution';
-                text = '谨慎考虑';
+                text = 'Consider carefully';
                 confidence = 70;
             }}
             
             verdictEl.textContent = text;
             verdictEl.className = 'verdict-value ' + verdict;
             sectionEl.className = 'verdict-section ' + verdict;
-            confidenceEl.textContent = '置信度 ' + confidence + '%';
+            confidenceEl.textContent = 'Confidence ' + confidence + '%';
         }}
         
         calculateAll();
@@ -863,7 +863,7 @@ class UnifiedActuaryReportV2:
         return html
     
     def _generate_variant_rows(self, variants: List[Dict]) -> str:
-        """生成变体表格行"""
+        """Generate variant table rows"""
         rows = []
         for v in variants:
             rows.append(f'''
@@ -888,7 +888,7 @@ class UnifiedActuaryReportV2:
         return '\n'.join(rows)
     
     def _calculate_pareto(self, variants: List[Dict]) -> List[Dict]:
-        """计算帕累托数据"""
+        """Calculate Pareto data"""
         sorted_variants = sorted(variants, key=lambda x: x['sales'], reverse=True)
         total_sales = sum(v['sales'] for v in variants)
         
@@ -909,7 +909,7 @@ class UnifiedActuaryReportV2:
         return pareto_data
     
     def _generate_pareto_bars(self, variants: List[Dict]) -> str:
-        """生成帕累托图"""
+        """Generate Pareto chart"""
         pareto_data = self._calculate_pareto(variants)
         bars = []
         for item in pareto_data:
@@ -926,50 +926,50 @@ class UnifiedActuaryReportV2:
         return '\n'.join(bars)
     
     def _assess_risks(self, variants: List[Dict], metrics_163: Dict) -> List[Dict]:
-        """评估风险"""
+        """Assess risks"""
         risks = []
         
-        # 检查变体数量
+        # Check number of variants
         if len(variants) > 10:
             risks.append({
                 'level': 'medium',
-                'title': '变体数量过多',
-                'desc': f'共{len(variants)}个变体，增加库存管理复杂度',
+                'title': 'Too many variants',
+                'desc': f'total{len(variants)}variants, increasing the complexity of inventory management',
                 'icon': '⚠️'
             })
         
-        # 检查评分
+        # Check rating
         avg_rating = sum(v['rating'] for v in variants) / len(variants) if variants else 0
         if avg_rating < 4.0:
             risks.append({
                 'level': 'high',
-                'title': '评分偏低',
-                'desc': f'平均评分{avg_rating:.1f}，可能影响转化率',
+                'title': 'Low rating',
+                'desc': f'average rating{avg_rating:.1f}, which may affect the conversion rate',
                 'icon': '📉'
             })
         
-        # 检查评论数
+        # Check number of comments
         total_reviews = sum(v['review_count'] for v in variants)
         if total_reviews < 100:
             risks.append({
                 'level': 'medium',
-                'title': '评论数不足',
-                'desc': f'总评论数仅{total_reviews}，信任度建设需要加强',
+                'title': 'Not enough comments',
+                'desc': f'The total number of comments is only{total_reviews}, trust building needs to be strengthened',
                 'icon': '💬'
             })
         
         if not risks:
             risks.append({
                 'level': 'low',
-                'title': '暂无重大风险',
-                'desc': '当前产品组合风险可控',
+                'title': 'No major risks yet',
+                'desc': 'Current product portfolio risks are controllable',
                 'icon': '✅'
             })
         
         return risks
     
     def _generate_risk_items(self, risks: List[Dict]) -> str:
-        """生成风险项"""
+        """Generate risk items"""
         items = []
         for risk in risks:
             items.append(f'''
@@ -984,88 +984,88 @@ class UnifiedActuaryReportV2:
         return '\n'.join(items)
     
     def _generate_action_items(self, variants: List[Dict]) -> str:
-        """生成基于产品数据的动态 30-60-90 天行动计划"""
+        """Generate updates based on product data 30-60-90 day action plan"""
         
-        # 分析产品数据
+        # Analyze product data
         sorted_by_sales = sorted(variants, key=lambda x: x.get('sales', 0), reverse=True)
         top_variants = sorted_by_sales[:3] if len(sorted_by_sales) >= 3 else sorted_by_sales
         
         avg_rating = sum(v.get('rating', 0) for v in variants) / len(variants) if variants else 0
         avg_bsr = sum(v.get('bsr', 999999) for v in variants) / len(variants) if variants else 999999
         
-        # 识别问题
+        # Identify the problem
         low_rating = avg_rating < 4.0
         high_bsr = avg_bsr > 100000
         
-        # 生成动态 30-60-90 天计划
+        # Generate dynamics 30-60-90 day plan
         actions = []
         
-        # === 30天行动计划 ===
+        # === 30 day action plan ===
         actions.append({
-            'phase': '30天',
+            'phase': '30 days',
             'priority': 'high',
-            'title': f'快速启动 - 集中火力推广TOP{len(top_variants)}变体',
-            'desc': f"立即启动广告投放: {', '.join([v.get('color', '默认') for v in top_variants])}。"
-                   f"预计首月可获得 {sum(v.get('sales', 0) for v in top_variants)//4} 单销量。"
-                   f"预算建议: ${sum(v.get('sales', 0) for v in top_variants)*0.5:.0f}/月 (基于TACOS 15%)",
-            'kpi': f'单量目标: {sum(v.get("sales", 0) for v in top_variants)//4}单/月 | ACoS < 25%'
+            'title': f'quick start - Concentrate on promoting TOP{len(top_variants)}Variants',
+            'desc': f"Start advertising now: {', '.join([v.get('color', 'Default') for v in top_variants])}。"
+                   f"Expected to be available in the first month {sum(v.get('sales', 0) for v in top_variants)//4} Single sales volume."
+                   f"budget advice: ${sum(v.get('sales', 0) for v in top_variants)*0.5:.0f}/month (Based on TACOS 15%)",
+            'kpi': f'Single quantity target: {sum(v.get("sales", 0) for v in top_variants)//4}Single/month | ACoS < 25%'
         })
         
-        # 根据数据添加针对性的30天行动
+        # Add targeted 30-day actions based on data
         if low_rating:
             actions.append({
-                'phase': '30天',
+                'phase': '30 days',
                 'priority': 'high',
-                'title': '紧急优化 - 提升评分至4.0+',
-                'desc': f'当前评分 {avg_rating:.1f} 偏低，启动Vine计划和售后邮件跟进。'
-                       '联系供应商检查产品质量问题，必要时暂停低评分变体销售。',
-                'kpi': '评分提升至4.0+ | 差评率<2%'
+                'title': 'Emergency optimization - Improve rating to 4.0+',
+                'desc': f'Current rating {avg_rating:.1f} On the low side, start the Vine plan and follow up with after-sales emails.'
+                       'Contact suppliers to check for product quality issues and suspend sales of low-scoring variants if necessary.',
+                'kpi': 'Rating improved to 4.0+ | Negative review rate<2%'
             })
         
-        # === 60天行动计划 ===
+        # === 60 day action plan ===
         actions.append({
-            'phase': '60天',
+            'phase': '60 days',
             'priority': 'medium',
-            'title': '库存优化 - 清理长尾变体',
-            'desc': f'根据首月数据，淘汰销量后50%的变体，集中库存到TOP{len(top_variants)}。'
-                   f'预计可降低库存成本 {len(variants)//2} 个SKU的管理成本。',
-            'kpi': f'库存周转率提升30% | SKU数量优化至{max(3, len(variants)//2)}个'
+            'title': 'Inventory optimization - Clean up long tail variants',
+            'desc': f'According to the first month’s data, after the elimination of sales volume, 50%Variation, centralized inventory to TOP{len(top_variants)}。'
+                   f'Expected to reduce inventory costs {len(variants)//2} The management cost of each SKU.',
+            'kpi': f'Inventory turnover rate increased by 30% | The number of SKUs is optimized to{max(3, len(variants)//2)}a'
         })
         
         if high_bsr:
             actions.append({
-                'phase': '60天',
+                'phase': '60 days',
                 'priority': 'medium',
-                'title': '排名冲刺 - BSR进入前5万',
-                'desc': f'当前平均BSR {avg_bsr:,.0f} 偏高，通过LD/7DD秒杀提升排名。'
-                       '优化关键词投放，针对高转化词提高竞价20%。',
-                'kpi': 'BSR进入类目TOP 50,000 | 自然流量占比>40%'
+                'title': 'Ranking Sprint - BSR enters the top 50,000',
+                'desc': f'Current average BSR {avg_bsr:,.0f} On the high side, through LD/7DD flash sale improves ranking.'
+                       'Optimize keyword placement and increase bids for high-converting words20%。',
+                'kpi': 'BSR enters the category TOP 50,000 | Natural traffic proportion>40%'
             })
         
-        # === 90天行动计划 ===
+        # === 90 day action plan ===
         total_monthly_sales = sum(v.get('sales', 0) for v in variants)
         actions.append({
-            'phase': '90天',
+            'phase': '90 days',
             'priority': 'low',
-            'title': '规模扩张 - 复制成功模式',
-            'desc': f'基于TOP变体的成功经验，拓展相似产品线。'
-                   f'当前月销{total_monthly_sales}单，目标Q2提升至{int(total_monthly_sales*1.5)}单。'
-                   '评估品牌旗舰店和A+页面建设。',
-            'kpi': f'月销量目标: {int(total_monthly_sales*1.5)}单 | 利润率达到25%+'
+            'title': 'scale expansion - Copy success pattern',
+            'desc': f'Based on the successful experience of TOP variants, similar product lines will be expanded.'
+                   f'Current monthly sales{total_monthly_sales}Single, the target Q2 is increased to{int(total_monthly_sales*1.5)}Single.'
+                   'Evaluate brand flagship store and A+Page construction.',
+            'kpi': f'monthly sales target: {int(total_monthly_sales*1.5)}Single | The profit margin reaches 25%+'
         })
         
-        # 生成HTML
+        # Generate HTML
         items = []
         current_phase = None
         
         for action in actions:
-            # 阶段分隔
+            # stage separation
             if current_phase != action['phase']:
                 current_phase = action['phase']
                 items.append(f'''
                     <div style="margin: 20px 0 10px 0; padding: 8px 16px; background: rgba(59,130,246,0.1); 
                                 border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0;">
-                        <span style="font-weight: 600; color: var(--blue);">📅 {action['phase']}行动计划</span>
+                        <span style="font-weight: 600; color: var(--blue);">📅 {action['phase']}action plan</span>
                     </div>
                 ''')
             
@@ -1093,11 +1093,11 @@ class UnifiedActuaryReportV2:
 
 def generate_unified_report_v2(asin: str, products: List[Dict], 
                                 analysis_data: Dict, output_path: str = None) -> str:
-    """生成统一精算师报告 v2"""
+    """Generate Uniform Actuarial Report v2"""
     generator = UnifiedActuaryReportV2()
     return generator.generate(asin, products, analysis_data, output_path)
 
 
 if __name__ == "__main__":
-    print("统一精算师报告生成器 v2")
-    print("包含完整 Keepa 指标和精算师分析维度")
+    print("Unified Actuarial Report Generator v2")
+    print("Contains complete Keepa indicators and actuarial analysis dimensions")

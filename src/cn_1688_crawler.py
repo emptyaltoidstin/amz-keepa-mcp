@@ -1,13 +1,13 @@
 """
-1688 以图搜图爬虫模块
+1688 Image search crawler module
 =====================
-基于1688内部API实现的图片搜索
-特点：
-- 无需浏览器，直接调用API
-- 支持URL/文件/base64图片输入
-- 获取价格、MOQ、供应商等完整信息
+Image search based on 1688 internal API
+Features:
+- No browser required, call API directly
+- Support URL/File/base64 image input
+- Get complete information on prices, MOQ, suppliers and more
 
-参考: https://github.com/Zhui-CN/1688_image_search_crawler
+Reference: https://github.com/Zhui-CN/1688_image_search_crawler
 """
 
 import re
@@ -24,11 +24,11 @@ from urllib.parse import urlencode
 
 @dataclass
 class CNSupplierOffer:
-    """1688供应商报价"""
+    """1688 supplier quotation"""
     offer_id: str
     title: str
-    price: float  # 人民币
-    moq: int  # 最小起订量
+    price: float  # RMB
+    moq: int  # MOQ
     unit: str
     image_url: str
     company_name: str
@@ -37,22 +37,22 @@ class CNSupplierOffer:
     shop_url: str
     is_verified: bool
     credit_level: str
-    years: int  # 诚信通年限
-    repurchase_rate: str  # 复购率
+    years: int  # Credit Pass Period
+    repurchase_rate: str  # Repurchase rate
     product_url: str
-    quantity_prices: List[Dict]  # 阶梯价格
-    scores: Dict  # 店铺评分
-    position_labels: List[str]  # 标签（如"源头工厂"）
+    quantity_prices: List[Dict]  # Ladder price
+    scores: Dict  # Store rating
+    position_labels: List[str]  # tags (such as"Source factory"）
 
 
 class CN1688Crawler:
     """
-    1688以图搜图爬虫
+    1688 Image search crawler
     
-    基于1688 H5 API实现
+    Implemented based on 1688 H5 API
     """
     
-    # API配置
+    # API configuration
     JSV = "2.7.2"
     API_VERSION = "1.0"
     API_KEY = "12574478"
@@ -64,7 +64,7 @@ class CN1688Crawler:
     
     API_HOST = "https://h5api.m.1688.com"
     
-    # 数据提取正则
+    # Data extraction regularity
     DATA_REG = re.compile(r"window\.data\.offerresultData\s?=\s?successDataCheck\((.*?)\);", re.S | re.I)
     
     def __init__(self, timeout: int = 30, use_proxy: bool = False):
@@ -79,10 +79,10 @@ class CN1688Crawler:
             "Connection": "keep-alive",
         })
         
-        # 禁用SSL验证 (解决某些环境的SSL问题)
+        # Disable SSL verification (Troubleshoot SSL issues for some environments)
         self.session.verify = False
         
-        # 忽略SSL警告
+        # Ignore SSL warnings
         import urllib3
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
@@ -92,7 +92,7 @@ class CN1688Crawler:
         self._session_id = None
     
     def _set_cookie_cna(self) -> str:
-        """设置cna cookie"""
+        """Set cna cookie"""
         timestamp = str(int(time.time() * 1000))
         url = f"https://log.mmstat.com/eg.js?t={timestamp}"
         headers = {"referer": "https://www.1688.com/"}
@@ -101,12 +101,12 @@ class CN1688Crawler:
         cna = self.session.cookies.get("cna")
         
         if not cna:
-            raise Exception("无法获取cna cookie")
+            raise Exception("Unable to get cna cookie")
         
         return cna
     
     def _set_token(self) -> str:
-        """获取token"""
+        """Get token"""
         url = f"{self.API_HOST}/h5/{self.TOKEN_API_PATH.lower()}/{self.API_VERSION}/"
         headers = {
             "origin": "https://www.1688.com",
@@ -128,23 +128,23 @@ class CN1688Crawler:
         
         resp = self.session.get(url, headers=headers, params=params, timeout=self.timeout)
         
-        # 从cookie获取token
+        # Get token from cookie
         m_h5_tk = self.session.cookies.get("_m_h5_tk")
         if not m_h5_tk:
-            raise Exception("无法获取_m_h5_tk cookie")
+            raise Exception("Unable to obtain_m_h5_tk cookie")
         
         self.token = m_h5_tk.split("_")[0]
         return self.token
     
     def _upload_image(self, b64_image: str) -> str:
         """
-        上传图片到1688
+        Upload pictures to 1688
         
         Args:
-            b64_image: base64编码的图片
+            b64_image: base64 encoded image
             
         Returns:
-            img_id: 图片ID
+            img_id: Image ID
         """
         url = f"{self.API_HOST}/h5/{self.UPLOAD_API_PATH.lower()}/{self.API_VERSION}/"
         headers = {
@@ -159,7 +159,7 @@ class CN1688Crawler:
             "appKey": self.APP_KEY
         }, separators=(",", ":"))
         
-        # 生成签名
+        # Generate signature
         sign_str = f"{self.token}&{timestamp}&{self.API_KEY}&{upload_data}"
         sign = hashlib.md5(sign_str.encode()).hexdigest()
         
@@ -186,7 +186,7 @@ class CN1688Crawler:
         result = resp.json()
         
         if not result.get("data") or not result["data"].get("imageId"):
-            raise Exception(f"上传图片失败: {result}")
+            raise Exception(f"Failed to upload image: {result}")
         
         self._img_id = result["data"]["imageId"]
         self._req_id = result["data"]["requestId"]
@@ -196,14 +196,14 @@ class CN1688Crawler:
     
     def _search_offers(self, page: int = 1, use_api: bool = True) -> List[Dict]:
         """
-        搜索商品列表
+        Search product list
         
         Args:
-            page: 页码
-            use_api: 是否使用API模式（False使用网页模式）
+            page: Page number
+            use_api: Whether to use API mode (False uses web mode)
             
         Returns:
-            商品列表
+            Product list
         """
         if use_api:
             return self._search_api(page)
@@ -211,7 +211,7 @@ class CN1688Crawler:
             return self._search_web()
     
     def _search_api(self, page: int = 1) -> List[Dict]:
-        """API模式搜索"""
+        """API pattern search"""
         url = "https://search.1688.com/service/imageSearchOfferResultViewService"
         headers = {
             "origin": "https://s.1688.com",
@@ -238,7 +238,7 @@ class CN1688Crawler:
         return offer_list
     
     def _search_web(self) -> List[Dict]:
-        """网页模式搜索（备用）"""
+        """Web mode search (backup)"""
         url = "https://s.1688.com/youyuan/index.htm"
         headers = {"referer": "https://www.1688.com/"}
         
@@ -253,7 +253,7 @@ class CN1688Crawler:
         resp = self.session.get(url, headers=headers, params=params, timeout=self.timeout)
         html = resp.text
         
-        # 提取JSON数据
+        # Extract JSON data
         match = self.DATA_REG.search(html)
         if not match:
             return []
@@ -264,37 +264,37 @@ class CN1688Crawler:
         return offer_list
     
     def _parse_offers(self, offer_list: List[Dict]) -> List[CNSupplierOffer]:
-        """解析商品数据"""
+        """Parse product data"""
         offers = []
         
         for offer in offer_list:
             try:
-                # 提取公司信息
+                # Extract company information
                 company = offer.get("company") or {}
-                # 提取商品信息
+                # Extract product information
                 information = offer.get("information") or {}
-                # 提取交易服务信息
+                # Extract transaction service information
                 trade_service = offer.get("tradeService") or {}
-                # 提取交易数量信息
+                # Extract transaction quantity information
                 trade_quantity = offer.get("tradeQuantity") or {}
-                # 提取价格信息
+                # Extract price information
                 offer_price = (offer.get("tradePrice") or {}).get("offerPrice") or {}
-                # 提取标签
+                # Extract tags
                 position_labels = (offer.get("commonPositionLabels") or {}).get("offerMiddle") or []
                 
-                # 解析价格
+                # parse price
                 price = 0.0
                 price_info = offer_price.get("priceInfo") or {}
                 if price_info.get("price"):
                     price = float(price_info["price"])
                 else:
-                    # 从originalValue解析
+                    # Parse from originalValue
                     original = offer_price.get("originalValue") or {}
                     integer = original.get("integer", 0)
                     decimals = original.get("decimals", 0)
                     price = float(f"{integer}.{decimals}")
                 
-                # 解析阶梯价格
+                # Analyze tiered prices
                 quantity_prices = []
                 for q in offer_price.get("quantityPrices", []):
                     q_price_info = q.get("value") or {}
@@ -305,19 +305,19 @@ class CN1688Crawler:
                         "price": float(f"{q_integer}.{q_decimals}")
                     })
                 
-                # 解析复购率
+                # Analyze repurchase rate
                 repurchase = information.get("rePurchaseRate", "")
                 if repurchase and "%" not in str(repurchase):
                     repurchase = f"{round(float(repurchase) * 100, 2)}%"
                 
-                # 构建结果
+                # Build results
                 offer_id = str(offer.get("id", ""))
                 supplier_offer = CNSupplierOffer(
                     offer_id=offer_id,
                     title=information.get("subject", ""),
                     price=price,
                     moq=trade_quantity.get("quantityBegin", 1),
-                    unit=trade_quantity.get("unit", "件"),
+                    unit=trade_quantity.get("unit", "pieces"),
                     image_url=(offer.get("image") or {}).get("imgUrl", ""),
                     company_name=company.get("name", ""),
                     province=company.get("province", ""),
@@ -346,7 +346,7 @@ class CN1688Crawler:
         return offers
     
     def _parse_score(self, score) -> float:
-        """解析评分"""
+        """Analyze scoring"""
         try:
             return round(float(score or 0), 1)
         except:
@@ -354,37 +354,37 @@ class CN1688Crawler:
     
     def search_by_image_url(self, image_url: str, max_results: int = 10) -> List[CNSupplierOffer]:
         """
-        通过图片URL搜索
+        Search by image URL
         
         Args:
-            image_url: 图片URL
-            max_results: 最大结果数
+            image_url: Image URL
+            max_results: Maximum number of results
             
         Returns:
-            供应商报价列表
+            Supplier quotation list
         """
-        # 下载图片
+        # Download pictures
         resp = requests.get(image_url, timeout=self.timeout)
         resp.raise_for_status()
         
-        # 转base64
+        # Convert to base64
         b64_image = base64.b64encode(resp.content).decode()
         
         return self.search_by_base64(b64_image, max_results)
     
     def search_by_file(self, image_path: str, max_results: int = 10) -> List[CNSupplierOffer]:
         """
-        通过本地图片文件搜索
+        Search by local image files
         
         Args:
-            image_path: 图片文件路径
-            max_results: 最大结果数
+            image_path: Image file path
+            max_results: Maximum number of results
             
         Returns:
-            供应商报价列表
+            Supplier quotation list
         """
         if not os.path.exists(image_path):
-            raise FileNotFoundError(f"图片文件不存在: {image_path}")
+            raise FileNotFoundError(f"Image file does not exist: {image_path}")
         
         with open(image_path, "rb") as f:
             b64_image = base64.b64encode(f.read()).decode()
@@ -393,23 +393,23 @@ class CN1688Crawler:
     
     def search_by_base64(self, b64_image: str, max_results: int = 10) -> List[CNSupplierOffer]:
         """
-        通过base64图片搜索
+        Search by base64 image
         
         Args:
-            b64_image: base64编码的图片
-            max_results: 最大结果数
+            b64_image: base64 encoded image
+            max_results: Maximum number of results
             
         Returns:
-            供应商报价列表
+            Supplier quotation list
         """
-        # 初始化session
+        # Initialize session
         self._set_cookie_cna()
         self._set_token()
         
-        # 上传图片
+        # Upload pictures
         self._upload_image(b64_image)
         
-        # 搜索商品
+        # Search for products
         all_offers = []
         page = 1
         
@@ -424,33 +424,33 @@ class CN1688Crawler:
             
             page += 1
             
-            # 简单防爬
+            # Simple anti-climbing
             time.sleep(0.5)
         
         return all_offers[:max_results]
     
     def find_best_price(self, image_url: str, target_moq: int = 100) -> Optional[CNSupplierOffer]:
         """
-        查找最优价格
+        Find the best price
         
         Args:
-            image_url: 图片URL
-            target_moq: 目标起订量
+            image_url: Image URL
+            target_moq: Target minimum order quantity
             
         Returns:
-            最优报价
+            best offer
         """
         offers = self.search_by_image_url(image_url, max_results=20)
         
         if not offers:
             return None
         
-        # 筛选符合MOQ的
+        # Screen those that meet the MOQ
         suitable = [o for o in offers if o.moq <= target_moq * 2]
         if not suitable:
             suitable = offers
         
-        # 综合评分排序
+        # Comprehensive rating ranking
         def score(o: CNSupplierOffer) -> float:
             price_score = 1 / (o.price + 1)
             verified_bonus = 0.3 if o.is_verified else 0
@@ -464,27 +464,27 @@ class CN1688Crawler:
 
 def extract_image_url_from_keepa(product: Dict) -> Optional[str]:
     """
-    从Keepa产品数据中提取主图URL
+    Extract main image URL from Keepa product data
     
-    支持多种格式:
-    - Keepa API返回的imagesCSV (逗号分隔的图片ID)
-    - Keepa CSV导出的Image字段 (分号分隔的完整URL)
-    - 163指标中的Image字段
+    Support multiple formats:
+    - imagesCSV returned by Keepa API (Comma separated image IDs)
+    - Image field for Keepa CSV export (Semicolon separated full URLs)
+    - Image field in 163 indicators
     
     Args:
-        product: Keepa产品数据字典
+        product: Keepa Product Data Dictionary
         
     Returns:
-        图片URL或None
+        Image URL or None
     """
-    # 方法1: 从163指标Image字段获取 (分号分隔的URL列表)
+    # Method 1: Get from 163 indicator Image field (Semicolon separated list of URLs)
     image_field = product.get("Image", "")
     if image_field and "https://" in image_field:
         urls = image_field.split(";")
         if urls and urls[0].startswith("http"):
             return urls[0].strip()
     
-    # 方法2: 从imagesCSV获取 (逗号分隔的图片ID)
+    # Method 2: Get from imagesCSV (Comma separated image IDs)
     images = product.get("imagesCSV", "")
     if images:
         image_ids = images.split(",")
@@ -493,13 +493,13 @@ def extract_image_url_from_keepa(product: Dict) -> Optional[str]:
             if image_id:
                 return f"https://m.media-amazon.com/images/I/{image_id}.jpg"
     
-    # 方法3: 从data.images获取
+    # Method 3: Get from data.images
     data = product.get("data", {})
     image_list = data.get("images", [])
     if image_list:
         return image_list[0]
     
-    # 方法4: 从metrics_163字典获取
+    # Method 4: from metrics_163 dictionary acquisition
     metrics = product.get('metrics_163', {})
     if metrics:
         image_value = metrics.get('Image', '')
@@ -509,7 +509,7 @@ def extract_image_url_from_keepa(product: Dict) -> Optional[str]:
                 if urls:
                     return urls[0].strip()
             else:
-                # 逗号分隔的图片ID
+                # Comma separated image IDs
                 ids = image_value.split(',')
                 if ids and ids[0]:
                     return f"https://m.media-amazon.com/images/I/{ids[0].strip()}.jpg"
@@ -517,17 +517,17 @@ def extract_image_url_from_keepa(product: Dict) -> Optional[str]:
     return None
 
 
-# 便捷函数
+# Convenience function
 def find_1688_price(image_url: str, target_moq: int = 100) -> Optional[Dict]:
     """
-    快速查找1688采购价格
+    Quickly find 1688 purchase price
     
     Args:
-        image_url: 产品图片URL
-        target_moq: 目标起订量
+        image_url: Product image URL
+        target_moq: Target minimum order quantity
         
     Returns:
-        价格信息字典
+        Price Information Dictionary
     """
     crawler = CN1688Crawler()
     
@@ -549,7 +549,7 @@ def find_1688_price(image_url: str, target_moq: int = 100) -> Optional[Dict]:
                 "quantity_prices": offer.quantity_prices
             }
         else:
-            return {"found": False, "error": "未找到匹配商品"}
+            return {"found": False, "error": "No matching product found"}
             
     except Exception as e:
         return {"found": False, "error": str(e)}
@@ -558,48 +558,48 @@ def find_1688_price(image_url: str, target_moq: int = 100) -> Optional[Dict]:
 def find_1688_price_for_product(keepa_product: Dict, 
                                  target_moq: int = 100) -> Optional[Dict]:
     """
-    为Keepa产品查找1688采购价格
+    Find 1688 purchase prices for Keepa products
     
-    自动从产品数据中提取图片URL并搜索
+    Automatically extract image URLs from product data and search
     
     Args:
-        keepa_product: Keepa产品数据
-        target_moq: 目标起订量
+        keepa_product: Keepa product data
+        target_moq: Target minimum order quantity
         
     Returns:
-        价格信息字典
+        Price Information Dictionary
     """
     image_url = extract_image_url_from_keepa(keepa_product)
     
     if not image_url:
-        return {"found": False, "error": "无法从产品数据中提取图片URL"}
+        return {"found": False, "error": "Unable to extract image URL from product data"}
     
     return find_1688_price(image_url, target_moq)
 
 
 if __name__ == "__main__":
-    # 测试
-    print("1688 以图搜图爬虫模块")
+    # test
+    print("1688 Image search crawler module")
     print("=" * 60)
     
-    # 测试图片提取
+    # Test image extraction
     test_products = [
-        # Keepa CSV格式
+        # Keepa CSV format
         {'Image': 'https://m.media-amazon.com/images/I/71h2vMaS4bL.jpg;https://m.media-amazon.com/images/I/71GErqPh7DL.jpg'},
-        # Keepa API格式
+        # Keepa API format
         {'imagesCSV': '41ZulE5Q6OL,51Q3+gP8+WL'},
-        # metrics_163格式
+        # metrics_163 format
         {'metrics_163': {'Image': '71h2vMaS4bL,71GErqPh7DL'}},
     ]
     
-    print("\n图片URL提取测试:")
+    print("\nImage URL extraction test:")
     for i, product in enumerate(test_products, 1):
         url = extract_image_url_from_keepa(product)
-        print(f"  测试{i}: {url}")
+        print(f"  test{i}: {url}")
     
-    print("\n使用示例:")
+    print("\nUsage examples:")
     print("  from cn_1688_crawler import CN1688Crawler, extract_image_url_from_keepa")
     print("  crawler = CN1688Crawler()")
-    print("  offers = crawler.search_by_image_url('图片URL')")
-    print("\n  # 或直接传入Keepa产品数据")
+    print("  offers = crawler.search_by_image_url('Image URL')")
+    print("\n  # Or directly pass in Keepa product data")
     print("  result = find_1688_price_for_product(keepa_product)")

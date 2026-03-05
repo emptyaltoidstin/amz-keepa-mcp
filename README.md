@@ -1,8 +1,8 @@
 # Amz-Keepa-MCP v3.0 🚀
 
-> **亚马逊运营精算师系统 - 数据驱动的选品决策**
+> **Amazon Operations Actuary System - Data-driven product selection decisions**
 >
-> 163个Keepa指标 + 真实COGS + TACOS模型 = 专业级FBA利润分析
+> 163 Keepa indicators + Real COGS + TACOS model = Professional-grade FBA profit analysis
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![MCP](https://img.shields.io/badge/MCP-1.26+-green.svg)
@@ -10,432 +10,432 @@
 
 ---
 
-## 🎯 标准流程 (推荐)
+## 🎯 Standard process (recommend)
 
-**一句话生成完整报告：**
+**Generate a complete report in one sentence:**
 
 ```bash
 python generate_report.py B0F6B5R47Q
 ```
 
-这就是**标准流程**！系统会自动：
+this is**standard process**! The system will automatically:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  标准流程: 输入ASIN → 统一精算师报告 (交互式+完整分析)                 │
+│ Standard process: Enter ASIN → Uniform Actuary Report (interactive+full analysis)                 │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
-│  步骤1: 从Keepa API采集产品数据                                       │
-│     ✓ 自动发现所有变体                                               │
-│     ✓ 获取163个完整指标                                              │
-│     ✓ 提取真实尺寸重量                                               │
+│ Step 1: Collect product data from Keepa API │
+│ ✓ Automatically discover all variants │
+│ ✓ Get 163 complete indicators │
+│ ✓ Extract true dimensional weight │
 │                                                                      │
-│  步骤2: 提取真实FBA费用和佣金                                         │
-│     ✓ 基于产品尺寸计算FBA费用 (2026年费率)                           │
-│     ✓ 基于类目确定佣金比例 (8%-20%)                                  │
-│     ✓ 自动计算体积重量 vs 实际重量                                   │
+│ Step 2: Withdraw real FBA fees and commissions │
+│ ✓ Calculate FBA fees based on product size (2026 rates)                           │
+│ ✓ Determine commission ratio based on category (8%-20%)                                  │
+│ ✓ Automatically calculate volumetric weight vs actual weight │
 │                                                                      │
-│  步骤3: 生成统一精算师报告                                            │
-│     ✓ 交互式成本计算器 (填入1688采购价即计算)                        │
-│     ✓ 帕累托分析 (80/20核心变体识别)                                 │
-│     ✓ 变体利润分析表                                                 │
-│     ✓ 风险评估                                                       │
-│     ✓ 投资建议与行动计划                                             │
+│ Step 3: Generate unified actuarial report │
+│ ✓ Interactive cost calculator (Fill in the 1688 purchase price and it will be calculated.)                        │
+│ ✓ Pareto analysis (80/20 core variant identification)                                 │
+│ ✓ Variation Profit Analysis Table │
+│ ✓ Risk Assessment │
+│ ✓ Investment advice and action plan │
 │                                                                      │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**输出文件：**
-- `cache/reports/{ASIN}_UNIFIED_ACTUARY.html` - 统一精算师报告 (交互式 + 完整分析) ⭐
+**Output file:**
+- `cache/reports/{ASIN}_UNIFIED_ACTUARY.html` - Uniform Actuary Report (interactive + full analysis) ⭐
 
-报告结构：
+Report structure:
 ```
-├─ 产品信息栏
-│  └─ 品牌/类目/总销量/总评论/平均评分/包装规格
+├─ Product information column
+│ └─ Brand/Category/total sales/Total comments/average rating/Packaging specifications
 │
-├─ 交互式成本计算器
-│  └─ 填入1688采购价 → 自动计算COGS
+├─ Interactive cost calculator
+│ └─ Fill in the 1688 purchase price → automatically calculate COGS
 │
-├─ 汇总指标面板
-│  └─ 月度总利润/总销量/平均利润率/ROI
+├─ Summary indicator panel
+│ └─ Total monthly profit/total sales/average profit margin/ROI
 │
-├─ 投资建议
-│  └─ GO/谨慎/避免 + 置信度评分
+├─ Investment advice
+│  └─ GO/cautious/avoid + confidence score
 │
-├─ 变体详细分析表 (12列完整指标)
-│  └─ ASIN/重量/价格/月销量/BSR/评分/评论/退货率/FBA费/佣金/COGS/利润
+├─ Variant detailed analysis table (12 columns of complete indicators)
+│  └─ ASIN/weight/price/monthly sales/BSR/score/Comment/return rate/FBA fee/Commission/COGS/profit
 │
-├─ 帕累托分析
-│  └─ 80/20核心变体识别
+├─ Pareto analysis
+│  └─ 80/20 core variant identification
 │
-├─ 风险评估
-│  └─ 风险项列表 + 等级
+├─ Risk Assessment
+│ └─ Risk item list + Level
 │
-├─ 行动计划
-│  └─ 30-60-90天优化建议
+├─ Action Plan
+│  └─ 30-60-90-day optimization suggestions
 │
-└─ 计算公式参考
-   └─ 完整财务模型说明
+└─ Calculation formula reference
+   └─ Complete financial model description
 ```
 
 ---
 
-## ✨ 核心特性
+## ✨ Core Features
 
-### 🧮 运营精算师分析 (v3.0 最终版)
+### 🧮 Operational Actuary Analysis (v3.0 final version)
 
-全新的精算师级分析系统，告别估算，拥抱真实数据：
+The new actuary-level analysis system says goodbye to estimates and embraces real data:
 
-| 特性                         | 说明                                     |
+| characteristic                         | Description                                     |
 | ---------------------------- | ---------------------------------------- |
-| **📊 163指标完整采集** | 采集Keepa Product Viewer CSV格式全部字段 |
-| **💰 真实COGS输入**    | 不估算成本，用户输入真实采购+头程+关税   |
-| **🎯 TACOS广告模型**   | Total ACOS = 广告总花费/总销售额，更准确 |
-| **📈 帕累托分析**      | 80/20法则识别核心变体                    |
-| **🤖 数据驱动决策**    | 基于利润率、评分、竞争度、退货率等多维度 |
-| **⚠️ 风险量化**      | 置信度评分(0-100%)、VaR风险价值计算      |
+| **📊 Complete collection of 163 indicators** | Collect all fields in Keepa Product Viewer CSV format |
+| **💰 Real COGS input**    | No cost estimate, user enters actual purchase+first leg+tariff   |
+| **🎯 TACOS advertising model**   | Total ACOS = total advertising spend/Total sales, more accurate |
+| **📈 Pareto analysis**      | 80/The Rule of 20 to identify core variants                    |
+| **🤖 Data-driven decision-making**    | Based on multiple dimensions such as profit margin, rating, competition, return rate, etc. |
+| **⚠️Risk quantification**      | confidence score(0-100%), VaR value at risk calculation      |
 
-### 🆕 基于Keepa真实费用 (2026-02更新)
+### 🆕 Based on Keepa real costs (2026-02 update)
 
 ```
-✅ FBA费用 - 基于真实尺寸重量计算 (2026年费率)
-✅ 佣金比例 - 基于类目确定 (Electronics 8%, Clothing 17%等)
-✅ 体积重量 - 自动计算实际重量 vs 体积重量
-✅ 尺寸数据 - 从Keepa API获取 packageLength/Width/Height/Weight
+✅ FBA fees - Calculated based on true dimensional weight (2026 rates)
+✅ Commission ratio - Determine based on category (Electronics 8%, Clothing 17%Wait)
+✅ Volume weight - Automatic calculation of actual weight vs volumetric weight
+✅ Dimensional data - Get packageLength from Keepa API/Width/Height/Weight
 ```
 
-### 🔍 其他分析能力
+### 🔍 Other analysis capabilities
 
-- 🚀 **MCP原生支持** - 直接在Claude Code中使用 `@amz-keepa` 分析
-- 💬 **自然语言交互** - 用自然语言描述需求，自动生成报告
-- 📄 **专业HTML报告** - 一键生成可直接展示的报告
-- 🧠 **智能校准系统** - 从真实销售数据学习偏差
-- 🎯 **机会评分** - 多维度评分系统 (0-100)
-- ⚠️ **风险检测** - 自动识别价格战、排名下滑等
-- 🌐 **多站点支持** - US, CN, JP, DE, UK 等20+站点
+- 🚀 **MCP native support** - Use directly in Claude Code `@amz-keepa` analysis
+- 💬 **natural language interaction** - Use natural language to describe requirements and automatically generate reports
+- 📄 **Professional HTML reporting** - Generate reports that can be displayed directly with one click
+- 🧠 **Intelligent calibration system** - Learning bias from real sales data
+- 🎯 **opportunity score** - Multidimensional scoring system (0-100)
+- ⚠️ **Risk detection** - Automatically identify price wars, ranking decline, etc.
+- 🌐 **Multisite support** - US, CN, JP, DE, UK et al20+site
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick start
 
-### 方式1: Claude Code + MCP (推荐 ⭐⭐⭐)
+### Way 1: Claude Code + MCP (Recommended ⭐⭐⭐)
 
-在 Claude Code 中直接使用：
+Use it directly in Claude Code:
 
 ```bash
-# 进入项目目录
+# Enter the project directory
 cd /Users/blobeats/Downloads/amz-keepa-mcp
 
-# 启动 Claude Code
+# Start Claude Code
 claude
 ```
 
-然后在 Claude 对话中使用：
+Then in Claude's conversation use:
 
 ```
-@amz-keepa 分析 ASIN B0F6B5R47Q
+@amz-keepa analysis ASIN B0F6B5R47Q
 ```
 
-输出：
+Output:
 ```
-✅ 统一精算师报告生成完成!
+✅ The unified actuary report is generated!
 
 📦 ASIN: B0F6B5R47Q
-📊 变体数量: 9
+📊Number of variants: 9
 
-📁 报告路径:
+📁 Report path:
    cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
 
-📋 报告内容:
-   ✓ 产品信息 (品牌/类目/总销量/评论/评分)
-   ✓ 交互式成本计算器
-   ✓ 完整变体分析表 (BSR/销量/评分/评论/退货率/FBA费/佣金)
-   ✓ 帕累托分析
-   ✓ 风险评估
-   ✓ 投资建议与行动计划
+📋 Report content:
+   ✓ Product information (brand/Category/total sales/Comment/score)
+   ✓ Interactive cost calculator
+   ✓ Complete variant analysis table (BSR/Sales volume/score/Comment/return rate/FBA fee/Commission)
+   ✓ Pareto analysis
+   ✓ Risk assessment
+   ✓ Investment advice and action plan
 
-📝 使用方法:
-   1. 打开报告查看完整分析
-   2. 在"采购成本"输入框填入1688采购价
-   3. 系统自动计算完整利润分析
+📝 How to use:
+   1. Open the report to view the complete analysis
+   2. in"Procurement cost"Fill in the input box with the purchase price of 1688
+   3. The system automatically calculates complete profit analysis
 ```
 
-### 方式2: 命令行
+### Way 2: command line
 
 ```bash
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 
-# 配置环境变量
+# Configure environment variables
 export KEEPA_KEY="your_keepa_api_key"
 
-# 生成完整报告
+# Generate full report
 python generate_report.py B0F6B5R47Q
 ```
 
-输出：
+Output:
 ```
-✅ 统一精算师报告生成完成!
+✅ The unified actuary report is generated!
 
-📊 分析摘要:
-   • 父ASIN: B0F6B5R47Q
-   • 变体数量: 9
+📊 Analysis summary:
+   • Parent ASIN: B0F6B5R47Q
+   • Number of variants: 9
 
-📁 生成的报告:
+📁 Generated reports:
    cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
 
-📋 报告包含:
-   ✅ 交互式成本计算器 (填入1688采购价即计算)
-   ✅ 帕累托分析 (80/20核心变体识别)
-   ✅ 变体利润分析表
-   ✅ 风险评估
-   ✅ 投资建议与行动计划
-   ✅ 完整计算公式参考
+📋 Report contains:
+   ✅Interactive cost calculator (Fill in the 1688 purchase price and it will be calculated.)
+   ✅ Pareto analysis (80/20 core variant identification)
+   ✅ Variation profit analysis table
+   ✅Risk assessment
+   ✅ Investment advice and action plan
+   ✅ Complete calculation formula reference
 
-📝 使用说明:
-   1. 打开报告: open cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
-   2. 在'采购成本'输入框填入从1688找到的采购价
-   3. 系统自动计算完整利润分析
-   4. 向下滚动查看帕累托分析、风险评估等
+📝 Instructions for use:
+   1. Open the report: open cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
+   2. in'Procurement cost'Fill in the input box with the purchase price found from 1688
+   3. The system automatically calculates complete profit analysis
+   4. Scroll down for Pareto analysis, risk assessment, and more
 
-💡 提示:
-   • 可以实时调整采购价，查看不同成本下的利润
-   • 所有FBA费用基于Keepa真实尺寸重量计算
-   • 佣金比例基于类目自动确定
+💡 Tips:
+   • You can adjust purchase prices in real time and view profits under different costs
+   • All FBA fees are calculated based on Keepa true dimensional weight
+   • Commission ratio is automatically determined based on category
 ```
 
-### 方式2: MCP对话方式
+### Way 2: MCP conversation method
 
-配置完成后，直接在Claude中输入:
+After the configuration is completed, enter it directly in Claude:
 
 ```
-分析 ASIN B0F6B5R47Q
+Analysis ASIN B0F6B5R47Q
 ```
 
-Claude 会自动执行**标准流程**，生成完整报告。
+Claude will do it automatically**standard process**, generate a complete report.
 
-### 方式3: Python代码方式
+### Way 3: Python code method
 
 ```python
 from generate_report import generate_complete_report
 
 results = generate_complete_report('B0F6B5R47Q', target_moq=100)
 
-print(f"报告路径: {results['unified_report']}")
-print(f"父ASIN: {results['parent_asin']}")
-print(f"变体数量: {results['variants_count']}")
+print(f"Report path: {results['unified_report']}")
+print(f"Parent ASIN: {results['parent_asin']}")
+print(f"Number of variants: {results['variants_count']}")
 ```
 
 ---
 
-## 📖 使用指南
+## 📖 User Guide
 
-### 标准流程详解
+### Detailed explanation of standard procedures
 
-#### 步骤1: 采集Keepa数据
+#### Step 1: Collect Keepa data
 
-系统自动从Keepa API获取：
-- 产品基础信息 (标题、品牌、类目)
-- 所有变体ASIN
-- 完整尺寸重量 (packageLength/Width/Height/Weight)
-- 价格历史、销量排名
-- 评论数据、退货率
+The system automatically obtains from Keepa API:
+- Basic product information (Title, brand, category)
+- All variant ASINs
+- Full size weight (packageLength/Width/Height/Weight)
+- Price history, sales ranking
+- Review data, return rate
 
-#### 步骤2: 计算真实费用
+#### Step 2: Calculate true costs
 
-基于Keepa数据自动计算：
+Automatic calculation based on Keepa data:
 
 ```python
-# FBA费用计算 (2026年费率)
-计费重量 = max(实际重量, 体积重量)
-体积重量 = (长×宽×高) / 166  (inch³)
+# FBA fee calculation (2026 rates)
+Billing weight = max(actual weight, Volume weight)
+Volume weight = (Length×width×height) / 166  (inch³)
 
-# 佣金比例 (基于类目)
+# Commission ratio (Based on category)
 Electronics: 8%
 Clothing: 17%
 Jewelry: 20%
-其他: 15%
+Others: 15%
 ```
 
-#### 步骤3: 生成统一精算师报告
+#### Step 3: Generate unified actuary report
 
-生成一份统一报告 (`{ASIN}_UNIFIED_ACTUARY.html`)：
+Generate a unified report (`{ASIN}_UNIFIED_ACTUARY.html`)：
 
-**报告结构：**
+**Report structure:**
 ```
-├─ 交互式成本计算器
-│  └─ 填入1688采购价 → 自动计算完整COGS
+├─ Interactive cost calculator
+│ └─ Fill in the 1688 purchase price → automatically calculate the complete COGS
 │
-├─ 汇总指标面板
-│  └─ 月度总利润 / 总销量 / 平均利润率 / ROI
+├─ Summary indicator panel
+│ └─ Total monthly profit / total sales / average profit margin / ROI
 │
-├─ 投资建议
-│  └─ GO / 谨慎 / 避免 + 置信度
+├─ Investment advice
+│  └─ GO / cautious / avoid + Confidence
 │
-├─ 帕累托分析
-│  └─ 80/20核心变体识别
+├─ Pareto analysis
+│  └─ 80/20 core variant identification
 │
-├─ 变体利润分析表
-│  └─ 每个变体的详细利润数据
+├─ Variation profit analysis table
+│ └─ Detailed profit data for each variant
 │
-├─ 风险评估
-│  └─ 风险项列表 + 等级
+├─ Risk Assessment
+│ └─ Risk item list + Level
 │
-├─ 行动计划
-│  └─ 30-60-90天优化建议
+├─ Action Plan
+│  └─ 30-60-90-day optimization suggestions
 │
-└─ 计算公式参考
-   └─ 完整财务模型说明
-```
-
-#### 步骤4: 填入采购价 (唯一需要手动的步骤)
-
-```
-1. 打开1688.com
-2. 使用"以图搜货"找到产品
-3. 记录采购价格 (如 ¥35.50)
-4. 在交互式报告中填入
-5. 系统自动计算完整COGS和利润
+└─ Calculation formula reference
+   └─ Complete financial model description
 ```
 
-### 完整财务模型
+#### Step 4: Enter purchase price (The only manual step required)
 
 ```
-售价 (Amazon)
-  - COGS (采购+头程+关税)
-  - FBA费用 (基于尺寸重量)
-  - 佣金 (基于类目)
-  - 退货成本
-  - 仓储费
-  - TACOS广告费 (15%)
+1. Open 1688.com
+2. Use"Search for goods by picture"find product
+3. Record the purchase price (Such as ¥35.50)
+4. Fill in the interactive report
+5. The system automatically calculates complete COGS and profit
+```
+
+### Complete financial model
+
+```
+selling price (Amazon)
+  - COGS (Procurement+first leg+tariff)
+  - FBA fees (Based on dimensional weight)
+  - Commission (Based on category)
+  - return cost
+  - Storage fee
+  - TACOS advertising fee (15%)
   ─────────────────
-  = 净利润
+  = net profit
 ```
 
 ---
 
-## 📊 报告示例
+## 📊 Report Example
 
-### 交互式报告界面
+### Interactive reporting interface
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  🔧 成本计算器                                                       │
+│ 🔧 Cost Calculator │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  采购成本                                                    │   │
+│ │ Procurement Cost │ │
 │  │                                                             │   │
-│  │     ¥35.50    ← 填入从1688找到的采购价格                    │   │
+│ │ ¥35.50 ← Fill in the purchase price found from 1688 │ │
 │  │                                                             │   │
 │  └─────────────────────────────────────────────────────────────┘   │
 │                                                                     │
-│  成本构成:                                                          │
-│  采购成本: ¥35.50 + 头程运费: ¥5.40 × 关税1.15 ÷ 汇率7.2           │
-│  = 总COGS: $6.54 USD                                               │
+│ Cost structure:                                                          │
+│ Procurement cost: ¥35.50 + First leg freight: ¥5.40 × Tariff 1.15 ÷ Exchange rate 7.2 │
+│  = Total COGS: $6.54 USD                                               │
 │                                                                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  📊 费用明细 (基于Keepa真实数据)                                     │
+│ 📊 Fee details (Based on Keepa real data)                                     │
 ├─────────────────────────────────────────────────────────────────────┤
-│  FBA费用:    $3.86  (基于450g重量计算)                             │
-│  佣金:       $3.68  (Electronics类目 8%)                           │
-│  退货成本:   $0.69  (5%退货率)                                     │
-│  仓储费:     $0.06                                                 │
-│  TACOS:      $6.90  (广告费15%)                                    │
+│ FBA fees:    $3.86  (Calculated based on 450g weight)                             │
+│ Commission:       $3.68  (Electronics Category 8%)                           │
+│ Return costs:   $0.69  (5%return rate)                                     │
+│ Storage fee:     $0.06                                                 │
+│  TACOS:      $6.90  (Advertising fee 15%)                                    │
 │  ─────────────────                                                 │
-│  总费用:     $15.19                                                │
+│ Total cost:     $15.19                                                │
 ├─────────────────────────────────────────────────────────────────────┤
-│  📈 利润分析                                                         │
+│ 📈 Profit Analysis │
 ├─────────────────────────────────────────────────────────────────────┤
-│  售价:        $45.99                                               │
-│  减 COGS:     $6.54                                                │
-│  减 费用:     $15.19                                               │
+│ Selling price:        $45.99                                               │
+│ Less COGS:     $6.54                                                │
+│ Less fees:     $15.19                                               │
 │  ─────────────────                                                 │
-│  单件利润:    $24.26  (利润率 52.8%)                               │
-│  月销量:      800件                                                │
-│  月利润:      $19,408                                              │
+│Profit per unit:    $24.26  (Profit margin 52.8%)                               │
+│Monthly Sales:      800 pieces │
+│Monthly profit:      $19,408                                              │
 │                                                                     │
-│  🎯 投资建议: 建议投资 (置信度 85%)                                 │
+│ 🎯 Investment Advice: Recommended investment (Confidence 85%)                                 │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ❓ 常见问题
+## ❓ FAQ
 
-### Q: 为什么只需要输入ASIN就能生成完整报告?
+### Q: Why you only need to enter the ASIN to generate a full report?
 
-**A:** 系统会自动：
-1. 从Keepa API获取产品数据 (尺寸、重量、价格等)
-2. 自动发现所有变体
-3. 基于真实尺寸计算FBA费用
-4. 基于类目确定佣金比例
-5. 生成包含163指标的完整报告
+**A:** The system will automatically:
+1. Get product data from Keepa API (Size, weight, price, etc.)
+2. Automatically discover all variants
+3. Calculate FBA fees based on real dimensions
+4. Determine commission ratio based on category
+5. Generate a complete report containing 163 indicators
 
-**唯一需要手动的**: 填入从1688找到的采购价 (因为需要人工确认供应商)
+**The only thing that requires manual**: Fill in the purchase price found from 1688 (Because manual confirmation of suppliers is required)
 
-### Q: FBA费用准确吗?
+### Q: Are FBA fees accurate??
 
-**A:** 是的，基于：
-- Keepa API提供的产品尺寸和重量
-- 2026年最新FBA费率表
-- 自动计算体积重量 vs 实际重量
+**A:** Yes, based on:
+- Product dimensions and weight provided by Keepa API
+- The latest FBA rate schedule in 2026
+- Automatic calculation of dimensional weight vs actual weight
 
-### Q: 佣金比例是如何确定的?
+### Q: How is the commission ratio determined??
 
-**A:** 基于Keepa API提供的类目信息：
+**A:** Based on category information provided by Keepa API:
 
-| 类目 | 佣金 |
+| Category | Commission |
 |------|------|
 | Electronics | 8% |
 | Clothing | 17% |
 | Jewelry | 20% |
-| 其他 | 15% |
+| Others | 15% |
 
-### Q: 如何获取1688采购价?
+### Q: How to get the 1688 purchase price?
 
 **A:** 
-1. 打开 https://www.1688.com
-2. 点击搜索框右侧"相机"图标 (以图搜货)
-3. 粘贴Amazon产品图片
-4. 找到相似产品，记录价格
+1. Open https://www.1688.com
+2. Click on the right side of the search box"camera"icon (Search for goods by picture)
+3. Paste Amazon product pictures
+4. Find similar products and record the price
 
-### Q: 什么是TACOS?
+### Q: What is TACOS?
 
-**A:** TACOS (Total ACOS) = 广告总花费 / 总销售额
+**A:** TACOS (Total ACOS) = total advertising spend / total sales
 
-- 比ACOS更能反映广告对整体业务的影响
-- 默认假设15%，可根据实际调整
+- Better than ACOS to reflect the impact of advertising on the overall business
+- Default assumption 15%, can be adjusted according to actual
 
 ---
 
-## 🏗️ 系统架构
+## 🏗️ System architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                         亚马逊运营精算师系统 v3.0                        │
+│ Amazon Operations Actuary System v3.0 │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐  │
-│  │  用户输入       │───▶│  标准流程引擎     │───▶│  Keepa API          │  │
-│  │  ASIN          │    │  (generate_)     │    │  (真实尺寸重量)      │  │
+│ │ User Input │───▶│ Standard Process Engine │───▶│ Keepa API │ │
+│  │  ASIN          │    │  (generate_)     │    │  (True size weight)      │  │
 │  └─────────────────┘    └──────────────────┘    └─────────────────────┘  │
 │                                │                                        │
 │                                ▼                                        │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │                     费用计算引擎                                   │   │
+│ │ Cost Calculation Engine │ │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │   │
-│  │  │ FBA费用     │  │ 佣金计算    │  │ 体积重量    │              │   │
-│  │  │ (2026费率)  │  │ (基于类目)  │  │ (vs实际)    │              │   │
+│ │ │ FBA fees │ │ Commission calculation │ │ Volumetric weight │ │ │
+│  │  │ (2026 rates)  │  │ (Based on category)  │  │ (vs actual)    │              │   │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘              │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                │                                        │
 │                                ▼                                        │
 │  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │                     报告生成层                                     │   │
+│ │ Report generation layer │ │
 │  │  ┌─────────────────┐    ┌─────────────────┐                     │   │
-│  │  │ 精算师报告       │    │ 交互式报告       │                     │   │
-│  │  │ (163指标)       │    │ (填入COGS)      │                     │   │
+│ │ │ Actuary Report │ │ Interactive Report │ │ │
+│  │  │ (163 indicators)       │    │ (Fill in COGS)      │                     │   │
 │  │  └─────────────────┘    └─────────────────┘                     │   │
 │  └─────────────────────────────────────────────────────────────────┘   │
 │                                                                          │
@@ -444,45 +444,45 @@ Jewelry: 20%
 
 ---
 
-## 📦 安装
+## 📦 Installation
 
-### 1. 克隆仓库
+### 1. Clone the repository
 
 ```bash
 git clone <repository-url>
 cd amz-keepa-mcp
 ```
 
-### 2. 创建虚拟环境
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
+# or
 venv\Scripts\activate  # Windows
 ```
 
-### 3. 安装依赖
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. 配置环境变量
+### 4. Configure environment variables
 
 ```bash
-# .env 文件
+# .env file
 KEEPA_KEY=your_keepa_api_key_here
-TMAPI_TOKEN=your_tmapi_token_here  # 可选，用于自动1688采购价
+TMAPI_TOKEN=your_tmapi_token_here  # Optional, for automatic 1688 purchase price
 ```
 
 ---
 
-## 🔧 MCP配置
+## 🔧 MCP configuration
 
-### Claude Desktop 配置
+### Claude Desktop Configuration
 
-编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -502,40 +502,40 @@ TMAPI_TOKEN=your_tmapi_token_here  # 可选，用于自动1688采购价
 
 ---
 
-## 📁 项目结构
+## 📁 Project structure
 
 ```
 amz-keepa-mcp/
-├── generate_report.py              ⭐ 标准流程入口 (推荐)
+├── generate_report.py ⭐ Standard process entry (recommend)
 ├── src/
-│   ├── amazon_actuary_final.py      # 精算师系统
-│   ├── keepa_metrics_collector.py   # 163指标采集
-│   ├── keepa_fee_extractor.py       # 真实费用提取 (NEW)
-│   ├── allinone_interactive_report.py # 交互式报告
+│   ├── amazon_actuary_final.py      # actuary system
+│   ├── keepa_metrics_collector.py   # 163 indicator collection
+│   ├── keepa_fee_extractor.py       # True fee withdrawal (NEW)
+│   ├── allinone_interactive_report.py # Interactive reporting
 │   └── ...
 ├── cache/
-│   └── reports/                     # 生成的报告
-├── README.md                        # 本文件
+│   └── reports/                     # generated report
+├── README.md                        # this document
 └── requirements.txt
 ```
 
 ---
 
-## ⚠️ 免责声明
+## ⚠️ Disclaimer
 
-本系统基于Keepa API历史数据进行分析，所有预测和推荐仅供参考：
+This system analyzes based on Keepa API historical data. All predictions and recommendations are for reference only:
 
-- 📈 市场波动可能导致实际结果与预测差异
-- 💰 盈利计算基于用户提供的COGS数据，请确保数据准确
-- ⚡ 亚马逊算法变化可能影响排名和销量
-- 📊 建议在做出重大投资决策前进行多渠道验证
-
----
-
-## 📄 许可证
-
-MIT License - 详见 LICENSE 文件
+- 📈 Market fluctuations may cause actual results to differ from forecasts
+- 💰 Profit calculation is based on COGS data provided by users, please ensure the data is accurate
+- ⚡ Amazon algorithm changes may affect rankings and sales
+- 📊 It is recommended to conduct multi-channel verification before making major investment decisions
 
 ---
 
-**最后更新**: 2026-02-16 | **版本**: v3.0 | **标准流程**: `python generate_report.py <ASIN>`
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+---
+
+**last updated**: 2026-02-16 | **version**: v3.0 | **standard process**: `python generate_report.py <ASIN>`

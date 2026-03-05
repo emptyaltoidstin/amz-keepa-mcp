@@ -1,7 +1,7 @@
 """
-亚马逊链接变体利润分析器
+Amazon Link Variant Profit Analyzer
 ===========================
-采集父ASIN下所有变体，基于真实销量分布和订单来源推演链接整体盈利
+Collect all variants under the parent ASIN, and deduce the overall profitability of the link based on real sales distribution and order sources.
 """
 
 import pandas as pd
@@ -13,7 +13,7 @@ from collections import defaultdict
 
 @dataclass
 class VariantMetrics:
-    """变体指标"""
+    """Variation indicator"""
     asin: str
     title: str
     color: str
@@ -25,11 +25,11 @@ class VariantMetrics:
     rating: float
     return_rate: float
     
-    # 订单来源分布 (从真实数据或估算)
-    organic_order_pct: float = 0.60  # 自然订单占比
-    ad_order_pct: float = 0.40       # 广告订单占比
+    # Order source distribution (from real data or estimates)
+    organic_order_pct: float = 0.60  # Proportion of natural orders
+    ad_order_pct: float = 0.40       # Insertion order proportion
     
-    # 成本结构
+    # cost structure
     cogs: float = 0.0
     fba_fee: float = 0.0
     
@@ -39,45 +39,45 @@ class VariantMetrics:
     
     @property
     def contribution_margin(self) -> float:
-        """贡献毛利 (不含广告费)"""
+        """Contribute gross profit (Does not include advertising fees)"""
         referral_fee = self.price * 0.15
         return_cost = self.price * self.return_rate * 0.30
-        storage = 0.05  # 估算
+        storage = 0.05  # Estimate
         return self.price - self.cogs - self.fba_fee - referral_fee - return_cost - storage
 
 
 @dataclass
 class LinkProfitability:
-    """链接整体盈利性"""
+    """Overall link profitability"""
     parent_asin: str
     total_variants: int
     active_variants: int
     
-    # 销量分布
+    # Sales volume distribution
     total_monthly_sales: int
     top_3_variants_sales_pct: float
     
-    # 收入结构
+    # income structure
     total_monthly_revenue: float
     
-    # 利润分析
-    blended_organic_margin: float  # 混合自然订单利润率
-    blended_ad_margin: float       # 混合广告订单利润率
-    blended_overall_margin: float  # 整体混合利润率
+    # profit analysis
+    blended_organic_margin: float  # Mixed organic order margin
+    blended_ad_margin: float       # Mixed insertion order margin
+    blended_overall_margin: float  # Overall blended profit margin
     
-    # 自然 vs 广告对比
+    # Organic vs Advertising Comparison
     organic_revenue_pct: float
     ad_revenue_pct: float
     organic_profit: float
     ad_profit: float
     
-    # 关键发现
-    pareto_variants: List[str]  # 贡献80%销量的变体
-    loss_variants: List[str]    # 亏损的变体
+    # Key findings
+    pareto_variants: List[str]  # Contribute 80%sales volume variations
+    loss_variants: List[str]    # Losing variant
 
 
 class VariantProfitAnalyzer:
-    """变体利润分析器"""
+    """Variant Profit Analyzer"""
     
     def __init__(self):
         self.referral_rate = 0.15
@@ -91,43 +91,43 @@ class VariantProfitAnalyzer:
                                    order_source_map: Optional[Dict[str, Tuple[float, float]]] = None
                                    ) -> LinkProfitability:
         """
-        分析整个链接的盈利性
+        Analyze the profitability of the entire link
         
         Args:
-            parent_asin: 父ASIN
-            variants_data: 所有变体的Keepa数据
-            cogs_map: 各变体的COGS {asin: cogs}
-            order_source_map: 各变体的订单来源比例 {asin: (organic_pct, ad_pct)}
+            parent_asin: Parent ASIN
+            variants_data: Keepa data for all variants
+            cogs_map: COGS of each variant {asin: cogs}
+            order_source_map: Proportion of order sources for each variant {asin: (organic_pct, ad_pct)}
         
         Returns:
-            LinkProfitability 链接整体盈利分析
+            LinkProfitability Link overall profitability analysis
         """
-        # 解析每个变体的指标
+        # Parse metrics for each variant
         variants = []
         for data in variants_data:
             variant = self._parse_variant_metrics(data)
             
-            # 应用自定义COGS
+            # Apply custom COGS
             if cogs_map and variant.asin in cogs_map:
                 variant.cogs = cogs_map[variant.asin]
             else:
-                # 基于价格的默认估算
+                # Price-based default estimate
                 variant.cogs = variant.price * 0.35
             
-            # 应用订单来源比例
+            # Apply order source ratio
             if order_source_map and variant.asin in order_source_map:
                 variant.organic_order_pct, variant.ad_order_pct = order_source_map[variant.asin]
             
             variants.append(variant)
         
-        # 按销量排序
+        # Sort by sales
         variants.sort(key=lambda x: x.estimated_sales, reverse=True)
         
-        # 计算链接整体指标
+        # Calculate overall link metrics
         return self._calculate_link_metrics(parent_asin, variants)
     
     def _parse_variant_metrics(self, data: Dict) -> VariantMetrics:
-        """解析变体指标"""
+        """Parse variant metrics"""
         return VariantMetrics(
             asin=data.get('asin', ''),
             title=data.get('title', ''),
@@ -143,7 +143,7 @@ class VariantProfitAnalyzer:
         )
     
     def _calculate_link_metrics(self, parent_asin: str, variants: List[VariantMetrics]) -> LinkProfitability:
-        """计算链接整体指标"""
+        """Calculate overall link metrics"""
         if not variants:
             return LinkProfitability(
                 parent_asin=parent_asin,
@@ -166,7 +166,7 @@ class VariantProfitAnalyzer:
         total_sales = sum(v.estimated_sales for v in variants)
         total_revenue = sum(v.monthly_revenue for v in variants)
         
-        # 帕累托分析 (80/20法则)
+        # Pareto analysis (80/Rule of 20)
         sales_accumulated = 0
         pareto_threshold = total_sales * 0.80
         pareto_variants = []
@@ -177,13 +177,13 @@ class VariantProfitAnalyzer:
             if sales_accumulated <= pareto_threshold:
                 pareto_variants.append(v.asin)
             
-            # 检查是否亏损
+            # Check if there is a loss
             if v.contribution_margin <= 0:
                 loss_variants.append(v.asin)
         
         top_3_sales = sum(v.estimated_sales for v in variants[:3])
         
-        # 计算加权平均利润率
+        # Calculate weighted average profit margin
         total_organic_profit = 0
         total_ad_profit = 0
         total_organic_revenue = 0
@@ -193,12 +193,12 @@ class VariantProfitAnalyzer:
             organic_sales = v.estimated_sales * v.organic_order_pct
             ad_sales = v.estimated_sales * v.ad_order_pct
             
-            # 自然订单利润 (无广告费)
+            # Natural order profit (No advertising fees)
             organic_profit_per_unit = v.contribution_margin
             total_organic_profit += organic_profit_per_unit * organic_sales
             total_organic_revenue += v.price * organic_sales
             
-            # 广告订单利润 (减去广告费)
+            # Insertion Order Profit (minus advertising costs)
             ad_cost_per_unit = v.price * 0.15  # ACoS 15%
             ad_profit_per_unit = v.contribution_margin - ad_cost_per_unit
             total_ad_profit += ad_profit_per_unit * ad_sales
@@ -234,14 +234,14 @@ class VariantProfitAnalyzer:
                                      link_metrics: LinkProfitability,
                                      variants: List[VariantMetrics],
                                      output_path: str):
-        """生成变体利润分析报告"""
+        """Generate variant profit analysis report"""
         
         html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>链接变体利润分析 - {parent_asin}</title>
+    <title>Link variant profit analysis - {parent_asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -362,104 +362,104 @@ class VariantProfitAnalyzer:
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔗 链接变体利润分析报告</h1>
-            <div style="opacity: 0.9;">父ASIN: {parent_asin}</div>
+            <h1>🔗 Link variant profit analysis report</h1>
+            <div style="opacity: 0.9;">Parent ASIN: {parent_asin}</div>
             <div style="margin-top: 15px; display: flex; gap: 20px; flex-wrap: wrap;">
-                <span>总变体数: {link_metrics.total_variants}</span>
-                <span>活跃变体: {link_metrics.active_variants}</span>
-                <span>帕累托变体: {len(link_metrics.pareto_variants)}个(贡献80%销量)</span>
+                <span>Total number of variants: {link_metrics.total_variants}</span>
+                <span>active variant: {link_metrics.active_variants}</span>
+                <span>Pareto variant: {len(link_metrics.pareto_variants)}a(Contribute 80%Sales volume)</span>
             </div>
         </div>
         
         <!-- Executive Summary -->
         <div class="card">
-            <h2 class="card-title">💼 链接整体盈利概览</h2>
+            <h2 class="card-title">💼 Link overall profit overview</h2>
             
             <div class="metrics-grid">
                 <div class="metric-box">
                     <div class="metric-value" style="color: #60a5fa;">{link_metrics.total_monthly_sales:,}</div>
-                    <div class="metric-label">预估月总销量</div>
+                    <div class="metric-label">Estimated total monthly sales</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: #a78bfa;">${link_metrics.total_monthly_revenue:,.0f}</div>
-                    <div class="metric-label">预估月销售额</div>
+                    <div class="metric-label">Estimated monthly sales</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: {'#4ade80' if link_metrics.blended_overall_margin > 15 else '#fbbf24' if link_metrics.blended_overall_margin > 5 else '#f87171'};">
                         {link_metrics.blended_overall_margin:.1f}%
                     </div>
-                    <div class="metric-label">整体混合利润率</div>
+                    <div class="metric-label">Overall blended profit margin</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: #22c55e;">{link_metrics.organic_revenue_pct:.0f}%</div>
-                    <div class="metric-label">自然订单收入占比</div>
+                    <div class="metric-label">Proportion of natural order revenue</div>
                 </div>
             </div>
             
             <div class="insight-box">
-                <strong>💡 关键发现:</strong> 前{len(link_metrics.pareto_variants)}个变体贡献了80%的销量，
-                其中{len(link_metrics.loss_variants)}个变体可能亏损。建议重点关注高销量变体的利润率优化。
+                <strong>💡 Key findings:</strong> before{len(link_metrics.pareto_variants)}variants contributed 80%sales volume,
+                in{len(link_metrics.loss_variants)}Variants may lose money. It is recommended to focus on margin optimization for high-volume variants.
             </div>
         </div>
         
         <!-- Organic vs Ad Comparison -->
         <div class="card">
-            <h2 class="card-title">📊 自然订单 vs 广告订单对比</h2>
+            <h2 class="card-title">📊 Organic order vs insertion order comparison</h2>
             
             <div class="comparison-grid">
                 <div style="background: rgba(34, 197, 94, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.3);">
-                    <h3 style="color: #4ade80; margin-bottom: 20px;">🌿 自然订单 ({link_metrics.organic_revenue_pct:.0f}%)</h3>
+                    <h3 style="color: #4ade80; margin-bottom: 20px;">🌿 Natural order ({link_metrics.organic_revenue_pct:.0f}%)</h3>
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>自然订单月利润</span>
+                            <span>Natural order monthly profit</span>
                             <span style="font-weight: 600; color: #4ade80;">${link_metrics.organic_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>自然订单利润率</span>
+                            <span>Natural order profit margin</span>
                             <span style="font-weight: 600; color: #4ade80;">{link_metrics.blended_organic_margin:.1f}%</span>
                         </div>
                     </div>
-                    <p style="opacity: 0.8; font-size: 0.9em;">自然订单无广告成本，利润率更高，应重点优化自然排名。</p>
+                    <p style="opacity: 0.8; font-size: 0.9em;">Natural orders have no advertising costs and higher profit margins, so focus should be placed on optimizing natural rankings.</p>
                 </div>
                 
                 <div style="background: rgba(245, 158, 11, 0.1); padding: 25px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.3);">
-                    <h3 style="color: #fbbf24; margin-bottom: 20px;">🎯 广告订单 ({link_metrics.ad_revenue_pct:.0f}%)</h3>
+                    <h3 style="color: #fbbf24; margin-bottom: 20px;">🎯 Insertion Order ({link_metrics.ad_revenue_pct:.0f}%)</h3>
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span>广告订单月利润</span>
+                            <span>Insertion order monthly profit</span>
                             <span style="font-weight: 600; color: #fbbf24;">${link_metrics.ad_profit:,.0f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>广告订单利润率</span>
+                            <span>Insertion order profit margin</span>
                             <span style="font-weight: 600; color: #fbbf24;">{link_metrics.blended_ad_margin:.1f}%</span>
                         </div>
                     </div>
-                    <p style="opacity: 0.8; font-size: 0.9em;">广告订单利润率较低，需监控ACoS，避免广告亏损。</p>
+                    <p style="opacity: 0.8; font-size: 0.9em;">The profit margin of advertising orders is low, and ACoS needs to be monitored to avoid advertising losses.</p>
                 </div>
             </div>
         </div>
         
         <!-- Variant Details -->
         <div class="card">
-            <h2 class="card-title">📋 变体详细分析</h2>
+            <h2 class="card-title">📋 Detailed analysis of variants</h2>
             <p style="color: #94a3b8; margin-bottom: 20px;">
-                共{len(variants)}个变体，按销量排序显示
+                total{len(variants)}variations, displayed sorted by sales volume
             </p>
             
             <div style="overflow-x: auto;">
                 <table class="variant-table">
                     <thead>
                         <tr>
-                            <th>排名</th>
+                            <th>Ranking</th>
                             <th>ASIN</th>
-                            <th>颜色/尺寸</th>
-                            <th>价格</th>
-                            <th>月销量</th>
-                            <th>订单来源</th>
-                            <th>贡献毛利</th>
-                            <th>自然利润</th>
-                            <th>广告利润</th>
-                            <th>状态</th>
+                            <th>color/Size</th>
+                            <th>price</th>
+                            <th>monthly sales</th>
+                            <th>Order source</th>
+                            <th>Contribute gross profit</th>
+                            <th>natural profit</th>
+                            <th>advertising profit</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -471,35 +471,35 @@ class VariantProfitAnalyzer:
         
         <!-- Recommendations -->
         <div class="card">
-            <h2 class="card-title">💡 运营建议</h2>
+            <h2 class="card-title">💡Operation suggestions</h2>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
-                    <h4 style="color: #4ade80; margin-bottom: 15px;">✅ 立即行动</h4>
+                    <h4 style="color: #4ade80; margin-bottom: 15px;">✅ Act now</h4>
                     <ul style="list-style: none; padding: 0;">
                         <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            1. 核查{len(link_metrics.loss_variants)}个亏损变体的COGS
+                            1. Verification{len(link_metrics.loss_variants)}COGS of loss-making variants
                         </li>
                         <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            2. 优化前{len(link_metrics.pareto_variants)}个变体的自然排名
+                            2. Before optimization{len(link_metrics.pareto_variants)}natural ranking of variants
                         </li>
                         <li style="padding: 8px 0;">
-                            3. 监控广告订单ACoS，控制在15%以内
+                            3. Monitor the ACoS of the insertion order and control it at 15%within
                         </li>
                     </ul>
                 </div>
                 
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
-                    <h4 style="color: #fbbf24; margin-bottom: 15px;">⚠️ 风险提示</h4>
+                    <h4 style="color: #fbbf24; margin-bottom: 15px;">⚠️Risk warning</h4>
                     <ul style="list-style: none; padding: 0;">
                         <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            • 自然订单占比{link_metrics.organic_revenue_pct:.0f}%，{'良好' if link_metrics.organic_revenue_pct > 60 else '需提升'}
+                            • Proportion of natural orders{link_metrics.organic_revenue_pct:.0f}%，{'good' if link_metrics.organic_revenue_pct > 60 else 'Need to improve'}
                         </li>
                         <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            • 头部{link_metrics.top_3_variants_sales_pct:.0f}%销量集中，{'风险集中' if link_metrics.top_3_variants_sales_pct > 80 else '分布合理'}
+                            • Head{link_metrics.top_3_variants_sales_pct:.0f}%Sales volume is concentrated,{'risk concentration' if link_metrics.top_3_variants_sales_pct > 80 else 'Reasonable distribution'}
                         </li>
                         <li style="padding: 8px 0;">
-                            • 实际盈利取决于真实COGS和订单来源比例
+                            • Actual profit depends on real COGS and order source ratio
                         </li>
                     </ul>
                 </div>
@@ -515,19 +515,19 @@ class VariantProfitAnalyzer:
         return output_path
     
     def _render_variant_rows(self, variants: List[VariantMetrics]) -> str:
-        """渲染变体行"""
+        """Render variant row"""
         html = ''
         for i, v in enumerate(variants, 1):
-            # 计算各种利润
+            # Calculate various profits
             referral = v.price * 0.15
             returns = v.price * v.return_rate * 0.30
             storage = 0.05
             
             contribution = v.price - v.cogs - v.fba_fee - referral - returns - storage
             organic_profit = contribution
-            ad_profit = contribution - v.price * 0.15  # 减去广告费
+            ad_profit = contribution - v.price * 0.15  # minus advertising costs
             
-            # 行样式
+            # row style
             row_class = ''
             status = ''
             if i <= 3:
@@ -535,9 +535,9 @@ class VariantProfitAnalyzer:
                 status = '🔥 Top'
             elif contribution <= 0:
                 row_class = 'loss-variant'
-                status = '⚠️ 亏损'
+                status = '⚠️ Loss'
             elif v.estimated_sales > 0:
-                status = '✅ 正常'
+                status = '✅Normal'
             
             profit_class = 'profit-positive' if contribution > 0 else 'profit-negative'
             
@@ -567,7 +567,7 @@ class VariantProfitAnalyzer:
         return html
     
     def _estimate_sales_from_rank(self, rank: int) -> int:
-        """根据排名估算月销量"""
+        """Estimated monthly sales based on ranking"""
         if rank < 1000:
             return 1000 + int((1000 - rank) * 5)
         elif rank < 10000:

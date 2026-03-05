@@ -1,69 +1,69 @@
-# 1688 爬虫方案对比分析
+# Comparative analysis of 1688 crawler solutions
 
-## 项目对比
+## Project comparison
 
-| 特性 | Carmenliukang项目 | Zhui-CN项目 | 当前系统 (cn_1688_crawler.py) |
+| characteristic | Carmenliukang project | Zhui-CN project | Current system (cn_1688_crawler.py) |
 |------|-------------------|-------------|------------------------------|
-| **实现方式** | 1688 H5 API | 1688 H5 API | 1688 H5 API |
-| **成功率** | ~60-80% | ~60-80% | ~60-80% |
-| **依赖** | requests | httpx | requests |
-| **代码质量** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **维护状态** | 2023年 | 2024年 | 2024年 (活跃) |
-| **集成难度** | 中 | 中 | 低 (已集成) |
+| **Implementation method** | 1688 H5 API | 1688 H5 API | 1688 H5 API |
+| **success rate** | ~60-80% | ~60-80% | ~60-80% |
+| **rely** | requests | httpx | requests |
+| **Code quality** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **maintenance status** | 2023 | 2024 | 2024 (active) |
+| **Integration difficulty** | middle | middle | Low (Integrated) |
 
-## 技术实现对比
+## Technical implementation comparison
 
-### 核心流程 (三者几乎相同)
+### core process (The three are almost the same)
 
 ```
-1. 获取 cna cookie (log.mmstat.com)
-2. 获取 token (_m_h5_tk cookie)
-3. 计算 sign (MD5)
-4. 上传图片获取 imageId
-5. 使用 imageId 搜索商品
-6. 解析返回数据
+1. Get cna cookie (log.mmstat.com)
+2. Get token (_m_h5_tk cookie)
+3. Calculate sign (MD5)
+4. Upload image to get imageId
+5. Use imageId to search for products
+6. Parse the returned data
 ```
 
-### API 配置对比
+### API configuration comparison
 
-| 配置项 | Carmenliukang | Zhui-CN | 当前系统 |
+| Configuration items | Carmenliukang | Zhui-CN | Current system |
 |--------|--------------|---------|----------|
 | api_key | 12574478 | 12574478 | 12574478 |
 | jsv | 2.7.2 | 2.7.2 | 2.7.2 |
 | app_key | pvvljh1grxcmaay2vgpe9nb68gg9ueg2 | pvvljh1grxcmaay2vgpe9nb68gg9ueg2 | pvvljh1grxcmaay2vgpe9nb68gg9ueg2 |
 | upload_api | mtop.1688.imageService.putImage | mtop.1688.imageService.putImage | mtop.1688.imageService.putImage |
 
-**结论**: 三者使用完全相同的1688内部API配置
+**in conclusion**: The three use the exact same 1688 internal API configuration
 
-## 是否能解决需求？
+## Can it solve the need?
 
-### ✅ 能解决的
+### ✅ It can be solved
 
-1. **以图搜图功能** - 三者都能实现
-2. **获取采购价格** - 可以获取1688商品价格
-3. **获取MOQ** - 可以获取最小起订量
-4. **供应商信息** - 可以获取店铺、评分等信息
+1. **Image search function** - All three can be achieved
+2. **Get purchase price** - You can get 1688 product prices
+3. **Get MOQ** - Minimum order quantity available
+4. **Supplier information** - You can get store, rating and other information
 
-### ⚠️ 共同限制
+### ⚠️ Common restrictions
 
-1. **反爬机制** - 1688会限制频繁请求
-2. **IP封禁** - 大量请求可能触发封禁
-3. **接口变更** - 1688可能随时更改API
-4. **图片限制** - Amazon图片可能需要转换
-5. **网络问题** - 某些环境可能遇到SSL/连接问题
+1. **Anti-climbing mechanism** - 1688 will limit frequent requests
+2. **IP ban** - A large number of requests may trigger a ban
+3. **Interface changes** - 1688 may change the API at any time
+4. **Image restrictions** - Amazon images may need to be converted
+5. **network problems** - Some environments may encounter SSL/connection problem
 
-## 推荐方案
+## Recommended plan
 
-### 方案1: 使用当前系统 (推荐)
+### Option 1: Use current system (recommend)
 
-**理由**:
-- ✅ 已实现并与精算师系统集成
-- ✅ 代码质量良好，有完整错误处理
-- ✅ 支持多种图片URL格式 (Keepa CSV/API/metrics_163)
-- ✅ 自动成本计算 (头程运费 + 关税 + 汇率)
-- ✅ 与交互式报告联动
+**reason**:
+- ✅ Implemented and integrated with Actuarial System
+- ✅ The code quality is good and there is complete error handling
+- ✅ Supports multiple image URL formats (Keepa CSV/API/metrics_163)
+- ✅ Automatic cost calculation (First leg freight + tariff + exchange rate)
+- ✅ Linked with interactive reports
 
-**使用方式**:
+**Usage**:
 ```python
 from src.cn_1688_crawler import CN1688Crawler
 
@@ -71,83 +71,83 @@ crawler = CN1688Crawler()
 offers = crawler.search_by_image_url('https://...')
 ```
 
-### 方案2: 集成 Carmenliukang 项目
+### Option 2: Integrating the Carmenliukang project
 
-**如果集成，带来的改进**:
-- 代码结构更模块化
-- 有独立的配置文件
-- 支持更多平台 (淘宝、义乌购等)
+**If integrated, the improvements brought by**:
+- Code structure is more modular
+- Have a separate configuration file
+- Support more platforms (Taobao, Yiwugou, etc.)
 
-**但是**:
-- 核心API调用逻辑完全相同
-- 需要额外适配工作
-- 不会显著提高成功率
+**but**:
+- The core API calling logic is exactly the same
+- Requires additional adaptation work
+- Does not significantly increase success rate
 
-### 方案3: 使用交互式报告 + 手动搜索 (最可靠)
+### Option 3: Use interactive reports + Manual search (most reliable)
 
-**理由**:
-- ✅ 100%成功率
-- ✅ 结果准确 (人工确认)
-- ✅ 不受API限制
-- ✅ 立即可用
+**reason**:
+- ✅ 100%success rate
+- ✅ Results are accurate (Manual confirmation)
+- ✅ No API restrictions
+- ✅ Available immediately
 
-**流程**:
-1. 从Keepa获取产品数据 (自动)
-2. 手动在1688搜索采购价 (5-10分钟)
-3. 填入交互式报告 (1分钟)
+**process**:
+1. Get product data from Keepa (automatic)
+2. Manually search for purchase price on 1688 (5-10 minutes)
+3. Fill in the interactive report (1 minute)
 
-## 诚实建议
+## Honest advice
 
-### 短期 (今天就能用)
+### short term (Available today)
 
-👉 **使用交互式报告 + 手动搜索**
+👉 **Use interactive reports + Manual search**
 
 ```bash
-# 生成报告
+# Generate report
 python3 -c "from src.amazon_actuary_final import generate_actuary_report_auto; \
     generate_actuary_report_auto('B0F6B5R47Q')"
 
-# 打开生成的HTML，填入采购价
+# Open the generated HTML and fill in the purchase price
 open cache/reports/B0F6B5R47Q_ALLINONE_INTERACTIVE.html
 ```
 
-### 中期 (需要调试)
+### medium term (Need debugging)
 
-👉 **优化当前的 cn_1688_crawler.py**
+👉 **Optimize the current cn_1688_crawler.py**
 
-可以添加:
-- 代理IP池支持
-- 请求频率控制
-- 重试机制
-- 更好的错误处理
+can be added:
+- Proxy IP pool support
+- Request frequency control
+- Retry mechanism
+- better error handling
 
-### 长期 (稳定方案)
+### long (Stable solution)
 
-👉 **购买 TMAPI 服务**
+👉 **Purchase TMAPI Services**
 
-- 稳定性高 (~95%)
-- 有技术支持
-- 成本可控 (~$0.01-0.05/次)
+- High stability (~95%)
+- Have technical support
+- Cost controllable (~$0.01-0.05/Second-rate)
 
-## 结论
+## in conclusion
 
-**集成 Carmenliukang 项目不会显著改善现状**，因为：
+**Integrating the Carmenliukang project will not significantly improve the status quo**,because:
 
-1. **技术实现相同** - 都基于1688 H5 API
-2. **成功率相同** - 都面临相同的反爬限制
-3. **核心问题未解决** - 网络/SSL问题依然存在
+1. **The technical implementation is the same** - All based on 1688 H5 API
+2. **Same success rate** - All face the same anti-crawling restrictions
+3. **Core issues remain unresolved** - network/SSL issues still exist
 
-**更务实的做法是**:
-1. 当前使用 **手动搜索 + 交互式报告** (立即可用)
-2. 同时 **优化开源爬虫** (添加代理、重试等)
-3. 长期考虑 **TMAPI** (商业稳定性)
+**A more pragmatic approach would be**:
+1. Current use **Manual search + Interactive reporting** (Available immediately)
+2. at the same time **Optimize open source crawlers** (Add proxy, retry, etc.)
+3. Think long-term **TMAPI** (business stability)
 
-## 当前系统已具备的功能
+## Functions that the current system already has
 
-✅ Keepa数据采集 (163指标)  
-✅ 自动成本计算 (重量→运费→COGS)  
-✅ 交互式报告 (填入价格自动分析)  
-✅ 1688爬虫代码 (可用但需调优)  
-✅ TMAPI集成代码 (Token激活后可用)  
+✅ Keepa data collection (163 indicators)  
+✅ Automatic cost calculation (Weight→Freight→COGS)  
+✅Interactive reporting (Fill in the price and automatically analyze it)  
+✅ 1688 crawler code (Available but needs tuning)  
+✅ TMAPI integration code (Token is available after activation)  
 
-**系统已经完整，可以根据实际情况选择使用方式。**
+**The system is complete and can be used according to the actual situation.**

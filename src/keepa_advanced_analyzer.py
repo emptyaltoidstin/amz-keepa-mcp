@@ -1,7 +1,7 @@
 """
-Keepa 深度分析器
+Keepa Deep Analyzer
 ================
-基于Keepa API完整数据的高级分析
+Advanced analysis based on complete data from Keepa API
 """
 
 import json
@@ -15,31 +15,31 @@ from dataclasses import dataclass
 
 @dataclass
 class PriceTrend:
-    """价格趋势分析"""
+    """Price trend analysis"""
     current: float
     avg_30d: float
     avg_90d: float
     avg_180d: float
     trend: str  # 'up', 'down', 'stable'
-    volatility: float  # 波动率
-    change_percent: float  # 变化百分比
+    volatility: float  # Volatility
+    change_percent: float  # % change
 
 
 @dataclass
 class CompetitionMetrics:
-    """竞争指标"""
+    """competitive indicators"""
     total_offers: int
     fba_offers: int
     fbm_offers: int
     amazon_present: bool
     buy_box_seller: str
-    seller_concentration: float  # 卖家集中度 HHI
-    price_spread: float  # 价格离散度
+    seller_concentration: float  # Seller concentration HHI
+    price_spread: float  # price dispersion
 
 
 @dataclass
 class Seasonality:
-    """季节性分析"""
+    """Seasonal analysis"""
     has_seasonality: bool
     peak_months: List[int]
     low_months: List[int]
@@ -47,7 +47,7 @@ class Seasonality:
 
 
 class KeepaAdvancedAnalyzer:
-    """Keepa高级分析器 - 深度数据挖掘"""
+    """Keepa Advanced Analyzer - Deep data mining"""
     
     def __init__(self):
         self.domain_names = {
@@ -59,10 +59,10 @@ class KeepaAdvancedAnalyzer:
     
     def analyze_product(self, product: dict) -> Dict:
         """
-        执行完整的产品深度分析
+        Perform a complete in-depth product analysis
         
         Returns:
-            包含所有分析结果的字典
+            A dictionary containing all analysis results
         """
         results = {
             'product_identity': self._analyze_identity(product),
@@ -75,24 +75,24 @@ class KeepaAdvancedAnalyzer:
             'risk_signals': self._detect_risk_signals(product),
         }
         
-        # 计算综合健康度评分
+        # Calculate overall health score
         results['health_score'] = self._calculate_health_score(results)
         
         return results
     
     def _analyze_identity(self, product: dict) -> Dict:
-        """分析产品身份信息"""
+        """Analyze product identity information"""
         domain_id = product.get('domainId', 1)
         
-        # 转换包装尺寸
+        # Convert package size
         package_dims = {}
         for key in ['packageHeight', 'packageLength', 'packageWidth', 'packageWeight']:
             if key in product and product[key]:
-                # Keepa使用百分之一单位
+                # Keepa uses hundredths units
                 if 'Weight' in key:
-                    package_dims[key] = product[key] / 100  # 转换为磅
+                    package_dims[key] = product[key] / 100  # Convert to pounds
                 else:
-                    package_dims[key] = product[key] / 100  # 转换为英寸
+                    package_dims[key] = product[key] / 100  # Convert to inches
         
         return {
             'asin': product.get('asin', 'N/A'),
@@ -113,10 +113,10 @@ class KeepaAdvancedAnalyzer:
         }
     
     def _analyze_price_trends(self, product: dict) -> Dict:
-        """分析价格趋势"""
+        """Analyze price trends"""
         data = product.get('data', {})
         
-        # 分析不同价格类型
+        # Analyze different price types
         price_types = ['NEW', 'AMAZON', 'USED', 'BUY_BOX_SHIPPING']
         analysis = {}
         
@@ -130,9 +130,9 @@ class KeepaAdvancedAnalyzer:
             if len(prices) == 0:
                 continue
             
-            # 过滤无效值(-1)
+            # Filter invalid values(-1)
             valid_mask = prices > 0
-            valid_prices = prices[valid_mask] / 100  # 转换为美元
+            valid_prices = prices[valid_mask] / 100  # Convert to USD
             valid_times = times[valid_mask] if len(times) == len(prices) else []
             
             if len(valid_prices) == 0:
@@ -140,7 +140,7 @@ class KeepaAdvancedAnalyzer:
             
             current = valid_prices[-1]
             
-            # 计算不同时间段的平均价格
+            # Calculate the average price for different time periods
             if len(valid_times) > 0:
                 now = datetime.utcnow()
                 days_30 = self._datetime_to_keepa_minutes(now - timedelta(days=30))
@@ -157,7 +157,7 @@ class KeepaAdvancedAnalyzer:
             else:
                 avg_30d = avg_90d = avg_180d = current
             
-            # 趋势判断
+            # Trend judgment
             if current > avg_90d * 1.05:
                 trend = 'up'
             elif current < avg_90d * 0.95:
@@ -165,10 +165,10 @@ class KeepaAdvancedAnalyzer:
             else:
                 trend = 'stable'
             
-            # 波动率
+            # Volatility
             volatility = np.std(valid_prices) / np.mean(valid_prices) * 100 if np.mean(valid_prices) > 0 else 0
             
-            # 变化百分比
+            # % change
             change_percent = ((current - avg_90d) / avg_90d * 100) if avg_90d > 0 else 0
             
             analysis[ptype] = {
@@ -186,7 +186,7 @@ class KeepaAdvancedAnalyzer:
         return analysis
     
     def _analyze_sales_rank(self, product: dict) -> Dict:
-        """分析销售排名趋势"""
+        """Analyze sales ranking trends"""
         data = product.get('data', {})
         
         if 'SALES' not in data or len(data['SALES']) == 0:
@@ -195,7 +195,7 @@ class KeepaAdvancedAnalyzer:
         ranks = np.array(data['SALES'])
         times = np.array(data.get('SALES_time', []))
         
-        # 过滤无效值(0或-1)
+        # Filter invalid values(0 or-1)
         valid_mask = ranks > 0
         valid_ranks = ranks[valid_mask]
         valid_times = times[valid_mask] if len(times) == len(ranks) else []
@@ -205,21 +205,21 @@ class KeepaAdvancedAnalyzer:
         
         current = int(valid_ranks[-1])
         
-        # 计算趋势
+        # Calculate trends
         if len(valid_ranks) >= 30:
             recent_avg = np.mean(valid_ranks[-30:])
             older_avg = np.mean(valid_ranks[:-30]) if len(valid_ranks) > 30 else recent_avg
             
             if recent_avg < older_avg * 0.9:
-                trend = 'improving'  # 排名变好(数字变小)
+                trend = 'improving'  # Ranking gets better(numbers get smaller)
             elif recent_avg > older_avg * 1.1:
-                trend = 'declining'  # 排名变差
+                trend = 'declining'  # Ranking deteriorates
             else:
                 trend = 'stable'
         else:
             trend = 'insufficient_data'
         
-        # 排名分类
+        # Ranking classification
         if current < 1000:
             rank_level = 'best_seller'
         elif current < 10000:
@@ -231,7 +231,7 @@ class KeepaAdvancedAnalyzer:
         else:
             rank_level = 'very_poor'
         
-        # 估算销量
+        # Estimated sales
         estimated_sales = self._estimate_sales_from_rank(current, product.get('rootCategory'))
         
         return {
@@ -245,10 +245,10 @@ class KeepaAdvancedAnalyzer:
         }
     
     def _analyze_competition(self, product: dict) -> Dict:
-        """分析竞争格局"""
+        """Analyze the competitive landscape"""
         data = product.get('data', {})
         
-        # 获取卖家数量历史
+        # Get seller quantity history
         offer_counts = {}
         for key in ['COUNT_NEW', 'COUNT_USED', 'COUNT_FBA']:
             if key in data and len(data[key]) > 0:
@@ -257,7 +257,7 @@ class KeepaAdvancedAnalyzer:
                 if len(valid) > 0:
                     offer_counts[key] = int(valid[-1])
         
-        # 获取offers详情
+        # Get offer details
         offers = product.get('offers', [])
         live_offers_indices = product.get('liveOffersOrder', [])
         
@@ -276,12 +276,12 @@ class KeepaAdvancedAnalyzer:
                 else:
                     fbm_count += 1
                 
-                # 获取当前价格
+                # Get current price
                 csv_data = offer.get('offerCSV', [])
                 if len(csv_data) > 0:
                     prices.append(csv_data[-1] / 100)
         
-        # 计算HHI集中度指数
+        # Calculate HHI Concentration Index
         if len(seller_ids) > 0:
             unique, counts = np.unique(seller_ids, return_counts=True)
             shares = counts / len(seller_ids)
@@ -289,7 +289,7 @@ class KeepaAdvancedAnalyzer:
         else:
             hhi = 0
         
-        # 价格离散度
+        # price dispersion
         if len(prices) > 1:
             price_spread = (max(prices) - min(prices)) / np.mean(prices) * 100
         else:
@@ -307,22 +307,22 @@ class KeepaAdvancedAnalyzer:
         }
     
     def _analyze_ratings(self, product: dict) -> Dict:
-        """分析评分和评价"""
+        """Analyze ratings and reviews"""
         data = product.get('data', {})
         
         ratings = {}
         
-        # 评分历史
+        # Rating history
         if 'RATING' in data and len(data['RATING']) > 0:
             rating_values = np.array(data['RATING'])
-            valid_ratings = rating_values[rating_values > 0] / 10  # Keepa存储为0-50
+            valid_ratings = rating_values[rating_values > 0] / 10  # Keepa is stored as 0-50
             
             if len(valid_ratings) > 0:
                 ratings['current'] = round(valid_ratings[-1], 1)
                 ratings['avg'] = round(np.mean(valid_ratings), 1)
                 ratings['trend'] = 'up' if valid_ratings[-1] > np.mean(valid_ratings[:-10]) else 'stable'
         
-        # 评论数量
+        # Number of comments
         if 'COUNT_REVIEWS' in data and len(data['COUNT_REVIEWS']) > 0:
             reviews = np.array(data['COUNT_REVIEWS'])
             valid_reviews = reviews[reviews > 0]
@@ -330,12 +330,12 @@ class KeepaAdvancedAnalyzer:
             if len(valid_reviews) > 0:
                 ratings['review_count'] = int(valid_reviews[-1])
                 
-                # 计算近期增长速度
+                # Calculate recent growth rate
                 if len(valid_reviews) >= 30:
                     recent_growth = valid_reviews[-1] - valid_reviews[-30]
                     ratings['monthly_review_growth'] = recent_growth
         
-        # 评分健康度
+        # Rating health
         if 'current' in ratings:
             if ratings['current'] >= 4.5:
                 ratings['health'] = 'excellent'
@@ -349,7 +349,7 @@ class KeepaAdvancedAnalyzer:
         return ratings
     
     def _analyze_seasonality(self, product: dict) -> Seasonality:
-        """分析季节性"""
+        """Analyze seasonality"""
         data = product.get('data', {})
         
         if 'SALES' not in data or len(data['SALES']) < 180:
@@ -358,7 +358,7 @@ class KeepaAdvancedAnalyzer:
         ranks = np.array(data['SALES'])
         times = np.array(data.get('SALES_time', []))
         
-        # 转换为DataFrame进行分析
+        # Convert to DataFrame for analysis
         df_data = []
         for i, (rank, time) in enumerate(zip(ranks, times)):
             if rank > 0 and time > 0:
@@ -370,15 +370,15 @@ class KeepaAdvancedAnalyzer:
         
         df = pd.DataFrame(df_data)
         
-        # 按月聚合
+        # Aggregate by month
         monthly_avg = df.groupby('month')['rank'].mean()
         
-        # 找出峰值月份(排名较低=销量较高)
+        # Find the peak month(Ranked lower=higher sales volume)
         sorted_months = monthly_avg.sort_values()
         peak_months = sorted_months.head(3).index.tolist()
         low_months = sorted_months.tail(3).index.tolist()
         
-        # 计算季节性强度
+        # Calculate seasonal intensity
         seasonality_score = (monthly_avg.max() - monthly_avg.min()) / monthly_avg.mean() * 100
         
         has_seasonality = seasonality_score > 20
@@ -391,7 +391,7 @@ class KeepaAdvancedAnalyzer:
         )
     
     def _analyze_buybox(self, product: dict) -> Dict:
-        """分析Buy Box"""
+        """Analyze Buy Box"""
         data = product.get('data', {})
         
         buybox_history = product.get('buyBoxSellerIdHistory', [])
@@ -399,7 +399,7 @@ class KeepaAdvancedAnalyzer:
         if len(buybox_history) == 0:
             return {'has_buybox_data': False}
         
-        # 统计Buy Box轮换情况
+        # Statistics on Buy Box rotation
         seller_changes = 0
         current_seller = None
         sellers = []
@@ -418,14 +418,14 @@ class KeepaAdvancedAnalyzer:
                 seller_changes += 1
                 current_seller = seller
         
-        # 计算Amazon获得Buy Box的比例
+        # Calculate Amazon’s proportion of Buy Box
         amazon_wins = sum(1 for s in sellers if s == 'ATVPDKIKX0DER')  # Amazon US seller ID
         amazon_share = amazon_wins / len(sellers) * 100 if sellers else 0
         
-        # Buy Box稳定性
+        # Buy Box stability
         stability = 'stable' if seller_changes < len(sellers) * 0.1 else 'volatile'
         
-        # Buy Box价格分析
+        # Buy Box price analysis
         if 'BUY_BOX_SHIPPING' in data and len(data['BUY_BOX_SHIPPING']) > 0:
             bb_prices = np.array(data['BUY_BOX_SHIPPING'])
             valid_bb = bb_prices[bb_prices > 0] / 100
@@ -449,12 +449,12 @@ class KeepaAdvancedAnalyzer:
         }
     
     def _detect_risk_signals(self, product: dict) -> List[Dict]:
-        """检测风险信号"""
+        """Detect risk signals"""
         risks = []
         
         data = product.get('data', {})
         
-        # 1. 价格大幅下降风险
+        # 1. Risk of significant price decline
         if 'NEW' in data and len(data['NEW']) > 30:
             prices = np.array(data['NEW'])
             valid = prices[prices > 0]
@@ -467,10 +467,10 @@ class KeepaAdvancedAnalyzer:
                     risks.append({
                         'type': 'price_drop',
                         'level': 'high',
-                        'desc': f'价格近30天下降 {(1-recent_avg/previous_avg)*100:.0f}%，可能触发价格战',
+                        'desc': f'Price has dropped in the past 30 days {(1-recent_avg/previous_avg)*100:.0f}%, which may trigger a price war',
                     })
         
-        # 2. 排名持续下滑风险
+        # 2. Risk of continued decline in rankings
         if 'SALES' in data and len(data['SALES']) > 60:
             ranks = np.array(data['SALES'])
             valid = ranks[ranks > 0]
@@ -479,36 +479,36 @@ class KeepaAdvancedAnalyzer:
                 recent_avg = np.mean(valid[-30:])
                 previous_avg = np.mean(valid[-60:-30])
                 
-                if recent_avg > previous_avg * 1.5:  # 排名数字变大=销量变差
+                if recent_avg > previous_avg * 1.5:  # Ranking numbers get bigger=Sales deteriorate
                     risks.append({
                         'type': 'rank_decline',
                         'level': 'medium',
-                        'desc': '销售排名持续下滑，需求可能正在萎缩',
+                        'desc': 'Sales ranking continues to decline, demand may be shrinking',
                     })
         
-        # 3. 断货风险
+        # 3. Risk of out of stock
         if 'OUT_OF_STOCK' in data:
             oos_events = len(data['OUT_OF_STOCK'])
             if oos_events > 5:
                 risks.append({
                     'type': 'stock_out',
                     'level': 'high',
-                    'desc': f'历史断货次数较多 ({oos_events}次)，供应链不稳定',
+                    'desc': f'Historically, there have been many out-of-stocks ({oos_events}Second-rate), supply chain is unstable',
                 })
         
-        # 4. 评价差评风险
+        # 4. Evaluate the risk of negative reviews
         if 'RATING' in data and len(data['RATING']) > 0:
             ratings = np.array(data['RATING'])
             valid = ratings[ratings > 0]
             
-            if len(valid) > 0 and valid[-1] < 35:  # 低于3.5星
+            if len(valid) > 0 and valid[-1] < 35:  # Less than 3.5 stars
                 risks.append({
                     'type': 'low_rating',
                     'level': 'high',
-                    'desc': f'评分较低 ({valid[-1]/10:.1f}/5)，可能影响转化',
+                    'desc': f'Low rating ({valid[-1]/10:.1f}/5), which may affect conversion',
                 })
         
-        # 5. 卖家数量激增风险
+        # 5. Risk of surge in number of sellers
         if 'COUNT_NEW' in data and len(data['COUNT_NEW']) > 30:
             counts = np.array(data['COUNT_NEW'])
             valid = counts[counts > 0]
@@ -521,16 +521,16 @@ class KeepaAdvancedAnalyzer:
                     risks.append({
                         'type': 'seller_surge',
                         'level': 'medium',
-                        'desc': '新卖家数量激增，竞争正在加剧',
+                        'desc': 'The number of new sellers is surging and competition is intensifying',
                     })
         
         return risks
     
     def _calculate_health_score(self, analysis: Dict) -> Dict:
-        """计算综合健康度评分"""
+        """Calculate overall health score"""
         scores = []
         
-        # 价格健康度 (25%)
+        # price health (25%)
         price_score = 70
         if 'price_analysis' in analysis:
             prices = analysis['price_analysis']
@@ -547,7 +547,7 @@ class KeepaAdvancedAnalyzer:
                     price_score -= 15
         scores.append(('price', price_score, 0.25))
         
-        # 销售健康度 (25%)
+        # sales health (25%)
         sales_score = 70
         if 'sales_analysis' in analysis and 'error' not in analysis['sales_analysis']:
             sales = analysis['sales_analysis']
@@ -567,7 +567,7 @@ class KeepaAdvancedAnalyzer:
                 sales_score -= 15
         scores.append(('sales', sales_score, 0.25))
         
-        # 竞争健康度 (20%)
+        # competitive health (20%)
         comp_score = 70
         if 'competition_analysis' in analysis:
             comp = analysis['competition_analysis']
@@ -582,7 +582,7 @@ class KeepaAdvancedAnalyzer:
                 comp_score -= 10
         scores.append(('competition', comp_score, 0.20))
         
-        # 评价健康度 (20%)
+        # Evaluate health (20%)
         rating_score = 70
         if 'rating_analysis' in analysis:
             ratings = analysis['rating_analysis']
@@ -598,7 +598,7 @@ class KeepaAdvancedAnalyzer:
                     rating_score = 40
         scores.append(('rating', rating_score, 0.20))
         
-        # Buy Box健康度 (10%)
+        # Buy Box health (10%)
         buybox_score = 70
         if 'buybox_analysis' in analysis and analysis['buybox_analysis'].get('has_buybox_data'):
             bb = analysis['buybox_analysis']
@@ -608,10 +608,10 @@ class KeepaAdvancedAnalyzer:
                 buybox_score = 60
         scores.append(('buybox', buybox_score, 0.10))
         
-        # 计算加权总分
+        # Calculate weighted total score
         total_score = sum(score * weight for _, score, weight in scores)
         
-        # 风险扣分
+        # Risk deduction points
         risks = analysis.get('risk_signals', [])
         risk_penalty = sum(10 if r['level'] == 'high' else 5 for r in risks)
         total_score = max(0, total_score - risk_penalty)
@@ -624,8 +624,8 @@ class KeepaAdvancedAnalyzer:
         }
     
     def _estimate_sales_from_rank(self, rank: int, category: Optional[int]) -> int:
-        """根据排名估算月销量"""
-        # 简化的估算模型
+        """Estimated monthly sales based on ranking"""
+        # Simplified estimation model
         if rank < 1000:
             return 1000 + int((1000 - rank) * 5)
         elif rank < 10000:
@@ -638,70 +638,70 @@ class KeepaAdvancedAnalyzer:
             return max(5, int(500000 / rank))
     
     def _keepa_time_to_datetime(self, keepa_minutes: int) -> datetime:
-        """将Keepa分钟时间转换为datetime"""
-        # Keepa时间起点: 2011-01-01 00:00:00 UTC
+        """Convert Keepa minute time to datetime"""
+        # Keepa time starting point: 2011-01-01 00:00:00 UTC
         base = datetime(2011, 1, 1)
         return base + timedelta(minutes=keepa_minutes)
     
     def _datetime_to_keepa_minutes(self, dt: datetime) -> int:
-        """将datetime转换为Keepa分钟时间"""
+        """Convert datetime to Keepa minutes time"""
         base = datetime(2011, 1, 1)
         return int((dt - base).total_seconds() / 60)
 
 
 def format_advanced_analysis(analysis: Dict) -> str:
-    """格式化高级分析结果为可读文本"""
+    """Format advanced analysis results as readable text"""
     lines = []
     
     lines.append("=" * 80)
-    lines.append("🔍 Keepa 深度分析报告")
+    lines.append("🔍 Keepa in-depth analysis report")
     lines.append("=" * 80)
     
-    # 产品身份
+    # product identity
     identity = analysis['product_identity']
-    lines.append(f"\n📦 产品信息")
+    lines.append(f"\n📦 product information")
     lines.append(f"  ASIN: {identity['asin']}")
-    lines.append(f"  标题: {identity['title'][:60]}...")
-    lines.append(f"  品牌: {identity['brand']}")
-    lines.append(f"  站点: {identity['domain']}")
+    lines.append(f"  title: {identity['title'][:60]}...")
+    lines.append(f"  brand: {identity['brand']}")
+    lines.append(f"  site: {identity['domain']}")
     
-    # 健康度评分
+    # health score
     health = analysis['health_score']
-    lines.append(f"\n💯 综合健康度评分: {health['overall']:.0f}/100 (等级: {health['grade']})")
-    lines.append(f"  分项评分:")
+    lines.append(f"\n💯 Comprehensive health score: {health['overall']:.0f}/100 (Level: {health['grade']})")
+    lines.append(f"  Sub-score:")
     for name, score in health['breakdown'].items():
-        lines.append(f"    - {name}: {score}分")
+        lines.append(f"    - {name}: {score}points")
     
-    # 价格分析
-    lines.append(f"\n💰 价格分析")
+    # price analysis
+    lines.append(f"\n💰 Price Analysis")
     for ptype, pdata in analysis['price_analysis'].items():
         lines.append(f"  {ptype}:")
-        lines.append(f"    当前: ${pdata['current']}, 趋势: {pdata['trend']}, 波动: {pdata['volatility']}%")
+        lines.append(f"    current: ${pdata['current']}, Trend: {pdata['trend']}, Fluctuation: {pdata['volatility']}%")
     
-    # 销售分析
+    # sales analysis
     if 'error' not in analysis['sales_analysis']:
         sales = analysis['sales_analysis']
-        lines.append(f"\n📈 销售分析")
-        lines.append(f"  当前排名: {sales['current']:,}")
-        lines.append(f"  趋势: {sales['trend']}")
-        lines.append(f"  估算月销量: {sales['estimated_monthly_sales']} 件")
+        lines.append(f"\n📈 Sales Analysis")
+        lines.append(f"  Current ranking: {sales['current']:,}")
+        lines.append(f"  Trend: {sales['trend']}")
+        lines.append(f"  Estimated monthly sales: {sales['estimated_monthly_sales']} pieces")
     
-    # 竞争分析
+    # competitive analysis
     comp = analysis['competition_analysis']
-    lines.append(f"\n🏪 竞争分析")
-    lines.append(f"  活跃卖家: {comp['total_live_offers']} (FBA: {comp['fba_offers']}, FBM: {comp['fbm_offers']})")
-    lines.append(f"  竞争程度: {comp['competition_level']}")
-    lines.append(f"  卖家集中度(HHI): {comp['seller_concentration_hhi']:.0f}")
+    lines.append(f"\n🏪 Competitive Analysis")
+    lines.append(f"  active seller: {comp['total_live_offers']} (FBA: {comp['fba_offers']}, FBM: {comp['fbm_offers']})")
+    lines.append(f"  level of competition: {comp['competition_level']}")
+    lines.append(f"  Seller concentration(HHI): {comp['seller_concentration_hhi']:.0f}")
     
-    # 风险信号
+    # risk signal
     risks = analysis['risk_signals']
     if risks:
-        lines.append(f"\n⚠️ 风险信号 ({len(risks)}个)")
+        lines.append(f"\n⚠️Risk Signal ({len(risks)}a)")
         for risk in risks:
             emoji = "🔴" if risk['level'] == 'high' else "🟡"
             lines.append(f"  {emoji} [{risk['type']}] {risk['desc']}")
     else:
-        lines.append(f"\n✅ 未发现明显风险信号")
+        lines.append(f"\n✅ No obvious risk signals found")
     
     lines.append("\n" + "=" * 80)
     

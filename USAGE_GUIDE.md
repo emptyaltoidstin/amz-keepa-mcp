@@ -1,34 +1,34 @@
-# 亚马逊运营精算师系统 - 使用指南
+# Amazon Operations Actuary System - User Guide
 
-> **v3.0 Final Edition | 数据驱动的FBA选品决策**
-
----
-
-## 📋 目录
-
-1. [快速开始](#快速开始)
-2. [核心概念](#核心概念)
-3. [单变体分析](#单变体分析)
-4. [多变体链接分析](#多变体链接分析)
-5. [数据输入指南](#数据输入指南)
-6. [报告解读](#报告解读)
-7. [常见问题](#常见问题)
+> **v3.0 Final Edition | Data-driven FBA product selection decision-making**
 
 ---
 
-## 快速开始
+## 📋 Table of Contents
 
-### 3分钟入门
+1. [quick start](#quick start)
+2. [core concepts](#core concepts)
+3. [Single variant analysis](#Single variant analysis)
+4. [Multi-variant linkage analysis](#Multi-variant linkage analysis)
+5. [Data Entry Guide](#Data Entry Guide)
+6. [Report interpretation](#Report interpretation)
+7. [FAQ](#FAQ)
+
+---
+
+## quick start
+
+### Get started in 3 minutes
 
 ```bash
-# 1. 激活环境
+# 1. Activate the environment
 source venv/bin/activate
 
-# 2. 准备数据 (示例)
+# 2. Prepare data (Example)
 python3 << 'EOF'
 from src.amazon_actuary_final import generate_final_report
 
-# 产品数据 (从Keepa API获取)
+# product data (Get from Keepa API)
 products = [{
     'asin': 'B0F6B5R47Q',
     'title': 'Your Product Title',
@@ -43,16 +43,16 @@ products = [{
     'data': {'df_SALES': None, 'df_NEW': None, 'df_BUY_BOX_SHIPPING': None}
 }]
 
-# 真实财务数据
+# real financial data
 financials = {
     'B0F6B5R47Q': {
-        'cogs': 9.50,          # 从供应商获取
-        'organic_pct': 0.70,   # 从广告后台获取
+        'cogs': 9.50,          # Obtain from supplier
+        'organic_pct': 0.70,   # Obtained from the advertising backend
         'ad_pct': 0.30,
     }
 }
 
-# 生成报告
+# Generate report
 report_path, analysis = generate_final_report(
     parent_asin='B0F6B5R47Q',
     products=products,
@@ -60,101 +60,101 @@ report_path, analysis = generate_final_report(
     tacos_rate=0.15
 )
 
-print(f"报告已生成: {report_path}")
-print(f"决策: {analysis.overall_decision.decision}")
-print(f"预期月利润: ${analysis.total_monthly_profit:,.2f}")
+print(f"Report generated: {report_path}")
+print(f"decision making: {analysis.overall_decision.decision}")
+print(f"Expected monthly profit: ${analysis.total_monthly_profit:,.2f}")
 EOF
 ```
 
 ---
 
-## 核心概念
+## core concepts
 
-### 1. 163个Keepa指标
+### 1. 163 Keepa indicators
 
-系统采集Keepa Product Viewer CSV格式的全部字段，包括：
+The system collects all fields in Keepa Product Viewer CSV format, including:
 
-| 类别 | 关键指标 | 用途 |
+| Category | key indicators | use |
 |------|----------|------|
-| **销售表现** | Sales Rank, 90d avg, Drops | 估算销量、判断趋势 |
-| **价格** | Current, 30d avg, Lowest/Highest | 价格稳定性分析 |
-| **Buy Box** | Seller, Amazon %, Flipability | 竞争格局分析 |
-| **评论** | Rating, Count, Velocity | 产品质量评估 |
-| **费用** | FBA Fee, Referral Fee | 成本结构计算 |
-| **竞争** | Offer Count, New/Used | 竞争激烈程度 |
+| **sales performance** | Sales Rank, 90d avg, Drops | Estimate sales and determine trends |
+| **price** | Current, 30d avg, Lowest/Highest | price stability analysis |
+| **Buy Box** | Seller, Amazon %, Flipability | Competitive Landscape Analysis |
+| **Comment** | Rating, Count, Velocity | Product quality assessment |
+| **cost** | FBA Fee, Referral Fee | cost structure calculation |
+| **compete** | Offer Count, New/Used | intensity of competition |
 
 ### 2. TACOS vs ACOS
 
 ```
-ACOS  = 广告花费 / 广告销售额  (只看广告订单)
-TACOS = 广告花费 / 总销售额    (看整体业务)
+ACOS  = advertising spend / advertising sales  (View insertion orders only)
+TACOS = advertising spend / total sales    (Look at the overall business)
 
-示例:
-- 广告花费: $1000
-- 广告销售额: $3000
-- 总销售额: $10000
+Example:
+- advertising spend: $1000
+- advertising sales: $3000
+- total sales: $10000
 
 ACOS  = $1000 / $3000 = 33.3%
 TACOS = $1000 / $10000 = 10%
 
-系统使用TACOS因为它更能反映广告对整体盈利的影响。
+The system uses TACOS because it better reflects the impact of advertising on overall profitability.
 ```
 
-### 3. 真实COGS原则
+### 3. True COGS principles
 
-**永远不要估算COGS！** 即使是$0.50的差异也会导致错误决策。
-
-```
-COGS = 产品采购价 + 头程运费 + 关税 + 质检费 + 其他
-
-示例:
-- 产品采购价 (1688): $6.00
-- 头程运费 (海运): $1.20
-- 关税 (15%): $0.90
-- 质检费: $0.20
-- 其他: $0.20
-- COGS总计: $8.50
-```
-
-### 4. 订单来源数据
-
-从亚马逊广告后台获取：
-
-**路径**: Seller Central → 广告 → 广告活动管理 → 测量和分析
+**Never estimate COGS!** Even if it is$A difference of 0.50 can also lead to wrong decisions.
 
 ```
-广告销售额占比 = 广告销售额 / 总销售额
+COGS = Product purchase price + First leg freight + tariff + Quality inspection fee + Others
 
-示例:
-- 广告销售额: $3000
-- 总销售额: $10000
-- 广告订单占比: 30%
-- 自然订单占比: 70%
+Example:
+- Product purchase price (1688): $6.00
+- First leg freight (Shipping): $1.20
+- tariff (15%): $0.90
+- Quality inspection fee: $0.20
+- Others: $0.20
+- Total COGS: $8.50
+```
+
+### 4. Order source data
+
+Obtained from Amazon Advertising Backend:
+
+**path**: Seller Central → Advertising → Campaign Management → Measurement and Analytics
+
+```
+Advertising sales ratio = advertising sales / total sales
+
+Example:
+- advertising sales: $3000
+- total sales: $10000
+- Insertion order proportion: 30%
+- Proportion of natural orders: 70%
 ```
 
 ---
 
-## 单变体分析
+## Single variant analysis
 
-适用于单一ASIN、无变体的产品。
+Applicable to products with a single ASIN and no variations.
 
-### 使用场景
-- 私模产品 (只有1个ASIN)
-- 测试市场反应的新品
-- 分析竞品单个ASIN
+### Usage scenarios
+- Private model products (Only 1 ASIN)
+- Test new products for market response
+- Analyze individual ASINs of competing products
 
-### 代码示例
+### code example
 
 ```python
 from src.amazon_actuary_final import generate_final_report
 
-# 单一产品数据
+# single product data
 products = [{
     'asin': 'B0XXX12345',
     'title': 'Single Product',
     'stars': 4.3,
     'reviews': 500,
-    # ... Keepa数据
+    # ...Keepa data
 }]
 
 financials = {
@@ -173,50 +173,50 @@ report_path, analysis = generate_final_report(
 )
 ```
 
-### 报告输出
-- 单变体利润分析
-- 自然vs广告订单对比
-- 基于163指标的投资建议
+### Report output
+- Single variant profit analysis
+- Organic vs Insertion Order Comparison
+- Investment advice based on 163 indicators
 
 ---
 
-## 多变体链接分析
+## Multi-variant linkage analysis
 
-**这是系统最强大的功能！** 对于有多个颜色/尺寸变体的产品，必须分析所有变体。
+**This is the most powerful feature of the system!** For multiple colors/For products with size variants, all variants must be analyzed.
 
-### 为什么必须分析所有变体?
+### Why all variants must be analyzed?
 
-1. **帕累托效应**: 通常2-3个变体贡献80%销量
-2. **成本差异**: 不同颜色/尺寸的COGS可能不同
-3. **广告依赖**: 热门颜色可能自然流量高，冷门颜色依赖广告
-4. **风险分散**: 避免只看到一个变体而误判整个链接
+1. **Pareto effect**: Usually 2-3 variants contribute 80%Sales volume
+2. **cost difference**: different colors/Dimensions of COGS may vary
+3. **advertising dependence**: Popular colors may have high natural traffic, while unpopular colors rely on advertising.
+4. **Risk diversification**: Avoid seeing only one variation and misjudging the entire link
 
-### 如何获取所有变体ASIN?
+### How to get all variant ASINs?
 
-#### 方法1: 亚马逊前台手动获取 (推荐)
+#### Method 1: Amazon front desk manual acquisition (recommend)
 
 ```
-1. 打开产品详情页
-2. 找到"Color"或"Size"下拉菜单
-3. 切换不同选项，观察URL变化:
+1. Open the product details page
+2. find"Color"or"Size"drop down menu
+3. Switch between different options and observe the URL changes:
    
-   黑色: amazon.com/dp/B0F6B5R47Q
-   棕色: amazon.com/dp/B0F6B5R47R  ← 记录这个ASIN
-   红色: amazon.com/dp/B0F6B5R47W  ← 记录这个ASIN
+   black: amazon.com/dp/B0F6B5R47Q
+   brown: amazon.com/dp/B0F6B5R47R ← Record this ASIN
+   red: amazon.com/dp/B0F6B5R47W ← Record this ASIN
 
-4. 记录所有变体的ASIN
+4. Record ASINs for all variants
 ```
 
-#### 方法2: 使用Keepa Product Viewer
+#### Method 2: Using Keepa Product Viewer
 
 ```
-1. 打开Keepa网站
-2. 搜索父ASIN
-3. 查看"Variations"标签页
-4. 导出所有变体ASIN列表
+1. Open the Keepa website
+2. Search for parent ASIN
+3. View"Variations"tab page
+4. Export all variant ASIN lists
 ```
 
-### 完整代码示例
+### Complete code example
 
 ```python
 from src.amazon_actuary_final import generate_final_report
@@ -225,10 +225,10 @@ import numpy as np
 from datetime import datetime, timedelta
 
 # ============================================
-# 步骤1: 准备所有变体的Keepa数据
+# Step 1: Prepare Keepa data for all variants
 # ============================================
 
-# 变体ASIN列表
+# Variant ASIN list
 variants = [
     {'asin': 'B0F6B5R47Q', 'color': 'Black', 'size': 'Standard'},
     {'asin': 'B0F6B5R47R', 'color': 'Brown', 'size': 'Standard'},
@@ -237,7 +237,7 @@ variants = [
     {'asin': 'B0F6B5R47S', 'color': 'Brown', 'size': 'Small'},
 ]
 
-# 从Keepa API获取的数据 (简化示例)
+# Data obtained from Keepa API (Simplified example)
 products = []
 for v in variants:
     products.append({
@@ -252,42 +252,42 @@ for v in variants:
         'packageWeight': 150,
         'categoryTree': [{'name': 'Luggage'}],
         'data': {
-            # 这里应该是真实的Keepa时间序列数据
+            # This should be the real Keepa time series data
             'df_SALES': create_mock_bsr_data(rank=15000),
             'df_NEW': create_mock_price_data(price=27.99),
         }
     })
 
 # ============================================
-# 步骤2: 准备真实COGS和订单来源数据
+# Step 2: Prepare real COGS and order source data
 # ============================================
 
 financials_map = {
-    # 黑色标准款 - 畅销，自然流量高
+    # black standard - Best-selling, high organic traffic
     'B0F6B5R47Q': {
-        'cogs': 9.50,          # 从供应商报价单
-        'organic_pct': 0.70,   # 从广告后台
+        'cogs': 9.50,          # Quote from supplier
+        'organic_pct': 0.70,   # From the advertising backend
         'ad_pct': 0.30,
     },
-    # 棕色标准款 - 中等销量
+    # Brown standard - medium sales
     'B0F6B5R47R': {
         'cogs': 9.50,
         'organic_pct': 0.55,
         'ad_pct': 0.45,
     },
-    # 酒红色 - 小众，需广告
+    # Claret - Niche, needs advertising
     'B0F6B5R47W': {
-        'cogs': 10.20,         # 红色皮革更贵
+        'cogs': 10.20,         # Red leather is more expensive
         'organic_pct': 0.35,
         'ad_pct': 0.65,
     },
-    # 大尺寸 - 销量低但利润好
+    # large size - Low sales but good profits
     'B0F6B5R47L': {
         'cogs': 11.80,
         'organic_pct': 0.60,
         'ad_pct': 0.40,
     },
-    # 小尺寸 - 测试市场
+    # small size - test market
     'B0F6B5R47S': {
         'cogs': 8.20,
         'organic_pct': 0.75,
@@ -296,7 +296,7 @@ financials_map = {
 }
 
 # ============================================
-# 步骤3: 生成精算师报告
+# Step 3: Generate actuary report
 # ============================================
 
 report_path, analysis = generate_final_report(
@@ -308,195 +308,195 @@ report_path, analysis = generate_final_report(
 )
 
 # ============================================
-# 步骤4: 查看分析结果
+# Step 4: View analysis results
 # ============================================
 
-print(f"\n📊 分析完成!")
-print(f"报告路径: {report_path}")
-print(f"\n整体决策: {analysis.overall_decision.decision}")
-print(f"置信度: {analysis.overall_decision.confidence}%")
-print(f"总月利润: ${analysis.total_monthly_profit:,.2f}")
-print(f"混合利润率: {analysis.blended_portfolio_margin_pct:.1f}%")
+print(f"\n📊 Analysis completed!")
+print(f"Report path: {report_path}")
+print(f"\nOverall decision-making: {analysis.overall_decision.decision}")
+print(f"Confidence: {analysis.overall_decision.confidence}%")
+print(f"Total monthly profit: ${analysis.total_monthly_profit:,.2f}")
+print(f"mixed profit margin: {analysis.blended_portfolio_margin_pct:.1f}%")
 
-print(f"\n📈 变体表现:")
+print(f"\n📈 variant performance:")
 for i, v in enumerate(analysis.variants, 1):
     print(f"  #{i} {v.asin} [{v.metrics.color}]")
-    print(f"      月销量: {v.estimated_monthly_sales}")
-    print(f"      利润率: {v.blended_margin_pct:.1f}%")
-    print(f"      决策: {v.decision.decision}")
+    print(f"      monthly sales: {v.estimated_monthly_sales}")
+    print(f"      profit margin: {v.blended_margin_pct:.1f}%")
+    print(f"      decision making: {v.decision.decision}")
 ```
 
 ---
 
-## 数据输入指南
+## Data Entry Guide
 
-### COGS数据来源
+### COGS data source
 
-| 成本项 | 来源 | 获取方式 |
+| Cost item | Source | How to get it |
 |--------|------|----------|
-| 产品采购价 | 供应商 | 1688/Alibaba报价单 |
-| 头程运费 | 货代 | 海运/空运报价 |
-| 关税 | 海关 | 产品HS编码查询 |
-| 质检费 | 第三方 | 质检公司报价 |
-| 其他 | 内部 | 包装、贴标等 |
+| Product purchase price | supplier | 1688/Alibaba quotation |
+| First leg freight | freight forwarding | Shipping/Air freight quotation |
+| tariff | customs | Product HS code query |
+| Quality inspection fee | third party | Quality inspection company quotation |
+| Others | internal | Packaging, labeling, etc. |
 
-### 订单来源数据来源
+### Order source data source
 
-**亚马逊广告后台**:
-1. 登录 Seller Central
-2. 广告 → 广告活动管理
-3. 点击"测量和分析"
-4. 查看"广告销售额"和"总销售额"
-5. 计算: 广告订单% = 广告销售额 / 总销售额
+**Amazon Advertising Backend**:
+1. Log in to Seller Central
+2. Advertising → Advertising campaign management
+3. Click"Measurement and Analysis"
+4. View"advertising sales"and"total sales"
+5. Calculation: insertion order% = advertising sales / total sales
 
-**业务报告**:
-1. 数据报告 → 业务报告
-2. 查看"子商品详情页上的销售量与访问量"
-3. 对比"已订购商品数量"和广告报告
+**business report**:
+1. Data Report → Business Report
+2. View"Sales volume and visits on sub-product detail pages"
+3. Comparison"Quantity of items ordered"and advertising reports
 
-### Keepa API数据
+### Keepa API data
 
-系统自动从Keepa API获取163个指标，包括：
-- 销售排名历史
-- 价格历史
-- Buy Box数据
-- 评论数据
-- 库存数据
-- 卖家竞争数据
-
----
-
-## 报告解读
-
-### 执行摘要部分
-
-```
-🟢 建议进行 (置信度: 75%)
-
-关键指标:
-- 总月销量: 1,486
-- 总月销售额: $42,516
-- 总月利润: $10,048
-- 混合利润率: 23.6%
-- 自然订单占比: 58%
-```
-
-**解读**: 
-- ✅ 利润率>20%，健康
-- ⚠️ 自然订单58%，可提升至70%
-- 整体建议进行，但需优化广告效率
-
-### 帕累托分析部分
-
-```
-核心发现: 前3个变体贡献80%销量
-核心变体: B0F6B5R47Q, B0F6B5R47R, B0F6B5R47W
-长尾变体: B0F6B5R47L, B0F6B5R47S
-```
-
-**行动建议**:
-1. 优先保证核心变体库存
-2. 长尾变体可考虑减少SKU
-
-### 风险评估部分
-
-```
-⚠️ 高广告依赖 (1个)
-ASIN: B0F6B5R47W (酒红色)
-广告订单占比: 65%
-```
-
-**行动建议**:
-- 开展站外推广提升自然流量
-- 优化Listing提升转化率
+The system automatically obtains 163 indicators from the Keepa API, including:
+- Sales ranking history
+- price history
+- Buy Box data
+- Comment data
+- Inventory data
+- Seller competition data
 
 ---
 
-## 常见问题
+## Report interpretation
 
-### Q: 为什么置信度不是100%?
+### executive summary section
 
-**A:** 置信度基于以下因素：
-- 数据完整度 (163指标中有多少可用)
-- 历史数据长度 (90天 vs 365天)
-- 数据一致性 (价格/排名是否稳定)
-- 风险因素数量
+```
+🟢 Recommended (Confidence: 75%)
 
-一般75%以上即可认为是可靠决策。
+key indicators:
+- Total monthly sales: 1,486
+- total monthly sales: $42,516
+- Total monthly profit: $10,048
+- mixed profit margin: 23.6%
+- Proportion of natural orders: 58%
+```
 
-### Q: 混合利润率多少算好?
+**Interpretation**: 
+- ✅ Profit margin>20%, healthy
+- ⚠️ Natural Order 58%, can be increased to 70%
+- Overall recommendations are made, but advertising efficiency needs to be optimized.
 
-| 利润率 | 评价 | 建议 |
+### Pareto analysis part
+
+```
+Core findings: The first 3 variants contribute 80%Sales volume
+core variant: B0F6B5R47Q, B0F6B5R47R, B0F6B5R47W
+long tail variant: B0F6B5R47L, B0F6B5R47S
+```
+
+**Suggestions for action**:
+1. Prioritize keeping core variants in stock
+2. Consider reducing SKUs for long-tail variants
+
+### risk assessment section
+
+```
+⚠️ High advertising dependence (1)
+ASIN: B0F6B5R47W (Claret)
+Insertion order proportion: 65%
+```
+
+**Suggestions for action**:
+- Carry out off-site promotion to increase natural traffic
+- Optimize Listing to Improve Conversion Rate
+
+---
+
+## FAQ
+
+### Q: Why the confidence level is not 100%?
+
+**A:** Confidence is based on the following factors:
+- Data integrity (How many of 163 indicators are available)
+- Historical data length (90 days vs 365 days)
+- data consistency (price/Is the ranking stable?)
+- Number of risk factors
+
+Normally 75%The above can be considered a reliable decision.
+
+### Q: What is a good blended profit margin??
+
+| profit margin | Evaluation | suggestion |
 |--------|------|------|
-| >25% | 优秀 | 可以加大投入 |
-| 15-25% | 良好 | 正常运营 |
-| 5-15% | 一般 | 需要优化 |
-| <5% | 危险 | 考虑退出 |
-| <0% | 亏损 | 立即停止 |
+| >25% | Excellent | Can increase investment |
+| 15-25% | good | Normal operations |
+| 5-15% | Average | Need optimization |
+| <5% | danger | Consider quitting |
+| <0% | Loss | Stop now |
 
-### Q: 如何处理亏损变体?
+### Q: How to deal with loss-making variants?
 
-**步骤**:
-1. 确认COGS数据准确
-2. 尝试提价10-20%测试
-3. 优化以降低退货率
-4. 如果仍亏损，考虑停售
+**steps**:
+1. Confirm that COGS data is accurate
+2. Try to raise the price by 10-20%test
+3. Optimize to reduce return rates
+4. If you are still losing money, consider stopping sales.
 
-### Q: 为什么我的实际利润和报告不同?
+### Q: Why are my actual profits different from those reported??
 
-**可能原因**:
-1. COGS输入不准确
-2. 销量估算有偏差 (BSR模型限制)
-3. 广告费用波动
-4. 退货率变化
+**Possible reasons**:
+1. COGS input is inaccurate
+2. Sales volume estimates are biased (BSR model limitations)
+3. Fluctuation in advertising costs
+4. Changes in return rate
 
-**建议**: 运行一个月后对比，用真实数据校准。
+**suggestion**: Compare after running for one month and calibrate with real data.
 
-### Q: 可以分析竞品吗?
+### Q: Can you analyze competing products??
 
-**A:** 可以！但注意：
-- 无法获取竞品COGS (只能估算)
-- 无法获取竞品订单来源
-- 主要用于竞争格局分析
-
----
-
-## 最佳实践
-
-### 1. 月度复盘
-
-每月初运行一次分析，对比：
-- 实际销售额 vs 预测
-- 实际利润 vs 预测
-- COGS是否有变化
-- 广告费用是否优化
-
-### 2. A/B测试
-
-对于高广告依赖变体：
-1. 保持原样运行2周
-2. 优化Listing后运行2周
-3. 对比自然订单占比变化
-4. 计算ROI提升
-
-### 3. 季节性调整
-
-某些产品有明显季节性：
-- 提前2个月备货
-- 旺季前加大广告投入
-- 淡季优化自然排名
+**A:** Yes! But note:
+- Unable to obtain competitive product COGS (Can only estimate)
+- Unable to obtain competitive product order source
+- Mainly used for competitive landscape analysis
 
 ---
 
-## 技术支持
+## best practices
 
-遇到问题？
+### 1. Monthly review
 
-1. 检查Keepa API Key是否有效
-2. 确认COGS数据格式正确 (float)
-3. 确认订单占比总和为1.0 (organic_pct + ad_pct = 1.0)
-4. 查看 `cache/reports/` 目录是否有生成文件
+Run an analysis at the beginning of each month to compare:
+- Actual Sales vs Forecast
+- Actual profit vs forecast
+- Is there any change in COGS?
+- Are advertising costs optimized?
+
+### 2. A/B test
+
+For high ad dependency variants:
+1. Leave it running as is for 2 weeks
+2. Run for 2 weeks after optimizing Listing
+3. Compare the changes in the proportion of natural orders
+4. Calculate ROI improvement
+
+### 3. Seasonal adjustment
+
+Some products have significant seasonality:
+- Stock up 2 months in advance
+- Increase advertising investment before peak season
+- Optimize natural ranking in off-season
 
 ---
 
-**文档版本**: v3.0 | **最后更新**: 2026-02-15
+## Technical support
+
+Having a problem?
+
+1. Check whether the Keepa API Key is valid
+2. Confirm that the COGS data format is correct (float)
+3. The total proportion of confirmed orders is 1.0 (organic_pct + ad_pct = 1.0)
+4. View `cache/reports/` Does the directory have generated files?
+
+---
+
+**Document version**: v3.0 | **last updated**: 2026-02-15

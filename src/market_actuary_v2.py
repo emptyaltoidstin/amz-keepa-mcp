@@ -1,15 +1,15 @@
 """
-市场精算师 V2 - 重新定义价值主张
+Market Actuary V2 - Redefine the value proposition
 
-承认现实: Keepa数据无法准确预测盈利，因为核心成本数据缺失
+admit reality: Keepa data cannot accurately predict profitability because core cost data is missing
 
-新价值主张:
-1. 市场侧分析 (Keepa强项) - 竞争格局、需求趋势、价格弹性
-2. 盈利潜力评估 (估算+风险提示) - 给出可能性区间而非确定数字
-3. 真实数据融合 (关键!) - 用户输入真实COGS后重新计算
-4. 可行性筛选 - 快速排除明显不合适的品类
+new value proposition:
+1. Market side analysis (Keepa's strengths) - Competition landscape, demand trends, price elasticity
+2. Earning potential assessment (Estimate+Risk warning) - Give a range of possibilities rather than a definite number
+3. Real data fusion (Key!) - Recalculate after user enters real COGS
+4. Feasibility screening - Quickly eliminate obviously inappropriate categories
 
-不再夸大: "精算级盈利预测" → 改为 "市场可行性分析 + 盈利潜力评估"
+no more exaggeration: "Actuarial-level profit forecasts" → Change to "Market feasibility analysis + Earning potential assessment"
 """
 
 import pandas as pd
@@ -21,59 +21,59 @@ from datetime import datetime
 
 @dataclass
 class MarketFeasibilityScore:
-    """市场可行性评分"""
-    demand_score: float  # 需求强度 (0-100)
-    competition_score: float  # 竞争可进入性 (0-100)
-    price_stability_score: float  # 价格稳定性 (0-100)
-    supply_chain_score: float  # 供应链可行性 (0-100)
+    """Market feasibility score"""
+    demand_score: float  # Demand intensity (0-100)
+    competition_score: float  # competitive accessibility (0-100)
+    price_stability_score: float  # price stability (0-100)
+    supply_chain_score: float  # Supply chain feasibility (0-100)
     
-    overall_score: float  # 综合评分
-    recommendation: str  # 建议: Go / Caution / No-Go
-    key_risks: List[str]  # 主要风险点
+    overall_score: float  # Overall rating
+    recommendation: str  # suggestion: Go / Caution / No-Go
+    key_risks: List[str]  # Main risk points
 
 
 class MarketActuaryV2:
     """
-    市场精算师 V2 - 诚实的价值主张
+    Market Actuary V2 - Honest value proposition
     
-    核心功能:
-    1. 基于Keepa数据的市场可行性分析 (可靠)
-    2. 盈利潜力区间估算 (带明确风险提示)
-    3. 真实COGS输入后的精确计算 (需要用户数据)
-    4. 类目对比筛选 (相对评估)
+    Core functions:
+    1. Market feasibility analysis based on Keepa data (reliable)
+    2. Estimation of profit potential range (With clear risk warning)
+    3. Accurate calculation after input of real COGS (User data required)
+    4. Category comparison and screening (relative assessment)
     """
     
     def __init__(self):
         self.disclaimer = """
-        ⚠️ 重要提示: 
-        本分析基于Keepa公开市场数据，无法获取您的真实COGS、运营成本等数据。
-        盈利估算仅供参考，实际盈亏取决于您的供应链能力和运营效率。
-        建议结合真实财务数据进行最终决策。
+        ⚠️ IMPORTANT NOTE: 
+        This analysis is based on Keepa public market data and cannot obtain your real COGS, operating cost and other data.
+        Profit estimates are for reference only, actual profits and losses depend on your supply chain capabilities and operational efficiency.
+        It is recommended to use real financial data to make final decisions.
         """
     
     def analyze_market_feasibility(self, product_data: Dict) -> MarketFeasibilityScore:
         """
-        1. 市场可行性分析 (基于Keepa数据，相对可靠)
+        1. Market feasibility analysis (Based on Keepa data, relatively reliable)
         
-        评估维度:
-        - 需求强度: 排名趋势、销量稳定性
-        - 竞争可进入性: 卖家集中度、新卖家机会
-        - 价格稳定性: 价格波动、价格战风险
-        - 供应链可行性: 尺寸重量、库存周转
+        Assessment Dimensions:
+        - Demand intensity: Ranking trends, sales stability
+        - competitive accessibility: Seller concentration, new seller opportunities
+        - price stability: Price fluctuations and price war risks
+        - Supply chain feasibility: Dimensional weight, inventory turnover
         """
-        # 需求强度评分
+        # Need intensity score
         demand_score = self._calculate_demand_score(product_data)
         
-        # 竞争可进入性评分
+        # Competitive Accessibility Rating
         competition_score = self._calculate_competition_score(product_data)
         
-        # 价格稳定性评分
+        # price stability score
         price_stability_score = self._calculate_price_stability(product_data)
         
-        # 供应链可行性评分
+        # Supply chain feasibility score
         supply_chain_score = self._calculate_supply_chain_feasibility(product_data)
         
-        # 综合评分
+        # Overall rating
         overall_score = (
             demand_score * 0.30 +
             competition_score * 0.25 +
@@ -81,7 +81,7 @@ class MarketActuaryV2:
             supply_chain_score * 0.20
         )
         
-        # 生成建议
+        # Generate suggestions
         recommendation = self._generate_recommendation(overall_score, {
             'demand': demand_score,
             'competition': competition_score,
@@ -110,29 +110,29 @@ class MarketActuaryV2:
                                  product_data: Dict,
                                  user_cogs: Optional[float] = None) -> Dict:
         """
-        2. 盈利潜力评估 (区间估算 + 明确风险提示)
+        2. Earning potential assessment (Interval estimation + Clear risk warning)
         
-        如果用户提供了真实COGS，给出精确计算
-        如果只有Keepa数据，给出可能性区间并明确标注不确定性
+        If the user provides real COGS, give an accurate calculation
+        If you only have Keepa data, give a probability interval and clearly label the uncertainty
         """
         current_price = self._extract_price(product_data)
         
         if user_cogs:
-            # 用户提供了真实COGS - 可以给出相对准确的估算
+            # User provides real COGS - Can give a relatively accurate estimate
             return self._calculate_with_real_cogs(current_price, user_cogs, product_data)
         else:
-            # 没有真实COGS - 给出可能性区间
+            # No real COGS - Give a probability interval
             return self._estimate_profit_range(current_price, product_data)
     
     def _estimate_profit_range(self, price: float, product_data: Dict) -> Dict:
         """
-        没有真实COGS时的盈利潜力区间估算
+        Estimated profit potential range without true COGS
         
-        基于类目给出COGS率的合理区间，而非固定值
+        Provide a reasonable range of COGS rates based on categories rather than fixed values
         """
         category = product_data.get('Categories: Root', '')
         
-        # 基于类目给出COGS率区间 (这是估算，不是确定值!)
+        # Give COGS rate interval based on category (This is an estimate, not a definite value!)
         cogs_ranges = {
             'Clothing, Shoes & Jewelry': (0.40, 0.70),
             'Health & Household': (0.30, 0.60),
@@ -146,129 +146,129 @@ class MarketActuaryV2:
         cogs_low, cogs_high = cogs_ranges.get(category, (0.35, 0.65))
         cogs_typical = (cogs_low + cogs_high) / 2
         
-        # 其他成本 (相对确定的)
+        # other costs (relatively certain)
         fba_fee = self._estimate_fba_fee(product_data, price)
         referral_rate = 0.15
         referral_fee = price * referral_rate
-        estimated_acos = 0.15  # 估算ACOS 15%，实际可能更高
+        estimated_acos = 0.15  # Estimate ACOS 15%, it may actually be higher
         ad_cost = price * estimated_acos
-        return_cost = price * 0.08 * 0.3  # 8%退货率，30%净损失
+        return_cost = price * 0.08 * 0.3  # 8%Return rate, 30%net loss
         storage_cost = 0.20
         
-        # 计算不同COGS场景下的利润率
+        # Calculate profit margins under different COGS scenarios
         def calc_margin(cogs_rate):
             cogs = price * cogs_rate
             total_cost = cogs + fba_fee + referral_fee + ad_cost + return_cost + storage_cost
             net_profit = price - total_cost
             return (net_profit / price * 100) if price > 0 else 0
         
-        margin_best = calc_margin(cogs_low)  # 最佳情况 (供应链极强)
-        margin_typical = calc_margin(cogs_typical)  # 典型情况
-        margin_worst = calc_margin(cogs_high)  # 最差情况 (供应链弱)
+        margin_best = calc_margin(cogs_low)  # best case scenario (Supply chain is extremely strong)
+        margin_typical = calc_margin(cogs_typical)  # Typical situation
+        margin_worst = calc_margin(cogs_high)  # worst case scenario (Weak supply chain)
         
         return {
-            'disclaimer': '以下估算基于假设的COGS率区间，实际利润率取决于您的供应链能力',
+            'disclaimer': 'The following estimates are based on assumed COGS rate ranges, actual profit margins depend on your supply chain capabilities',
             'cogs_assumption': {
                 'category': category,
                 'estimated_range': f"{cogs_low:.0%} - {cogs_high:.0%}",
                 'typical': f"{cogs_typical:.0%}",
-                'note': '此为市场常见区间，您的实际COGS可能高于或低于此范围'
+                'note': 'This is a common range in the market. Your actual COGS may be higher or lower than this range.'
             },
             'profit_scenarios': {
                 'best_case': {
                     'cogs_rate': f"{cogs_low:.0%}",
                     'net_margin': f"{margin_best:.1f}%",
-                    'description': '如果您有极强的供应链优势，能达到行业最低COGS'
+                    'description': 'If you have strong supply chain advantages, you can achieve the lowest COGS in the industry'
                 },
                 'typical_case': {
                     'cogs_rate': f"{cogs_typical:.0%}",
                     'net_margin': f"{margin_typical:.1f}%",
-                    'description': '行业平均水平，大多数卖家的COGS水平'
+                    'description': 'Industry average, the COGS level of most sellers'
                 },
                 'worst_case': {
                     'cogs_rate': f"{cogs_high:.0%}",
                     'net_margin': f"{margin_worst:.1f}%",
-                    'description': '如果您供应链较弱，COGS较高的情况'
+                    'description': 'If your supply chain is weak and COGS is high'
                 }
             },
             'key_uncertainties': [
-                'COGS率: 实际可能高于/低于估算区间 ±20%',
-                'ACOS: 估算15%，实际健康产品18-25%，竞争激烈产品30%+',
-                '退货率: 估算8%，实际因产品质量差异可能达15-25%',
-                '价格战: 未来价格下降风险未计入'
+                'COGS rate: It may actually be higher than/±20 below estimated interval%',
+                'ACOS: Estimate 15%, actual health products 18-25%, highly competitive products 30%+',
+                'return rate: Estimate 8%, the actual difference in product quality may reach 15-25%',
+                'price war: The risk of future price declines has not been taken into account'
             ],
-            'reliability_assessment': '中低 - 强烈建议输入真实COGS进行精确计算',
-            'call_to_action': '如果您有真实COGS数据，请提供以获得精确分析'
+            'reliability_assessment': 'medium low - It is strongly recommended to enter real COGS for accurate calculations',
+            'call_to_action': 'If you have real COGS data, please provide it for accurate analysis'
         }
     
     def _calculate_with_real_cogs(self, price: float, cogs: float, product_data: Dict) -> Dict:
         """
-        用户提供了真实COGS - 给出相对可靠的计算
+        User provides real COGS - gives relatively reliable calculations
         """
         cogs_rate = cogs / price if price > 0 else 0
         
-        # 使用真实数据或合理估算
+        # Use real data or reasonable estimates
         fba_fee = self._estimate_fba_fee(product_data, price)
         referral_fee = price * 0.15
         
-        # 从数据中获取或估算退货率
+        # Obtain or estimate return rates from data
         return_rate = self._extract_return_rate(product_data)
         return_cost = price * return_rate * 0.3
         
         storage_cost = 0.20
-        ad_cost = price * 0.18  # 假设ACOS 18%，略高于理想值
+        ad_cost = price * 0.18  # Assuming ACOS 18%, slightly higher than the ideal value
         
         total_cost = cogs + fba_fee + referral_fee + return_cost + storage_cost + ad_cost
         net_profit = price - total_cost
         net_margin = (net_profit / price * 100) if price > 0 else 0
         
-        # 盈亏平衡分析
-        monthly_fixed = 500  # 假设月固定成本
+        # Break-even analysis
+        monthly_fixed = 500  # Assuming monthly fixed costs
         break_even = monthly_fixed / net_profit if net_profit > 0 else float('inf')
         
         return {
-            'disclaimer': '基于您提供的真实COGS计算，其他成本项为估算值',
+            'disclaimer': 'Based on the real COGS calculation you provided, other cost items are estimates.',
             'real_cogs': {
                 'value': f"${cogs:.2f}",
                 'rate': f"{cogs_rate:.1%}",
-                'assessment': '优秀' if cogs_rate < 0.35 else '良好' if cogs_rate < 0.50 else '一般' if cogs_rate < 0.65 else '偏高'
+                'assessment': 'Excellent' if cogs_rate < 0.35 else 'good' if cogs_rate < 0.50 else 'Average' if cogs_rate < 0.65 else 'On the high side'
             },
             'cost_breakdown': {
                 'cogs': f"${cogs:.2f} ({cogs_rate:.1%})",
                 'fba_fee': f"${fba_fee:.2f}",
                 'referral': f"${referral_fee:.2f} (15%)",
-                'ad_cost': f"${ad_cost:.2f} (估算18% ACOS)",
-                'return_cost': f"${return_cost:.2f} ({return_rate:.1%}退货率)",
+                'ad_cost': f"${ad_cost:.2f} (Estimate 18% ACOS)",
+                'return_cost': f"${return_cost:.2f} ({return_rate:.1%}return rate)",
                 'storage': f"${storage_cost:.2f}",
                 'total': f"${total_cost:.2f}"
             },
             'profit_calculation': {
                 'net_margin': f"{net_margin:.1f}%",
                 'net_profit_per_unit': f"${net_profit:.2f}",
-                'break_even_units': f"{break_even:.0f}件/月" if break_even != float('inf') else '无法盈亏平衡',
-                'assessment': '盈利' if net_margin > 15 else '微利' if net_margin > 5 else '亏损风险'
+                'break_even_units': f"{break_even:.0f}pieces/month" if break_even != float('inf') else 'Unable to break even',
+                'assessment': 'profit' if net_margin > 15 else 'small profit' if net_margin > 5 else 'risk of loss'
             },
             'sensitivities': {
-                'if_acos_25': f"净利率降至 {net_margin - 7:.1f}%",
-                'if_return_15': f"净利率降至 {net_margin - 2:.1f}%",
-                'if_price_drop_10': f"净利率降至 {net_margin - 8:.1f}%"
+                'if_acos_25': f"Net interest rate dropped to {net_margin - 7:.1f}%",
+                'if_return_15': f"Net interest rate dropped to {net_margin - 2:.1f}%",
+                'if_price_drop_10': f"Net interest rate dropped to {net_margin - 8:.1f}%"
             },
-            'reliability_assessment': '中高 - 基于真实COGS，建议再核实广告和退货数据'
+            'reliability_assessment': 'Middle to high - Based on real COGS, it is recommended to verify advertising and return data'
         }
     
     def generate_comprehensive_report(self, 
                                      product_data: Dict,
                                      user_cogs: Optional[float] = None) -> Dict:
         """
-        生成综合分析报告
+        Generate comprehensive analysis reports
         """
-        # 1. 市场可行性分析 (可靠)
+        # 1. Market feasibility analysis (reliable)
         feasibility = self.analyze_market_feasibility(product_data)
         
-        # 2. 盈利潜力评估 (区间或精确)
+        # 2. Earning potential assessment (interval or exact)
         profit_analysis = self.estimate_profit_potential(product_data, user_cogs)
         
-        # 3. 最终建议
+        # 3. Final recommendations
         final_recommendation = self._generate_final_recommendation(feasibility, profit_analysis)
         
         return {
@@ -288,17 +288,17 @@ class MarketActuaryV2:
             'final_recommendation': final_recommendation,
             'data_quality': {
                 'has_real_cogs': user_cogs is not None,
-                'profit_reliability': '高' if user_cogs else '中低 (区间估算)',
-                'market_reliability': '高 (基于Keepa数据)'
+                'profit_reliability': 'high' if user_cogs else 'medium low (Interval estimation)',
+                'market_reliability': 'high (Based on Keepa data)'
             }
         }
     
     # Helper methods
     def _calculate_demand_score(self, data: Dict) -> float:
-        """需求强度评分 (0-100)"""
-        score = 50  # 基础分
+        """Need intensity score (0-100)"""
+        score = 50  # Basic points
         
-        # 排名越低（数字越小）需求越强
+        # The lower the ranking (the smaller the number) the stronger the demand
         rank = self._extract_sales_rank(data)
         if rank < 1000:
             score += 30
@@ -309,7 +309,7 @@ class MarketActuaryV2:
         elif rank > 100000:
             score -= 20
         
-        # 排名趋势
+        # Ranking trends
         rank_drops = data.get('Sales Rank: Drops last 90 days', 0)
         if isinstance(rank_drops, str):
             try:
@@ -318,17 +318,17 @@ class MarketActuaryV2:
                 rank_drops = 0
         if isinstance(rank_drops, (int, float)):
             if rank_drops > 50:
-                score -= 15  # 需求下降
+                score -= 15  # Decline in demand
             elif rank_drops < 20:
-                score += 10  # 需求稳定或上升
+                score += 10  # Demand is stable or rising
         
         return max(0, min(100, score))
     
     def _calculate_competition_score(self, data: Dict) -> float:
-        """竞争可进入性评分 (0-100)"""
+        """Competitive Accessibility Rating (0-100)"""
         score = 50
         
-        # 卖家数量
+        # Number of sellers
         offers = data.get('Total Offer Count', 0)
         if isinstance(offers, str):
             try:
@@ -343,14 +343,14 @@ class MarketActuaryV2:
             elif offers > 30:
                 score -= 20
         
-        # Amazon自营占比
+        # Amazon’s self-operated share
         amazon_pct = self._extract_amazon_share(data)
         if amazon_pct > 50:
             score -= 30
         elif amazon_pct > 30:
             score -= 15
         
-        # Buy Box稳定性
+        # Buy Box stability
         winners = data.get('Buy Box: Winner Count 90 days', 0)
         if isinstance(winners, str):
             try:
@@ -366,12 +366,12 @@ class MarketActuaryV2:
         return max(0, min(100, score))
     
     def _calculate_price_stability(self, data: Dict) -> float:
-        """价格稳定性评分 (0-100)"""
+        """price stability score (0-100)"""
         score = 50
         
-        # 价格波动
+        # price fluctuations
         price_cv = data.get('Buy Box: Standard Deviation 90 days', 0)
-        # 处理字符串类型(如'$ 3.38')
+        # Handling string types(Such as'$ 3.38')
         if isinstance(price_cv, str):
             price_cv = price_cv.replace('$', '').replace(',', '').strip()
             try:
@@ -387,7 +387,7 @@ class MarketActuaryV2:
             elif cv_ratio > 0.15:
                 score -= 20
         
-        # 价格战指标
+        # price war indicator
         price_drops = data.get('Buy Box: Drops last 90 days', 0)
         if isinstance(price_drops, str):
             try:
@@ -400,10 +400,10 @@ class MarketActuaryV2:
         return max(0, min(100, score))
     
     def _calculate_supply_chain_feasibility(self, data: Dict) -> float:
-        """供应链可行性评分 (0-100)"""
+        """Supply chain feasibility score (0-100)"""
         score = 60
         
-        # 辅助函数: 安全转换为float
+        # Helper function: safe conversion to float
         def safe_float(val, default=0):
             if isinstance(val, (int, float)):
                 return float(val)
@@ -414,26 +414,26 @@ class MarketActuaryV2:
                     return default
             return default
         
-        # 尺寸重量
+        # Dimensions and weight
         weight = safe_float(data.get('Package: Weight (g)', 0))
         if weight > 0:
-            if weight < 500:  # 轻小件
+            if weight < 500:  # Light and small items
                 score += 15
-            elif weight > 2000:  # 重货
+            elif weight > 2000:  # Heavy cargo
                 score -= 10
         
-        # 体积
+        # Volume
         length = safe_float(data.get('Package: Length (cm)', 0))
         width = safe_float(data.get('Package: Width (cm)', 0))
         height = safe_float(data.get('Package: Height (cm)', 0))
         if length > 0 and width > 0 and height > 0:
             volume = length * width * height
-            if volume < 1000:  # 小体积
+            if volume < 1000:  # Small size
                 score += 10
-            elif volume > 10000:  # 大体积
+            elif volume > 10000:  # Large size
                 score -= 10
         
-        # 是否有断货历史
+        # Is there a history of out of stock?
         oos = data.get('Amazon: 90 days OOS', 0)
         if isinstance(oos, str):
             try:
@@ -441,107 +441,107 @@ class MarketActuaryV2:
             except:
                 oos = 0
         if isinstance(oos, (int, float)) and oos > 20:
-            score -= 15  # 供应链不稳定
+            score -= 15  # Supply chain instability
         
         return max(0, min(100, score))
     
     def _generate_recommendation(self, overall_score: float, dimension_scores: Dict) -> str:
-        """生成可行性建议"""
+        """Generate actionable suggestions"""
         if overall_score >= 70:
-            return "Go - 市场可行性高，值得深入调研"
+            return "Go - High market feasibility and worthy of in-depth investigation"
         elif overall_score >= 50:
             if dimension_scores['competition'] < 40:
-                return "Caution - 竞争激烈，需有差异化优势"
+                return "Caution - Competition is fierce and differentiation is needed"
             elif dimension_scores['demand'] < 40:
-                return "Caution - 需求不足，谨慎进入"
+                return "Caution - Insufficient demand, enter with caution"
             else:
-                return "Caution - 中等可行性，需进一步分析"
+                return "Caution - Moderately feasible, needs further analysis"
         else:
-            return "No-Go - 市场可行性低，建议放弃"
+            return "No-Go - Market feasibility is low, it is recommended to give up"
     
     def _identify_key_risks(self, data: Dict, scores: Dict) -> List[str]:
-        """识别主要风险"""
+        """Identify key risks"""
         risks = []
         
         if scores['demand'] < 40:
-            risks.append("需求风险: 销量排名低或呈下降趋势")
+            risks.append("demand risk: Sales ranking is low or on a downward trend")
         
         if scores['competition'] < 40:
             amazon_pct = self._extract_amazon_share(data)
             if amazon_pct > 30:
-                risks.append(f"竞争风险: Amazon自营占比{amazon_pct:.0%}，难以获取Buy Box")
+                risks.append(f"Competing risks: Amazon’s self-operated share{amazon_pct:.0%}, it is difficult to obtain the Buy Box")
             else:
-                risks.append("竞争风险: 卖家数量过多，价格战风险高")
+                risks.append("Competing risks: Too many sellers and high risk of price war")
         
         if scores['price'] < 40:
-            risks.append("价格风险: 价格波动大或持续下降趋势")
+            risks.append("price risk: Large price fluctuations or continued downward trend")
         
         if scores['supply'] < 40:
-            risks.append("供应链风险: 产品体积大或历史断货频繁")
+            risks.append("supply chain risk: The product is large or has a history of frequent out-of-stocks")
         
         if not risks:
-            risks.append("主要风险: 市场看似可行，但仍需验证真实盈利能力")
+            risks.append("Main risks: The market seems feasible, but the true profitability still needs to be verified")
         
         return risks
     
     def _generate_final_recommendation(self, feasibility: MarketFeasibilityScore, profit: Dict) -> Dict:
-        """生成最终综合建议"""
+        """Generate final comprehensive recommendations"""
         
-        # 市场可行性高 + 盈利潜力好 = 强烈推荐
-        # 市场可行性高 + 盈利不确定 = 谨慎调研
-        # 市场可行性低 = 建议放弃
+        # High market feasibility + Good profit potential = Highly recommended
+        # High market feasibility + Uncertain profits = Investigate carefully
+        # Low market viability = It is recommended to give up
         
         if feasibility.recommendation.startswith('Go'):
             if 'real_cogs' in profit:
                 margin = float(profit['profit_calculation']['net_margin'].rstrip('%'))
                 if margin > 20:
                     return {
-                        'decision': '推荐深入',
-                        'confidence': '高',
-                        'rationale': '市场可行性好，且基于真实COGS预测盈利良好',
-                        'next_steps': ['验证广告成本', '确认退货率', '小批量试销']
+                        'decision': 'Recommend in-depth',
+                        'confidence': 'high',
+                        'rationale': 'Good market feasibility and good profitability based on real COGS forecasts',
+                        'next_steps': ['Verify advertising costs', 'Confirm return rate', 'Small batch trial marketing']
                     }
                 elif margin > 10:
                     return {
-                        'decision': '谨慎考虑',
-                        'confidence': '中',
-                        'rationale': '市场可行性好，但利润空间中等',
-                        'next_steps': ['优化COGS', '控制广告成本', '小规模测试']
+                        'decision': 'Consider carefully',
+                        'confidence': 'middle',
+                        'rationale': 'Good market viability, but medium profit margins',
+                        'next_steps': ['Optimize COGS', 'Control advertising costs', 'small-scale testing']
                     }
                 else:
                     return {
-                        'decision': '暂时观望',
-                        'confidence': '中',
-                        'rationale': '市场可行性好，但盈利空间有限',
-                        'next_steps': ['大幅优化成本结构', '寻找差异化定位', '等待时机']
+                        'decision': 'Wait and see for now',
+                        'confidence': 'middle',
+                        'rationale': 'Good market feasibility, but limited profit potential',
+                        'next_steps': ['Significantly optimize cost structure', 'Find differentiated positioning', 'bide your time']
                     }
             else:
                 return {
-                    'decision': '值得调研',
-                    'confidence': '中',
-                    'rationale': '市场可行性高，但需要真实COGS数据确认盈利',
-                    'next_steps': ['核算真实COGS', '获取样品测试', '调研供应商']
+                    'decision': 'Worth investigating',
+                    'confidence': 'middle',
+                    'rationale': 'High market feasibility, but real COGS data is needed to confirm profitability',
+                    'next_steps': ['Calculate real COGS', 'Get samples to test', 'Research suppliers']
                 }
         
         elif feasibility.recommendation.startswith('Caution'):
             return {
-                'decision': '谨慎进入',
-                'confidence': '低-中',
-                'rationale': feasibility.key_risks[0] if feasibility.key_risks else '存在特定风险',
-                'next_steps': ['针对性解决风险点', '评估自身竞争力', '小规模测试']
+                'decision': 'Enter with caution',
+                'confidence': 'Low-middle',
+                'rationale': feasibility.key_risks[0] if feasibility.key_risks else 'There are specific risks',
+                'next_steps': ['Address risk points in a targeted manner', 'Assess your own competitiveness', 'small-scale testing']
             }
         
         else:
             return {
-                'decision': '建议放弃',
-                'confidence': '高',
-                'rationale': '市场可行性低，进入风险大于机会',
-                'next_steps': ['寻找其他品类', '关注市场变化', '等待时机']
+                'decision': 'It is recommended to give up',
+                'confidence': 'high',
+                'rationale': 'Market feasibility is low and entry risks outweigh opportunities',
+                'next_steps': ['Find other categories', 'Pay attention to market changes', 'bide your time']
             }
     
     # Data extraction helpers
     def _extract_price(self, data: Dict) -> float:
-        """提取价格"""
+        """Extract price"""
         for field in ['Buy Box: Current', 'New: Current', 'Amazon: Current']:
             val = data.get(field, 0)
             if val and str(val).replace('.', '').replace('-', '').isdigit():
@@ -549,7 +549,7 @@ class MarketActuaryV2:
         return 0.0
     
     def _extract_sales_rank(self, data: Dict) -> int:
-        """提取销售排名"""
+        """Extract sales ranking"""
         val = data.get('Sales Rank: Current', 0)
         try:
             return int(val)
@@ -557,7 +557,7 @@ class MarketActuaryV2:
             return 999999
     
     def _extract_amazon_share(self, data: Dict) -> float:
-        """提取Amazon自营占比"""
+        """Extract Amazon’s self-operated proportion"""
         val = data.get('Buy Box: % Amazon 90 days', '0%')
         try:
             return float(val.replace('%', '')) / 100
@@ -565,17 +565,17 @@ class MarketActuaryV2:
             return 0.0
     
     def _extract_return_rate(self, data: Dict) -> float:
-        """提取退货率"""
+        """Extract return rate"""
         val = data.get('Return Rate', '')
         if isinstance(val, str):
             if 'High' in val:
                 return 0.12
             elif 'Medium' in val:
                 return 0.08
-        return 0.08  # 默认8%
+        return 0.08  # Default 8%
     
     def _estimate_fba_fee(self, data: Dict, price: float) -> float:
-        """估算FBA费用"""
+        """Estimate FBA fees"""
         weight = data.get('Package: Weight (g)', 0) or 200
         if weight < 100:
             return 3.22
@@ -588,73 +588,73 @@ class MarketActuaryV2:
 
 
 def format_v2_report(report: Dict) -> str:
-    """格式化V2报告"""
+    """Format V2 report"""
     lines = []
     
     lines.append("=" * 90)
-    lines.append("📊 市场精算师分析 V2 - 市场可行性评估报告")
+    lines.append("📊 Market Actuary Analysis V2 - Market feasibility assessment report")
     lines.append("=" * 90)
     
     lines.append(f"\n⚠️  {report['disclaimer']}")
     
-    # 市场可行性
+    # market feasibility
     mf = report['market_feasibility']
     lines.append(f"\n" + "─" * 90)
-    lines.append(f"🎯 1. 市场可行性分析 (基于Keepa数据)")
+    lines.append(f"🎯 1. Market feasibility analysis (Based on Keepa data)")
     lines.append("─" * 90)
-    lines.append(f"\n  综合评分: {mf['overall_score']:.0f}/100")
-    lines.append(f"  建议: {mf['recommendation']}")
-    lines.append(f"\n  维度评分:")
-    lines.append(f"    需求强度: {mf['dimension_scores']['demand']:.0f}/100")
-    lines.append(f"    竞争可进入: {mf['dimension_scores']['competition']:.0f}/100")
-    lines.append(f"    价格稳定性: {mf['dimension_scores']['price_stability']:.0f}/100")
-    lines.append(f"    供应链可行: {mf['dimension_scores']['supply_chain']:.0f}/100")
-    lines.append(f"\n  主要风险:")
+    lines.append(f"\n Comprehensive rating: {mf['overall_score']:.0f}/100")
+    lines.append(f"  suggestion: {mf['recommendation']}")
+    lines.append(f"\n dimension score:")
+    lines.append(f"    Demand intensity: {mf['dimension_scores']['demand']:.0f}/100")
+    lines.append(f"    Competition is available: {mf['dimension_scores']['competition']:.0f}/100")
+    lines.append(f"    price stability: {mf['dimension_scores']['price_stability']:.0f}/100")
+    lines.append(f"    Supply chain is feasible: {mf['dimension_scores']['supply_chain']:.0f}/100")
+    lines.append(f"\n Main risks:")
     for risk in mf['key_risks']:
         lines.append(f"    • {risk}")
     
-    # 盈利分析
+    # Profit analysis
     lines.append(f"\n" + "─" * 90)
-    lines.append(f"💰 2. 盈利潜力评估")
+    lines.append(f"💰 2. Profit potential assessment")
     lines.append("─" * 90)
     
     pa = report['profit_analysis']
     lines.append(f"\n  ⚠️ {pa['disclaimer']}")
     
     if 'real_cogs' in pa:
-        lines.append(f"\n  基于真实COGS计算:")
-        lines.append(f"    您的COGS: {pa['real_cogs']['value']} ({pa['real_cogs']['rate']}) - {pa['real_cogs']['assessment']}")
-        lines.append(f"    净利率: {pa['profit_calculation']['net_margin']}")
-        lines.append(f"    单件利润: {pa['profit_calculation']['net_profit_per_unit']}")
-        lines.append(f"    盈亏平衡: {pa['profit_calculation']['break_even_units']}")
-        lines.append(f"\n  成本结构:")
+        lines.append(f"\n Calculated based on real COGS:")
+        lines.append(f"    Your COGS: {pa['real_cogs']['value']} ({pa['real_cogs']['rate']}) - {pa['real_cogs']['assessment']}")
+        lines.append(f"    net profit margin: {pa['profit_calculation']['net_margin']}")
+        lines.append(f"    Profit per unit: {pa['profit_calculation']['net_profit_per_unit']}")
+        lines.append(f"    break even: {pa['profit_calculation']['break_even_units']}")
+        lines.append(f"\n cost structure:")
         for key, value in pa['cost_breakdown'].items():
             lines.append(f"    {key}: {value}")
-        lines.append(f"\n  敏感性分析:")
+        lines.append(f"\n Sensitivity analysis:")
         for key, value in pa['sensitivities'].items():
             lines.append(f"    {key}: {value}")
     else:
-        lines.append(f"\n  COGS假设: {pa['cogs_assumption']['estimated_range']} (类目常见区间)")
-        lines.append(f"\n  盈利情景分析:")
+        lines.append(f"\n COGS hypothesis: {pa['cogs_assumption']['estimated_range']} (Common ranges of categories)")
+        lines.append(f"\n Profit scenario analysis:")
         for scenario, values in pa['profit_scenarios'].items():
             lines.append(f"\n    {scenario}:")
-            lines.append(f"      COGS率: {values['cogs_rate']}")
-            lines.append(f"      净利率: {values['net_margin']}")
-            lines.append(f"      说明: {values['description']}")
-        lines.append(f"\n  ⚠️ 关键不确定性:")
+            lines.append(f"      COGS rate: {values['cogs_rate']}")
+            lines.append(f"      net profit margin: {values['net_margin']}")
+            lines.append(f"      Description: {values['description']}")
+        lines.append(f"\n ⚠️ Key uncertainties:")
         for unc in pa['key_uncertainties']:
             lines.append(f"    • {unc}")
     
-    # 最终建议
+    # Final recommendations
     lines.append(f"\n" + "─" * 90)
-    lines.append(f"📋 3. 综合决策建议")
+    lines.append(f"📋 3. Comprehensive decision-making suggestions")
     lines.append("─" * 90)
     
     fr = report['final_recommendation']
-    lines.append(f"\n  决策: {fr['decision']}")
-    lines.append(f"  置信度: {fr['confidence']}")
-    lines.append(f"  理由: {fr['rationale']}")
-    lines.append(f"\n  下一步行动:")
+    lines.append(f"\n decision making: {fr['decision']}")
+    lines.append(f"  Confidence: {fr['confidence']}")
+    lines.append(f"  reason: {fr['rationale']}")
+    lines.append(f"\n next action:")
     for step in fr['next_steps']:
         lines.append(f"    • {step}")
     

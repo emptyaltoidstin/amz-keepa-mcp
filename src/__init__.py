@@ -1,23 +1,23 @@
 """
-亚马逊运营精算师系统 v3.0
+Amazon Operations Actuary System v3.0
 ==========================
 
-核心模块:
-- amazon_actuary_final: 最终版精算师报告 (推荐)
-- variant_auto_collector: 自动变体采集器
-- keepa_metrics_collector: 163指标采集器
-- market_actuary_v2: 市场可行性分析
+core module:
+- amazon_actuary_final: Final Actuary’s Report (recommend)
+- variant_auto_collector: Automatic variant collector
+- keepa_metrics_collector: 163 indicator collector
+- market_actuary_v2: Market feasibility analysis
 
-快速开始:
+quick start:
     from src import auto_analyze
     report, analysis, info = auto_analyze("B0XXXYYYY")
 """
 
-# 核心功能
+# Core functions
 from .amazon_actuary_final import (
     generate_final_report,
     generate_actuary_report_auto,
-    auto_analyze,  # 便捷别名
+    auto_analyze,  # Convenience alias
     KeepaMetrics163,
     VariantFinancials,
     LinkPortfolioAnalyzer,
@@ -34,13 +34,13 @@ from .keepa_metrics_collector import KeepaMetricsCollector
 
 __version__ = "3.0.0"
 __all__ = [
-    # 主要函数
+    # main function
     'generate_final_report',
     'generate_actuary_report_auto',
     'auto_analyze',
     'collect_variants_for_analysis',
     
-    # 核心类
+    # core class
     'KeepaMetrics163',
     'VariantFinancials',
     'LinkPortfolioAnalyzer',

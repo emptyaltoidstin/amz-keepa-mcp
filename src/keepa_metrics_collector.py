@@ -1,6 +1,6 @@
 """
-Keepa 163指标完整采集器
-将Keepa API数据映射为CSV格式的163个指标
+Keepa 163 indicator complete collector
+Map Keepa API data to 163 metrics in CSV format
 """
 
 import pandas as pd
@@ -11,14 +11,14 @@ from datetime import datetime, timedelta
 
 class KeepaMetricsCollector:
     """
-    Keepa 163指标采集器
+    Keepa 163 indicator collector
     
-    将Keepa API原始数据转换为Product Viewer CSV格式的163个指标
+    Convert Keepa API raw data to 163 metrics in Product Viewer CSV format
     """
     
-    # 完整指标定义
+    # Complete indicator definition
     ALL_METRICS = {
-        # 1. 基础信息 (18个)
+        # 1. Basic information (18)
         'basic_info': [
             'Locale', 'Image', 'Image Count', 'Title', 'Parent Title',
             'Description & Features: Description', 'Description & Features: Short Description',
@@ -29,7 +29,7 @@ class KeepaMetricsCollector:
             'Description & Features: Feature 9', 'Description & Features: Feature 10',
         ],
         
-        # 2. 销售表现 (8个)
+        # 2. Sales performance (8)
         'sales_performance': [
             'Sales Rank: Current', 'Sales Rank: 90 days avg.',
             'Sales Rank: Drops last 90 days', 'Sales Rank: Reference',
@@ -37,13 +37,13 @@ class KeepaMetricsCollector:
             'Bought in past month', '90 days change % monthly sold',
         ],
         
-        # 3. 退货与评论 (5个)
+        # 3. Returns and Comments (5)
         'reviews_returns': [
             'Return Rate', 'Reviews: Rating', 'Reviews: Rating Count',
             'Reviews: Review Count - Format Specific', 'Last Price Change',
         ],
         
-        # 4. Buy Box (15个)
+        # 4. Buy Box (15)
         'buy_box': [
             'Buy Box: Buy Box Seller', 'Buy Box: Shipping Country',
             'Buy Box: Strikethrough Price', 'Buy Box: % Amazon 90 days',
@@ -55,7 +55,7 @@ class KeepaMetricsCollector:
             'Warehouse Deals: Current',
         ],
         
-        # 5. Amazon自营价格 (15个)
+        # 5. Amazon self-operated prices (15)
         'amazon_price': [
             'Amazon: Current', 'Amazon: 30 days avg.', 'Amazon: 90 days avg.',
             'Amazon: 180 days avg.', 'Amazon: 365 days avg.',
@@ -66,7 +66,7 @@ class KeepaMetricsCollector:
             'Amazon: Lowest', 'Amazon: Highest',
         ],
         
-        # 6. 新品价格 (13个)
+        # 6. New product price (13)
         'new_price': [
             'New: Current', 'New: 30 days avg.', 'New: 90 days avg.',
             'New: 180 days avg.', 'New: 365 days avg.',
@@ -76,12 +76,12 @@ class KeepaMetricsCollector:
             'New: Lowest', 'New: Highest',
         ],
         
-        # 7. 二手价格 (类似结构)
+        # 7. Second-hand price (similar structure)
         'used_price': [
             'Used: Current', 'Used: 90 days avg.', 'Used: Lowest', 'Used: Highest',
         ],
         
-        # 8. 库存 (8个)
+        # 8. Inventory (8)
         'inventory': [
             'Amazon: Stock', 'Amazon: 90 days OOS',
             'Amazon: OOS Count 30 days', 'Amazon: OOS Count 90 days',
@@ -89,14 +89,14 @@ class KeepaMetricsCollector:
             'Amazon: Amazon offer shipping delay',
         ],
         
-        # 9. 费用 (6个)
+        # 9. Fees (6)
         'fees': [
             'FBA Pick&Pack Fee', 'Referral Fee %',
             'Referral Fee based on current Buy Box price',
             'List Price: Current', 'List Price: 30 days avg.', 'List Price: 90 days avg.',
         ],
         
-        # 10. 卖家竞争 (10个)
+        # 10. Seller competition (10)
         'competition': [
             'Total Offer Count', 'New Offer Count: Current', 'Used Offer Count: Current',
             'Count of retrieved live offers: New, FBA',
@@ -104,20 +104,20 @@ class KeepaMetricsCollector:
             'Tracking since', 'Listed since',
         ],
         
-        # 11. 类目 (5个)
+        # 11. Category (5)
         'category': [
             'URL: Amazon', 'Categories: Root', 'Categories: Sub',
             'Categories: Tree', 'Website Display Group: Name',
         ],
         
-        # 12. 产品代码 (8个)
+        # 12. Product code (8)
         'product_codes': [
             'ASIN', 'Imported by Code', 'Product Codes: UPC',
             'Product Codes: EAN', 'Product Codes: GTIN', 'Product Codes: PartNumber',
             'Parent ASIN', 'Variation ASINs',
         ],
         
-        # 13. 产品属性 (20个)
+        # 13. Product attributes (20)
         'attributes': [
             'Type', 'Manufacturer', 'Brand', 'Brand Store Name', 'Brand Store URL Name',
             'Product Group', 'Model', 'Variation Attributes',
@@ -126,7 +126,7 @@ class KeepaMetricsCollector:
             'Target Audience', 'Recommended Uses',
         ],
         
-        # 14. 内容 (8个)
+        # 14. Content (8)
         'content': [
             'Videos: Video Count', 'Videos: Has Main Video',
             'Videos: Main Videos', 'Videos: Additional Videos',
@@ -134,7 +134,7 @@ class KeepaMetricsCollector:
             'A+ Content: A+ Content',
         ],
         
-        # 15. 包装规格 (9个)
+        # 15. Packaging specifications (9)
         'package': [
             'Package: Dimension (cm³)', 'Package: Length (cm)',
             'Package: Width (cm)', 'Package: Height (cm)',
@@ -143,7 +143,7 @@ class KeepaMetricsCollector:
             'Item: Height (cm)', 'Item: Weight (g)',
         ],
         
-        # 16. 其他属性 (剩余字段)
+        # 16. Other attributes (remaining fields)
         'other': [
             'Included Components', 'Ingredients', 'Active Ingredients',
             'Special Ingredients', 'Safety Warning', 'Batteries Required',
@@ -161,71 +161,71 @@ class KeepaMetricsCollector:
     
     def collect_all_metrics(self, product: Dict) -> Dict[str, Any]:
         """
-        从Keepa API产品数据中提取所有163个指标
+        Extract all 163 metrics from Keepa API product data
         
         Args:
-            product: Keepa API返回的产品数据
+            product: Product data returned by Keepa API
             
         Returns:
-            包含163个指标的字典
+            Dictionary containing 163 indicators
         """
         metrics = {}
         
-        # 基础产品信息
+        # Basic product information
         metrics.update(self._extract_basic_info(product))
         
-        # 销售表现
+        # sales performance
         metrics.update(self._extract_sales_performance(product))
         
-        # 评论与退货
+        # Reviews and Returns
         metrics.update(self._extract_reviews_returns(product))
         
-        # Buy Box数据
+        # Buy Box data
         metrics.update(self._extract_buy_box_metrics(product))
         
-        # 价格数据 (Amazon/New/Used)
+        # price data (Amazon/New/Used)
         metrics.update(self._extract_price_metrics(product))
         
-        # 库存数据
+        # Inventory data
         metrics.update(self._extract_inventory_metrics(product))
         
-        # 费用数据
+        # cost data
         metrics.update(self._extract_fee_metrics(product))
         
-        # 竞争数据
+        # Competitive data
         metrics.update(self._extract_competition_metrics(product))
         
-        # 类目数据
+        # Category data
         metrics.update(self._extract_category_metrics(product))
         
-        # 产品代码
+        # product code
         metrics.update(self._extract_product_codes(product))
         
-        # 产品属性
+        # Product attributes
         metrics.update(self._extract_attributes(product))
         
-        # 内容数据
+        # content data
         metrics.update(self._extract_content_metrics(product))
         
-        # 包装规格
+        # Packaging specifications
         metrics.update(self._extract_package_metrics(product))
         
-        # 其他属性
+        # Other properties
         metrics.update(self._extract_other_attributes(product))
         
         self.collected_metrics = metrics
         return metrics
     
     def _extract_basic_info(self, product: Dict) -> Dict:
-        """提取基础信息 (18个指标)"""
+        """Extract basic information (18 indicators)"""
         return {
-            'Locale': 'com',  # 默认美国站
+            'Locale': 'com',  # Default US site
             'Image': product.get('imagesCSV', ''),
             'Image Count': len(product.get('imagesCSV', '').split(';')) if product.get('imagesCSV') else 0,
             'Title': product.get('title', ''),
             'Parent Title': product.get('parentTitle', ''),
             'Description & Features: Description': product.get('description', ''),
-            'Description & Features: Short Description': '',  # API无此字段
+            'Description & Features: Short Description': '',  # API does not have this field
             'Description & Features: Feature 1': self._get_feature(product, 0),
             'Description & Features: Feature 2': self._get_feature(product, 1),
             'Description & Features: Feature 3': self._get_feature(product, 2),
@@ -239,10 +239,10 @@ class KeepaMetricsCollector:
         }
     
     def _extract_sales_performance(self, product: Dict) -> Dict:
-        """提取销售表现 (8个指标)"""
+        """Extract sales performance (8 indicators)"""
         data = product.get('data', {})
         
-        # 获取BSR数据
+        # Get BSR data
         df_sales = data.get('df_SALES')
         if df_sales is not None and not df_sales.empty:
             current_rank = int(df_sales['value'].iloc[-1]) if len(df_sales) > 0 else 0
@@ -254,7 +254,7 @@ class KeepaMetricsCollector:
             avg_90d = 0
             drops_90d = 0
         
-        # 估算月销量 (基于BSR)
+        # Estimated monthly sales (Based on BSR)
         estimated_sales = self._estimate_sales_from_bsr(avg_90d)
         
         return {
@@ -269,20 +269,20 @@ class KeepaMetricsCollector:
         }
     
     def _extract_reviews_returns(self, product: Dict) -> Dict:
-        """提取评论与退货 (5个指标)"""
+        """Retrieve reviews and returns (5 indicators)"""
         data = product.get('data', {})
         
-        # 评论数据
+        # Comment data
         df_reviews = data.get('df_COUNT_REVIEWS')
         if df_reviews is not None and not df_reviews.empty:
             review_count = int(df_reviews['value'].iloc[-1])
         else:
             review_count = product.get('reviews', 0)
         
-        # 评分
+        # score
         rating = product.get('stars', 0) or data.get('csv', [{}])[0].get('RATING', 0)
         
-        # 退货率 (基于类目估算)
+        # return rate (Category-based estimation)
         category = product.get('categoryTree', [{}])[0].get('name', '') if product.get('categoryTree') else ''
         return_rate = self._estimate_return_rate(category)
         
@@ -295,10 +295,10 @@ class KeepaMetricsCollector:
         }
     
     def _extract_buy_box_metrics(self, product: Dict) -> Dict:
-        """提取Buy Box指标 (15个指标)"""
+        """Extract Buy Box indicators (15 indicators)"""
         data = product.get('data', {})
         
-        # Buy Box价格
+        # Buy Box price
         df_buybox = data.get('df_BUY_BOX_SHIPPING')
         if df_buybox is not None and not df_buybox.empty:
             current_buybox = df_buybox['value'].iloc[-1]
@@ -309,16 +309,16 @@ class KeepaMetricsCollector:
             std_90d = 0
             flipability = 'N/A'
         
-        # 卖家信息
+        # Seller information
         buybox_seller = product.get('buyBoxSellerIdHistory', ['Unknown'])[-1] if product.get('buyBoxSellerIdHistory') else 'Unknown'
         
-        # Amazon自营占比
+        # Amazon’s self-operated share
         amazon_pct = self._calculate_amazon_buybox_share(data)
         
         return {
             'Buy Box: Buy Box Seller': buybox_seller,
-            'Buy Box: Shipping Country': 'US',  # 默认
-            'Buy Box: Strikethrough Price': '',  # API无此字段
+            'Buy Box: Shipping Country': 'US',  # Default
+            'Buy Box: Strikethrough Price': '',  # API does not have this field
             'Buy Box: % Amazon 90 days': f"{amazon_pct:.1f}%",
             'Buy Box: % Top Seller 90 days': 'N/A',
             'Buy Box: Winner Count 90 days': len(set(product.get('buyBoxSellerIdHistory', []) or [])),
@@ -334,25 +334,25 @@ class KeepaMetricsCollector:
         }
     
     def _extract_price_metrics(self, product: Dict) -> Dict:
-        """提取价格指标 (Amazon/New/Used)"""
+        """Extract price indicators (Amazon/New/Used)"""
         data = product.get('data', {})
         metrics = {}
         
-        # Amazon价格
+        # Amazon price
         df_amazon = data.get('df_AMAZON')
         if df_amazon is not None and not df_amazon.empty:
             metrics.update(self._calculate_price_metrics(df_amazon, 'Amazon'))
         else:
             metrics.update(self._empty_price_metrics('Amazon'))
         
-        # New价格
+        # New price
         df_new = data.get('df_NEW')
         if df_new is not None and not df_new.empty:
             metrics.update(self._calculate_price_metrics(df_new, 'New'))
         else:
             metrics.update(self._empty_price_metrics('New'))
         
-        # Used价格 (简化)
+        # UsedPrice (Simplify)
         df_used = data.get('df_USED')
         if df_used is not None and not df_used.empty:
             metrics['Used: Current'] = df_used['value'].iloc[-1]
@@ -368,13 +368,13 @@ class KeepaMetricsCollector:
         return metrics
     
     def _extract_inventory_metrics(self, product: Dict) -> Dict:
-        """提取库存指标"""
+        """Extract inventory indicators"""
         data = product.get('data', {})
         
-        # Amazon库存
+        # Amazon inventory
         df_amazon = data.get('df_AMAZON')
         if df_amazon is not None and not df_amazon.empty:
-            # 检测断货 (价格为-1表示断货)
+            # Detect out of stock (The price is-1 means out of stock)
             oos_count = (df_amazon['value'] == -1).tail(90).sum()
             oos_rate = (oos_count / min(90, len(df_amazon))) * 100
         else:
@@ -382,7 +382,7 @@ class KeepaMetricsCollector:
             oos_rate = 0
         
         return {
-            'Amazon: Stock': 0,  # API不直接提供
+            'Amazon: Stock': 0,  # API is not provided directly
             'Amazon: 90 days OOS': f"{oos_rate:.1f}%",
             'Amazon: OOS Count 30 days': int(oos_count * 30/90),
             'Amazon: OOS Count 90 days': int(oos_count),
@@ -391,23 +391,23 @@ class KeepaMetricsCollector:
         }
     
     def _extract_fee_metrics(self, product: Dict) -> Dict:
-        """提取费用指标 - 使用Keepa API真实数据"""
+        """Extract cost metrics - Use Keepa API real data"""
         from keepa_fee_extractor import KeepaFeeExtractor
         
-        # Buy Box价格
+        # Buy Box price
         data = product.get('data', {})
         df_buybox = data.get('df_BUY_BOX_SHIPPING')
         buybox_price = df_buybox['value'].iloc[-1] if df_buybox is not None and not df_buybox.empty else 0
         
-        # 使用Keepa费用提取器获取真实费用
+        # Get real fees with Keepa fee extractor
         fees = KeepaFeeExtractor.extract_all_fees(product, buybox_price)
         
         fba_fee = fees['fba_fee']
         referral_rate = fees['referral_rate']
         referral_fee = fees['referral_fee']
         
-        # 标记FBA费用来源
-        fba_note = "(Keepa)" if not fees['is_fba_estimated'] else "(估算)"
+        # Mark FBA fee sources
+        fba_note = "(Keepa)" if not fees['is_fba_estimated'] else "(Estimate)"
         
         return {
             'FBA Pick&Pack Fee': f"${fba_fee:.2f} {fba_note}",
@@ -419,10 +419,10 @@ class KeepaMetricsCollector:
         }
     
     def _extract_competition_metrics(self, product: Dict) -> Dict:
-        """提取竞争指标"""
+        """Extract competitive metrics"""
         data = product.get('data', {})
         
-        # 卖家数量
+        # Number of sellers
         df_count_new = data.get('df_COUNT_NEW')
         if df_count_new is not None and not df_count_new.empty:
             total_offers = int(df_count_new['value'].iloc[-1])
@@ -433,14 +433,14 @@ class KeepaMetricsCollector:
             'Total Offer Count': total_offers,
             'New Offer Count: Current': total_offers,
             'Used Offer Count: Current': 0,
-            'Count of retrieved live offers: New, FBA': total_offers,  # 简化
+            'Count of retrieved live offers: New, FBA': total_offers,  # Simplify
             'Count of retrieved live offers: New, FBM': 0,
             'Tracking since': self._format_date(product.get('trackingSince', 0)),
             'Listed since': self._format_date(product.get('listedSince', 0)),
         }
     
     def _extract_category_metrics(self, product: Dict) -> Dict:
-        """提取类目指标"""
+        """Extract category indicators"""
         category_tree = product.get('categoryTree', [])
         root = category_tree[0].get('name', '') if category_tree else ''
         sub = category_tree[1].get('name', '') if len(category_tree) > 1 else ''
@@ -454,7 +454,7 @@ class KeepaMetricsCollector:
         }
     
     def _extract_product_codes(self, product: Dict) -> Dict:
-        """提取产品代码"""
+        """Extract product code"""
         return {
             'ASIN': product.get('asin', ''),
             'Imported by Code': '',
@@ -467,13 +467,13 @@ class KeepaMetricsCollector:
         }
     
     def _extract_attributes(self, product: Dict) -> Dict:
-        """提取产品属性"""
-        # 提取变体属性 (从变体列表中找到当前ASIN的属性)
+        """Extract product attributes"""
+        # Extract variant attributes (Find the attributes of the current ASIN from the list of variations)
         variation_attrs = []
         current_asin = product.get('asin', '')
         for v in product.get('variations', []):
             if v.get('asin') == current_asin:
-                # 变体可能有 color, size, style 等属性
+                # Variants may have color, size, Attributes such as style
                 attrs = []
                 if v.get('color'):
                     attrs.append(f"Color:{v['color']}")
@@ -508,14 +508,14 @@ class KeepaMetricsCollector:
         }
     
     def _extract_content_metrics(self, product: Dict) -> Dict:
-        """提取内容指标"""
+        """Extract content metrics"""
         videos = product.get('videos', [])
         
-        # 分类主视频和附加视频
+        # Classify main video and additional videos
         main_videos = [v for v in videos if v.get('isMain')]
         additional_videos = [v for v in videos if not v.get('isMain')]
         
-        # 提取视频ID/URL列表
+        # Extract video ID/URL list
         main_video_list = ';'.join([v.get('videoId', '') for v in main_videos]) if main_videos else ''
         add_video_list = ';'.join([v.get('videoId', '') for v in additional_videos]) if additional_videos else ''
         
@@ -530,7 +530,7 @@ class KeepaMetricsCollector:
         }
     
     def _extract_package_metrics(self, product: Dict) -> Dict:
-        """提取包装规格"""
+        """Extract packaging specifications"""
         length = product.get('packageLength', 0) or 0
         width = product.get('packageWidth', 0) or 0
         height = product.get('packageHeight', 0) or 0
@@ -556,7 +556,7 @@ class KeepaMetricsCollector:
         }
     
     def _extract_other_attributes(self, product: Dict) -> Dict:
-        """提取其他属性"""
+        """Extract other attributes"""
         return {
             'Included Components': '',
             'Ingredients': '',
@@ -580,22 +580,22 @@ class KeepaMetricsCollector:
             'Freq. Bought Together': ';'.join(product.get('freqBoughtTogether', [])) if product.get('freqBoughtTogether') else '',
         }
     
-    # 辅助方法
+    # Helper method
     def _get_feature(self, product: Dict, index: int) -> str:
-        """获取产品卖点"""
+        """Get product selling points"""
         features = product.get('features', [])
         return features[index] if index < len(features) else ''
     
     def _count_rank_drops(self, ranks: List) -> int:
-        """统计排名下降次数"""
+        """Statistical ranking drops"""
         drops = 0
         for i in range(1, len(ranks)):
-            if ranks[i] > ranks[i-1] * 1.05:  # 排名数字变大表示下降
+            if ranks[i] > ranks[i-1] * 1.05:  # A larger ranking number indicates a decline
                 drops += 1
         return drops
     
     def _estimate_sales_from_bsr(self, bsr: int) -> int:
-        """根据BSR估算月销量"""
+        """Estimated monthly sales based on BSR"""
         if bsr < 1000:
             return 1000
         elif bsr < 5000:
@@ -612,7 +612,7 @@ class KeepaMetricsCollector:
             return 5
     
     def _calculate_sales_change(self, data: Dict) -> str:
-        """计算销量变化率"""
+        """Calculate sales volume change rate"""
         df_sales = data.get('df_SALES')
         if df_sales is not None and len(df_sales) >= 90:
             recent = df_sales['value'].tail(30).mean()
@@ -623,7 +623,7 @@ class KeepaMetricsCollector:
         return "0%"
     
     def _estimate_return_rate(self, category: str) -> str:
-        """估算退货率"""
+        """Estimated return rate"""
         rates = {
             'Clothing': '12%',
             'Shoes': '12%',
@@ -637,12 +637,12 @@ class KeepaMetricsCollector:
         return '6%'
     
     def _get_last_price_change(self, data: Dict) -> str:
-        """获取上次价格变化"""
-        # 简化实现
+        """Get the last price change"""
+        # Simplify implementation
         return ''
     
     def _calculate_flipability(self, prices: pd.Series) -> str:
-        """计算Buy Box可翻转性"""
+        """Calculate Buy Box Flipability"""
         if len(prices) < 10:
             return 'N/A'
         changes = prices.diff().abs()
@@ -655,16 +655,16 @@ class KeepaMetricsCollector:
             return 'Low'
     
     def _calculate_amazon_buybox_share(self, data: Dict) -> float:
-        """计算Amazon自营Buy Box占比"""
-        # 简化实现，实际需要buyBoxSellerIdHistory
+        """Calculate the proportion of Amazon’s self-operated Buy Box"""
+        # Simplified implementation, actually need buyBoxSellerIdHistory
         return 0.0
     
     def _is_fba_seller(self, product: Dict) -> bool:
-        """判断是否为FBA卖家"""
+        """Determine whether it is an FBA seller"""
         return product.get('buyBoxIsFBA', False)
     
     def _calculate_price_metrics(self, df: pd.DataFrame, prefix: str) -> Dict:
-        """计算价格指标"""
+        """Calculate price indicators"""
         metrics = {}
         values = df['value']
         
@@ -674,7 +674,7 @@ class KeepaMetricsCollector:
         metrics[f'{prefix}: 180 days avg.'] = values.tail(180).mean() if len(values) >= 180 else values.mean()
         metrics[f'{prefix}: 365 days avg.'] = values.tail(365).mean() if len(values) >= 365 else values.mean()
         
-        # 下降百分比
+        # Percentage drop
         for days in [1, 7, 30, 90]:
             if len(values) >= days + 1:
                 prev_value = values.iloc[-days-1]
@@ -692,7 +692,7 @@ class KeepaMetricsCollector:
         return metrics
     
     def _empty_price_metrics(self, prefix: str) -> Dict:
-        """空价格指标"""
+        """empty price indicator"""
         return {
             f'{prefix}: Current': 0,
             f'{prefix}: 30 days avg.': 0,
@@ -708,8 +708,8 @@ class KeepaMetricsCollector:
         }
     
     def _estimate_fba_fee(self, weight_kg: float, volume_cm3: float) -> float:
-        """估算FBA费用"""
-        # 简化估算
+        """Estimate FBA fees"""
+        # Simplify estimating
         if weight_kg <= 0.25:
             return 3.22
         elif weight_kg <= 0.5:
@@ -722,11 +722,11 @@ class KeepaMetricsCollector:
             return 8.50
     
     def _format_subcategory_ranks(self, category_tree: List) -> str:
-        """格式化子类目排名"""
+        """Formatting subcategory rankings"""
         return '; '.join([f"{c.get('name', '')}: #{c.get('rank', 0)}" for c in category_tree if c.get('rank')])
     
     def _format_date(self, keepa_time: int) -> str:
-        """格式化Keepa时间为日期"""
+        """Format Keepa time as date"""
         if keepa_time == 0:
             return ''
         base = datetime(2011, 1, 1)
@@ -734,27 +734,27 @@ class KeepaMetricsCollector:
         return date.strftime('%Y/%m/%d')
     
     def to_dataframe(self) -> pd.DataFrame:
-        """将采集的指标转换为DataFrame"""
+        """Convert collected indicators into DataFrame"""
         if not self.collected_metrics:
-            raise ValueError("尚未采集指标，请先调用collect_all_metrics()")
+            raise ValueError("Indicators have not been collected yet, please call collect first._all_metrics()")
         
         return pd.DataFrame([self.collected_metrics])
     
     def export_to_csv(self, filepath: str):
-        """导出为CSV文件"""
+        """Export to CSV file"""
         df = self.to_dataframe()
         df.to_csv(filepath, index=False, encoding='utf-8-sig')
 
 
 def collect_163_metrics(product: Dict) -> Dict[str, Any]:
     """
-    快捷函数：从Keepa产品数据中提取所有163个指标
+    Shortcut function: extract all 163 metrics from Keepa product data
     
     Args:
-        product: Keepa API返回的产品数据
+        product: Product data returned by Keepa API
         
     Returns:
-        包含163个指标的字典
+        Dictionary containing 163 indicators
     """
     collector = KeepaMetricsCollector()
     return collector.collect_all_metrics(product)

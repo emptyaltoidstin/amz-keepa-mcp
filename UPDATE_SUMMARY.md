@@ -1,149 +1,149 @@
-# 项目更新总结 - 统一报告集成
+# Project update summary - Unified reporting integration
 
-## 📅 更新日期: 2026-02-16
+## 📅 Update date: 2026-02-16
 
-## 🎯 更新内容
+## 🎯 Update content
 
-### 1. 统一报告生成器 (unified_report.py)
+### 1. Unified Report Generator (unified_report.py)
 
-**目标**: 将两份报告合并为一份，集成精算师分析维度
+**target**: Merge two reports into one, integrating actuarial analysis dimensions
 
-**实现**:
-- ✅ 创建 `src/unified_report.py`
-- ✅ 合并交互式计算器 + 精算师分析
-- ✅ 包含帕累托分析 (80/20法则)
-- ✅ 包含风险评估
-- ✅ 包含行动计划
-- ✅ 统一设计风格
+**realize**:
+- ✅Create `src/unified_report.py`
+- ✅ Incorporated interactive calculator + Actuary analysis
+- ✅ Contains Pareto analysis (80/Rule of 20)
+- ✅ Includes risk assessment
+- ✅ Includes action plan
+- ✅ Unified design style
 
-**报告结构**:
+**Report structure**:
 ```
-├─ 顶部: 交互式成本计算器
-│  └─ 填入1688采购价 → 实时计算COGS
+├─ Top: Interactive cost calculator
+│ └─ Fill in the 1688 purchase price → calculate COGS in real time
 │
-├─ 上部: 汇总指标面板
-│  └─ 月度总利润 / 总销量 / 利润率 / ROI
+├─ Upper part: Summary Metrics Panel
+│ └─ Total monthly profit / total sales / profit margin / ROI
 │
-├─ 中部: 投资建议
-│  └─ GO / 谨慎 / 避免 + 置信度
+├─Central: investment advice
+│  └─ GO / cautious / avoid + Confidence
 │
-├─ 下部: 帕累托分析
-│  └─ 80/20核心变体识别
+├─ Lower part: Pareto analysis
+│  └─ 80/20 core variant identification
 │
-├─ 下部: 变体利润分析表
-│  └─ 每个变体的详细数据
+├─ Lower part: Variation profit analysis table
+│ └─ Detailed data for each variant
 │
-├─ 底部: 风险评估
-│  └─ 风险项列表
+├─ Bottom: risk assessment
+│ └─ Risk item list
 │
-├─ 底部: 行动计划
-│  └─ 30-60-90天优化建议
+├─ Bottom: action plan
+│  └─ 30-60-90-day optimization suggestions
 │
-└─ 底部: 计算公式参考
-   └─ 完整财务模型
+└─ Bottom: Calculation formula reference
+   └─ Complete financial model
 ```
 
-### 2. 更新标准流程脚本
+### 2. Update the standard process script
 
-**修改**: `generate_report.py`
+**Modify**: `generate_report.py`
 
-**变更**:
-- 简化流程: 4步 → 3步
-- 输出: 2份报告 → 1份统一报告
-- 报告路径: `{ASIN}_UNIFIED_ACTUARY.html`
+**change**:
+- Simplify the process: 4 steps → 3 steps
+- output: 2 reports → 1 unified report
+- Report path: `{ASIN}_UNIFIED_ACTUARY.html`
 
-**新流程**:
+**new process**:
 ```python
-步骤1: 采集Keepa数据
-步骤2: 提取真实费用
-步骤3: 生成统一报告 (包含所有分析维度)
+Step 1: Collect Keepa data
+Step 2: Withdraw true fees
+Step 3: Generate unified reports (Includes all dimensions of analysis)
 ```
 
-### 3. 更新文档
+### 3. Update documentation
 
-**修改**: `README.md`
+**Modify**: `README.md`
 
-**更新内容**:
-- 更新流程图示 (3步骤)
-- 更新输出说明 (1份统一报告)
-- 更新报告结构说明
-- 更新使用示例
+**Update content**:
+- Update process diagram (3 steps)
+- Updated output description (1 unified report)
+- Updated report structure description
+- Update usage example
 
-## 📊 对比: 之前 vs 现在
+## 📊 Compare: before vs now
 
-### 之前 (两份报告)
-
-```
-输出:
-├── {ASIN}_ACTUARY_FINAL_v3.html      # 精算师分析
-└── {ASIN}_ALLINONE_INTERACTIVE.html  # 交互式计算器
-
-使用:
-1. 打开交互式报告，填入采购价
-2. 查看利润计算
-3. 再打开主报告查看详细分析
-```
-
-### 现在 (一份统一报告)
+### before (two reports)
 
 ```
-输出:
-└── {ASIN}_UNIFIED_ACTUARY.html       # 统一报告 (交互式+完整分析)
+output:
+├── {ASIN}_ACTUARY_FINAL_v3.html      # Actuary analysis
+└── {ASIN}_ALLINONE_INTERACTIVE.html  # interactive calculator
 
-使用:
-1. 打开统一报告
-2. 在顶部填入采购价 → 实时计算利润
-3. 向下滚动查看帕累托分析、风险评估、行动计划
-4. 一站式完成所有分析
+use:
+1. Open the interactive report and fill in the purchase price
+2. View profit calculation
+3. Open the main report again to view detailed analysis
 ```
 
-**优势**:
-- ✅ 只需打开一个文件
-- ✅ 交互式计算 + 完整分析在同一页面
-- ✅ 分析维度更全面 (帕累托、风险、行动计划)
-- ✅ 用户体验更流畅
+### now (a unified report)
 
-## 🚀 使用方式
+```
+output:
+└── {ASIN}_UNIFIED_ACTUARY.html       # unified reporting (interactive+full analysis)
 
-### 命令行
+use:
+1. Open unified reporting
+2. Fill in the purchase price at the top → calculate the profit in real time
+3. Scroll down for Pareto Analysis, Risk Assessment, Action Plan
+4. Complete all analysis in one stop
+```
+
+**Advantages**:
+- ✅ Just open a file
+- ✅Interactive calculations + Full analysis on the same page
+- ✅ More comprehensive analysis dimensions (Pareto, risk, action plan)
+- ✅ Smoother user experience
+
+## 🚀 How to use
+
+### command line
 
 ```bash
 python generate_report.py B0F6B5R47Q
 ```
 
-### 输出示例
+### Output example
 
 ```
-✅ 统一精算师报告生成完成!
+✅ The unified actuary report is generated!
 
-📊 分析摘要:
-   • 父ASIN: B0F6B5R47Q
-   • 变体数量: 9
+📊 Analysis summary:
+   • Parent ASIN: B0F6B5R47Q
+   • Number of variants: 9
 
-📁 生成的报告:
+📁 Generated reports:
    cache/reports/B0F6B5R47Q_UNIFIED_ACTUARY.html
 
-📋 报告包含:
-   ✅ 交互式成本计算器
-   ✅ 帕累托分析
-   ✅ 变体利润分析表
-   ✅ 风险评估
-   ✅ 投资建议与行动计划
-   ✅ 完整计算公式参考
+📋 Report contains:
+   ✅Interactive cost calculator
+   ✅ Pareto analysis
+   ✅ Variation profit analysis table
+   ✅Risk assessment
+   ✅ Investment advice and action plan
+   ✅ Complete calculation formula reference
 ```
 
-## 📁 更新文件清单
+## 📁 Update file list
 
-| 文件 | 状态 | 说明 |
+| File | Status | Description |
 |------|------|------|
-| `src/unified_report.py` | 新增 | 统一报告生成器 |
-| `generate_report.py` | 修改 | 使用统一报告 |
-| `README.md` | 修改 | 更新流程和说明 |
+| `src/unified_report.py` | New | Unified Report Generator |
+| `generate_report.py` | Modify | Use unified reporting |
+| `README.md` | Modify | Update process and instructions |
 
-## ✅ 测试验证
+## ✅ Test verification
 
 ```bash
-# 测试统一报告生成
+# Test unified report generation
 python -c "
 from src.unified_report import generate_unified_report
 
@@ -152,21 +152,21 @@ test_products = [
 ]
 
 output = generate_unified_report('B0TEST001', test_products, {})
-print(f'报告生成成功: {output}')
+print(f'Report generated successfully: {output}')
 "
 
-# 结果: ✅ 报告生成成功: cache/reports/B0TEST001_UNIFIED_ACTUARY.html
+# result: ✅ Report generated successfully: cache/reports/B0TEST001_UNIFIED_ACTUARY.html
 ```
 
-## 🎉 完成状态
+## 🎉 Completed status
 
-**目标**: 将两份报告合并为一份，集成精算师分析维度
+**target**: Merge two reports into one, integrating actuarial analysis dimensions
 
-**状态**: ✅ 已完成
+**Status**: ✅ Completed
 
-**验证**: ✅ 测试通过
+**Verify**: ✅ Test passed
 
 ---
 
-**更新者**: Amz-Keepa-MCP v3.0  
-**日期**: 2026-02-16
+**Updater**: Amz-Keepa-MCP v3.0  
+**Date**: 2026-02-16

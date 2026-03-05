@@ -1,15 +1,15 @@
 """
-统一精算师报告生成器
+Unified Actuarial Report Generator
 ====================
-将精算师分析 + 交互式计算器合并为一份完整报告
+Analyze the actuary + Interactive calculators combined into one complete report
 
-包含:
-1. 交互式成本计算器 (填入采购价即计算)
-2. 163指标完整展示
-3. 帕累托分析 (80/20法则)
-4. 变体利润分析
-5. 风险评估
-6. 投资建议与行动计划
+Include:
+1. Interactive cost calculator (Enter the purchase price and it will be calculated)
+2. Complete display of 163 indicators
+3. Pareto analysis (80/Rule of 20)
+4. Variation profit analysis
+5. Risk assessment
+6. Investment advice and action plan
 """
 
 import json
@@ -20,12 +20,12 @@ from dataclasses import asdict
 
 class UnifiedActuaryReport:
     """
-    统一精算师报告
+    Uniform Actuary Report
     
-    All-in-One设计:
-    - 顶部: 交互式计算器
-    - 中部: 精算师分析 (帕累托、风险、决策)
-    - 下部: 完整163指标
+    All-in-One design:
+    - top: interactive calculator
+    - central: Actuary analysis (Pareto, risk, decision-making)
+    - lower part: Complete 163 indicators
     """
     
     def __init__(self):
@@ -35,16 +35,16 @@ class UnifiedActuaryReport:
         
     def generate(self, asin: str, products: List[Dict], 
                  analysis_data: Dict, output_path: str = None) -> str:
-        """生成统一报告"""
+        """Generate unified reports"""
         
         if output_path is None:
             output_path = f'cache/reports/{asin}_UNIFIED_ACTUARY.html'
         
-        # 准备数据
+        # Prepare data
         variants = self._prepare_variants(products, analysis_data)
         parent_info = analysis_data.get('parent_info', {})
         
-        # 生成HTML
+        # Generate HTML
         html = self._build_unified_html(asin, variants, parent_info, analysis_data)
         
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -53,24 +53,24 @@ class UnifiedActuaryReport:
         return output_path
     
     def _prepare_variants(self, products: List[Dict], analysis_data: Dict) -> List[Dict]:
-        """准备变体数据"""
+        """Prepare variant data"""
         variants = []
         
         for product in products:
             asin = product.get('asin', '')
             
-            # 获取重量
+            # Get weight
             weight_g = product.get('packageWeight', 0) or product.get('itemWeight', 0) or 0
             if weight_g == 0:
-                weight_g = 300  # 默认300g
+                weight_g = 300  # Default 300g
             
-            # 获取价格
+            # get price
             price = 0
             stats = product.get('stats', {})
             if stats and 'buyBoxPrice' in stats:
                 price = stats['buyBoxPrice'] / 100
             
-            # 获取销量
+            # Get sales
             sales = 0
             bought = product.get('boughtInPastMonth', 0)
             if isinstance(bought, (int, float)):
@@ -78,10 +78,10 @@ class UnifiedActuaryReport:
             elif isinstance(bought, list) and len(bought) > 1:
                 sales = bought[1]
             
-            # 获取属性
+            # Get properties
             attrs = product.get('attributes', [])
-            color = self._get_attr(attrs, 'Color') or '默认'
-            size = self._get_attr(attrs, 'Size') or '标准'
+            color = self._get_attr(attrs, 'Color') or 'Default'
+            size = self._get_attr(attrs, 'Size') or 'standard'
             
             variants.append({
                 'asin': asin,
@@ -96,7 +96,7 @@ class UnifiedActuaryReport:
         return variants
     
     def _get_attr(self, attrs: List, name: str) -> str:
-        """获取属性值"""
+        """Get attribute value"""
         for attr in attrs:
             if isinstance(attr, dict) and attr.get('name') == name:
                 return attr.get('value', '')
@@ -104,23 +104,23 @@ class UnifiedActuaryReport:
     
     def _build_unified_html(self, asin: str, variants: List[Dict], 
                            parent_info: Dict, analysis_data: Dict) -> str:
-        """构建统一HTML报告"""
+        """Build unified HTML reports"""
         
         variants_json = json.dumps(variants, ensure_ascii=False)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # 计算汇总数据
+        # Calculate summary data
         total_sales = sum(v['sales'] for v in variants)
         avg_price = sum(v['price'] for v in variants) / len(variants) if variants else 30
         avg_weight = sum(v['weight_kg'] for v in variants) / len(variants) if variants else 0.3
         
-        # 帕累托分析 (模拟)
+        # Pareto analysis (Simulation)
         pareto_data = self._calculate_pareto(variants)
         
-        # 风险评估 (模拟)
+        # risk assessment (Simulation)
         risk_level = self._assess_risk(variants, analysis_data)
         
-        # 投资建议
+        # investment advice
         recommendation = self._generate_recommendation(variants, risk_level)
         
         html = f'''<!DOCTYPE html>
@@ -128,7 +128,7 @@ class UnifiedActuaryReport:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>统一精算师分析报告 | {asin}</title>
+    <title>Uniform Actuary Analysis Report | {asin}</title>
     <style>
         :root {{
             --bg: #0a0a0a;
@@ -582,37 +582,37 @@ class UnifiedActuaryReport:
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>统一精算师分析报告</h1>
-            <div class="subtitle">All-in-One 交互式分析 · 数据驱动决策</div>
-            <div class="meta">ASIN: {asin} | 生成时间: {timestamp}</div>
+            <h1>Uniform Actuary Analysis Report</h1>
+            <div class="subtitle">All-in-One Interactive Analysis · Data-Driven Decisions</div>
+            <div class="meta">ASIN: {asin} | Generation time: {timestamp}</div>
         </header>
         
         <!-- Section 1: Interactive Calculator -->
         <div class="section calculator-section">
             <div class="section-header">
                 <span class="icon">🔧</span>
-                <h2>成本计算器 · 填入1688采购价</h2>
+                <h2>Cost Calculator · Fill in the 1688 purchase price</h2>
             </div>
             
             <div class="main-input">
-                <label>采购成本 (从1688获取)</label>
+                <label>Procurement cost (Get from 1688)</label>
                 <input type="number" class="input-large" id="procurementCost" 
                        placeholder="0" oninput="calculateAll()">
-                <div style="color: var(--text-muted); margin-top: 10px;">人民币 (RMB)</div>
+                <div style="color: var(--text-muted); margin-top: 10px;">RMB (RMB)</div>
             </div>
             
             <div class="settings-grid">
                 <div class="setting-box">
-                    <label>船运价格</label>
+                    <label>shipping price</label>
                     <input type="number" id="shippingRate" value="{self.shipping_rate}" 
                            oninput="calculateAll()">
                 </div>
                 <div class="setting-box">
-                    <label>关税率</label>
+                    <label>tariff rate</label>
                     <div style="font-size: 1.4em; color: var(--text-secondary); font-family: monospace;">15%</div>
                 </div>
                 <div class="setting-box">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <input type="number" id="exchangeRate" value="{self.exchange_rate}" 
                            step="0.1" oninput="calculateAll()">
                 </div>
@@ -624,26 +624,26 @@ class UnifiedActuaryReport:
             
             <div class="cost-flow">
                 <div class="flow-item">
-                    <label>采购成本</label>
+                    <label>Procurement cost</label>
                     <div class="value" id="costProcurement">-</div>
                 </div>
                 <div class="flow-op">+</div>
                 <div class="flow-item">
-                    <label>头程运费</label>
+                    <label>First leg freight</label>
                     <div class="value" id="costShipping">-</div>
                 </div>
                 <div class="flow-op">×</div>
                 <div class="flow-item">
-                    <label>关税 15%</label>
+                    <label>Tariff 15%</label>
                     <div class="value">1.15</div>
                 </div>
                 <div class="flow-op">÷</div>
                 <div class="flow-item">
-                    <label>汇率</label>
+                    <label>exchange rate</label>
                     <div class="value" id="costExchange">7.2</div>
                 </div>
                 <div class="flow-item highlight">
-                    <label>总COGS (USD)</label>
+                    <label>Total COGS (USD)</label>
                     <div class="value" id="costTotal">-</div>
                 </div>
             </div>
@@ -652,26 +652,26 @@ class UnifiedActuaryReport:
         <!-- Section 2: Dashboard Metrics -->
         <div class="dashboard-grid" id="dashboardSection" style="display: none;">
             <div class="metric-card highlight">
-                <label>月度总利润</label>
+                <label>Total monthly profit</label>
                 <div class="value" id="totalProfit">$0</div>
             </div>
             <div class="metric-card">
-                <label>月度总销量</label>
+                <label>Total monthly sales</label>
                 <div class="value" id="totalSales">0</div>
             </div>
             <div class="metric-card">
-                <label>平均利润率</label>
+                <label>average profit margin</label>
                 <div class="value" id="avgMargin">0%</div>
             </div>
             <div class="metric-card highlight">
-                <label>ROI估算</label>
+                <label>ROI estimation</label>
                 <div class="value" id="roiEstimate">0%</div>
             </div>
         </div>
         
         <!-- Section 3: Investment Verdict -->
         <div class="verdict-section" id="verdictSection" style="display: none;">
-            <div class="verdict-label">投资建议</div>
+            <div class="verdict-label">investment advice</div>
             <div class="verdict-value" id="verdictValue">-</div>
             <div style="color: var(--text-muted); font-size: 1.1em;" id="verdictConfidence">-</div>
         </div>
@@ -680,11 +680,11 @@ class UnifiedActuaryReport:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📊</span>
-                <h2>帕累托分析 · 80/20法则</h2>
+                <h2>Pareto Analysis · 80/Rule of 20</h2>
             </div>
             <div class="pareto-container">
                 <div style="margin-bottom: 20px; color: var(--text-muted); font-size: 0.9em;">
-                    识别核心变体 (贡献80%利润的20%变体)
+                    Identify core variants (Contribute 80%Profit of 20%Variants)
                 </div>
                 {self._generate_pareto_bars(variants)}
             </div>
@@ -694,19 +694,19 @@ class UnifiedActuaryReport:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📦</span>
-                <h2>变体利润分析</h2>
+                <h2>Variant Profit Analysis</h2>
             </div>
             <table class="data-table" id="variantsTable">
                 <thead>
                     <tr>
-                        <th>变体</th>
-                        <th>重量</th>
-                        <th>价格</th>
-                        <th>头程运费</th>
+                        <th>Variants</th>
+                        <th>weight</th>
+                        <th>price</th>
+                        <th>First leg freight</th>
                         <th>COGS</th>
-                        <th>月销</th>
-                        <th>利润</th>
-                        <th>利润率</th>
+                        <th>monthly sales</th>
+                        <th>profit</th>
+                        <th>profit margin</th>
                     </tr>
                 </thead>
                 <tbody id="variantsTableBody">
@@ -719,7 +719,7 @@ class UnifiedActuaryReport:
         <div class="section">
             <div class="section-header">
                 <span class="icon">⚠️</span>
-                <h2>风险评估</h2>
+                <h2>risk assessment</h2>
             </div>
             <div class="risk-list">
                 {self._generate_risk_items(risk_level)}
@@ -730,7 +730,7 @@ class UnifiedActuaryReport:
         <div class="section">
             <div class="section-header">
                 <span class="icon">🎯</span>
-                <h2>行动计划</h2>
+                <h2>action plan</h2>
             </div>
             <div class="action-list">
                 {self._generate_action_items(recommendation)}
@@ -741,47 +741,47 @@ class UnifiedActuaryReport:
         <div class="section">
             <div class="section-header">
                 <span class="icon">📐</span>
-                <h2>计算公式</h2>
+                <h2>Calculation formula</h2>
             </div>
             <div class="formula-display">
-<span class="comment">// 成本计算</span>
-<span class="variable">总COGS (USD)</span> = [采购价(RMB) + (重量kg × 船运价格)] × 1.15(关税) ÷ 汇率
+<span class="comment">// cost calculation</span>
+<span class="variable">Total COGS (USD)</span> = [purchase price(RMB) + (Weight kg × shipping price)] × 1.15(tariff) ÷ exchange rate
 
-<span class="comment">// 利润计算</span>
-<span class="variable">利润</span> = 售价 - COGS - FBA费用 - 佣金 - 退货成本 - TACOS广告费
+<span class="comment">// Profit calculation</span>
+<span class="variable">profit</span> = selling price - COGS - FBA fees - Commission - return cost - TACOS advertising fee
 
-<span class="comment">// 费用明细</span>
-<span class="variable">FBA费用</span>: 基于2026年费率，按计费重量计算
-<span class="variable">佣金</span>: 基于类目 (Electronics 8%, Clothing 17%, Jewelry 20%等)
-<span class="variable">TACOS</span>: Total ACOS = 广告总花费 / 总销售额 (默认15%)
+<span class="comment">// Cost details</span>
+<span class="variable">FBA fees</span>: Based on 2026 rates, calculated by billable weight
+<span class="variable">Commission</span>: Based on category (Electronics 8%, Clothing 17%, Jewelry 20%Wait)
+<span class="variable">TACOS</span>: Total ACOS = total advertising spend / total sales (Default 15%)
             </div>
         </div>
     </div>
     
     <script>
-        // 变体数据
+        // variant data
         const variantsData = {variants_json};
         
-        // 初始化
+        // initialization
         function init() {{
             calculateAll();
         }}
         
-        // 计算所有
+        // Count all
         function calculateAll() {{
             const procurementRMB = parseFloat(document.getElementById('procurementCost').value) || 0;
             const shippingRate = parseFloat(document.getElementById('shippingRate').value) || {self.shipping_rate};
             const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || {self.exchange_rate};
             
-            // 更新流程显示
+            // Update process display
             document.getElementById('costProcurement').textContent = procurementRMB > 0 ? procurementRMB.toFixed(2) + ' RMB' : '-';
             document.getElementById('costExchange').textContent = exchangeRate.toFixed(1);
             
-            // 计算变体
+            // Compute variants
             calculateVariants(procurementRMB, shippingRate, exchangeRate);
         }}
         
-        // 计算变体
+        // Compute variants
         function calculateVariants(procurementRMB, shippingRate, exchangeRate) {{
             const rows = document.querySelectorAll('#variantsTableBody tr');
             let totalProfit = 0;
@@ -794,10 +794,10 @@ class UnifiedActuaryReport:
                 const price = v.price;
                 const sales = v.sales;
                 
-                // 计算头程运费
+                // Calculate first leg freight
                 const shippingRMB = procurementRMB > 0 ? weightKg * shippingRate : 0;
                 
-                // 计算COGS
+                // Calculate COGS
                 let cogsUSD = 0;
                 if (procurementRMB > 0) {{
                     const subtotalRMB = procurementRMB + shippingRMB;
@@ -805,7 +805,7 @@ class UnifiedActuaryReport:
                     cogsUSD = totalRMB / exchangeRate;
                 }}
                 
-                // 费用计算
+                // Cost calculation
                 const fbaFee = estimateFBAFee(weightKg);
                 const referralFee = price * 0.15;
                 const returnCost = price * 0.05 * 0.3;
@@ -821,7 +821,7 @@ class UnifiedActuaryReport:
                 totalSales += sales;
                 totalRevenue += price * sales;
                 
-                // 更新行
+                // update row
                 const cells = row.querySelectorAll('td');
                 if (cells.length >= 8) {{
                     if (procurementRMB > 0) {{
@@ -842,7 +842,7 @@ class UnifiedActuaryReport:
                 }}
             }});
             
-            // 更新汇总
+            // Update summary
             if (procurementRMB > 0) {{
                 document.getElementById('dashboardSection').style.display = 'grid';
                 document.getElementById('verdictSection').style.display = 'block';
@@ -858,7 +858,7 @@ class UnifiedActuaryReport:
                 const roi = monthlyCogs > 0 ? (totalProfit / monthlyCogs) * 100 : 0;
                 document.getElementById('roiEstimate').textContent = roi.toFixed(0) + '%';
                 
-                // 更新总COGS显示
+                // Update total COGS display
                 const avgWeight = variantsData.reduce((a, v) => a + v.weight_kg, 0) / variantsData.length;
                 const shippingRMB = avgWeight * shippingRate;
                 const totalRMB = (procurementRMB + shippingRMB) * 1.15;
@@ -866,7 +866,7 @@ class UnifiedActuaryReport:
                 document.getElementById('costShipping').textContent = shippingRMB.toFixed(0) + ' RMB';
                 document.getElementById('costTotal').textContent = '$' + cogsUSD.toFixed(2);
                 
-                // 决策
+                // decision making
                 updateVerdict(avgMargin, roi);
             }} else {{
                 document.getElementById('dashboardSection').style.display = 'none';
@@ -876,7 +876,7 @@ class UnifiedActuaryReport:
             }}
         }}
         
-        // 估算FBA费用
+        // Estimate FBA fees
         function estimateFBAFee(weightKg) {{
             const weightLb = weightKg * 2.20462;
             if (weightLb <= 0.5) return 3.22;
@@ -885,33 +885,33 @@ class UnifiedActuaryReport:
             return 5.77 + (weightLb - 2.0) * 0.50;
         }}
         
-        // 更新决策
+        // update decision
         function updateVerdict(margin, roi) {{
             const verdictEl = document.getElementById('verdictValue');
             const confidenceEl = document.getElementById('verdictConfidence');
             const sectionEl = document.getElementById('verdictSection');
             
             let verdict = 'avoid';
-            let text = '建议避免';
+            let text = 'Recommended to avoid';
             let confidence = 60;
             
             if (margin > 15 && roi > 50) {{
                 verdict = 'proceed';
-                text = '建议投资';
+                text = 'Recommended investment';
                 confidence = 85;
             }} else if (margin > 10 && roi > 20) {{
                 verdict = 'caution';
-                text = '谨慎考虑';
+                text = 'Consider carefully';
                 confidence = 70;
             }}
             
             verdictEl.textContent = text;
             verdictEl.className = 'verdict-value ' + verdict;
             sectionEl.className = 'verdict-section ' + verdict;
-            confidenceEl.textContent = '置信度 ' + confidence + '%';
+            confidenceEl.textContent = 'Confidence ' + confidence + '%';
         }}
         
-        // 初始化
+        // initialization
         init();
     </script>
 </body>
@@ -920,7 +920,7 @@ class UnifiedActuaryReport:
         return html
     
     def _generate_variant_rows(self, variants: List[Dict]) -> str:
-        """生成变体表格行"""
+        """Generate variant table rows"""
         rows = []
         for v in variants:
             rows.append(f'''
@@ -941,14 +941,14 @@ class UnifiedActuaryReport:
         return '\n'.join(rows)
     
     def _calculate_pareto(self, variants: List[Dict]) -> List[Dict]:
-        """计算帕累托数据"""
-        # 按销量排序
+        """Calculate Pareto data"""
+        # Sort by sales
         sorted_variants = sorted(variants, key=lambda x: x['sales'], reverse=True)
         total_sales = sum(v['sales'] for v in variants)
         
         pareto_data = []
         cumulative = 0
-        for i, v in enumerate(sorted_variants[:5]):  # 只显示前5
+        for i, v in enumerate(sorted_variants[:5]):  # Only show top 5
             cumulative += v['sales']
             percentage = (v['sales'] / total_sales * 100) if total_sales > 0 else 0
             cumulative_pct = (cumulative / total_sales * 100) if total_sales > 0 else 0
@@ -957,13 +957,13 @@ class UnifiedActuaryReport:
                 'name': f"{v['color']}",
                 'percentage': percentage,
                 'cumulative': cumulative_pct,
-                'is_core': cumulative_pct <= 80  # 80/20法则
+                'is_core': cumulative_pct <= 80  # 80/Rule of 20
             })
         
         return pareto_data
     
     def _generate_pareto_bars(self, variants: List[Dict]) -> str:
-        """生成帕累托柱状图"""
+        """Generate Pareto histogram"""
         pareto_data = self._calculate_pareto(variants)
         
         bars = []
@@ -983,41 +983,41 @@ class UnifiedActuaryReport:
         return '\n'.join(bars)
     
     def _assess_risk(self, variants: List[Dict], analysis_data: Dict) -> Dict:
-        """风险评估"""
+        """risk assessment"""
         risks = []
         
-        # 检查变体数量
+        # Check number of variants
         if len(variants) > 10:
             risks.append({
                 'level': 'medium',
-                'title': '变体过多',
-                'desc': f'共{len(variants)}个变体，库存管理复杂度高',
+                'title': 'Too many variants',
+                'desc': f'total{len(variants)}variants, inventory management complexity is high',
                 'icon': '⚠️'
             })
         
-        # 检查重量差异
+        # Check weight difference
         weights = [v['weight_kg'] for v in variants]
         if weights and max(weights) > min(weights) * 2:
             risks.append({
                 'level': 'low',
-                'title': '重量差异大',
-                'desc': '不同变体重量差异超过2倍，FBA费用计算需注意',
+                'title': 'Big weight difference',
+                'desc': 'If the weight difference between different variants exceeds 2 times, please pay attention to FBA fee calculation.',
                 'icon': '⚖️'
             })
         
-        # 默认风险
+        # default risk
         if not risks:
             risks.append({
                 'level': 'low',
-                'title': '暂无重大风险',
-                'desc': '当前产品组合风险可控',
+                'title': 'No major risks yet',
+                'desc': 'Current product portfolio risks are controllable',
                 'icon': '✅'
             })
         
         return {'items': risks}
     
     def _generate_risk_items(self, risk_level: Dict) -> str:
-        """生成风险项"""
+        """Generate risk items"""
         items = []
         for risk in risk_level.get('items', []):
             items.append(f'''
@@ -1032,28 +1032,28 @@ class UnifiedActuaryReport:
         return '\n'.join(items)
     
     def _generate_recommendation(self, variants: List[Dict], risk_level: Dict) -> Dict:
-        """生成建议"""
+        """Generate suggestions"""
         actions = [
             {
                 'priority': 'high',
-                'title': '优先推广核心变体',
-                'desc': '集中广告预算在销量前20%的变体上，提升ROI'
+                'title': 'Prioritize promotion of core variants',
+                'desc': 'Focus your advertising budget on the top 20 sales%On the variant, improve ROI'
             },
             {
                 'priority': 'medium',
-                'title': '优化库存结构',
-                'desc': '根据帕累托分析，减少长尾变体库存，降低仓储成本'
+                'title': 'Optimize inventory structure',
+                'desc': 'Based on Pareto analysis, reduce long-tail variant inventory and reduce warehousing costs'
             },
             {
                 'priority': 'low',
-                'title': '监控竞品动态',
-                'desc': '定期跟踪竞品价格和排名变化，及时调整策略'
+                'title': 'Monitor competitive product dynamics',
+                'desc': 'Regularly track price and ranking changes of competing products and adjust strategies in a timely manner'
             }
         ]
         return {'actions': actions}
     
     def _generate_action_items(self, recommendation: Dict) -> str:
-        """生成行动项"""
+        """Generate action items"""
         items = []
         for action in recommendation.get('actions', []):
             items.append(f'''
@@ -1068,32 +1068,32 @@ class UnifiedActuaryReport:
         return '\n'.join(items)
 
 
-# 便捷函数
+# Convenience function
 def generate_unified_report(asin: str, products: List[Dict], 
                             analysis_data: Dict, output_path: str = None) -> str:
-    """生成统一精算师报告"""
+    """Generate unified actuary report"""
     generator = UnifiedActuaryReport()
     return generator.generate(asin, products, analysis_data, output_path)
 
 
 if __name__ == "__main__":
-    # 测试
-    print("统一精算师报告生成器")
+    # test
+    print("Unified Actuarial Report Generator")
     print("=" * 60)
     
     test_products = [
         {
             'asin': 'B0TEST001',
-            'color': '黑色',
-            'size': '标准',
+            'color': 'black',
+            'size': 'standard',
             'packageWeight': 450,
             'stats': {'buyBoxPrice': 4599},
             'boughtInPastMonth': 800
         },
         {
             'asin': 'B0TEST002',
-            'color': '白色',
-            'size': '标准',
+            'color': 'white',
+            'size': 'standard',
             'packageWeight': 450,
             'stats': {'buyBoxPrice': 4599},
             'boughtInPastMonth': 650
@@ -1101,4 +1101,4 @@ if __name__ == "__main__":
     ]
     
     output = generate_unified_report('B0TEST001', test_products, {})
-    print(f"报告已生成: {output}")
+    print(f"Report generated: {output}")

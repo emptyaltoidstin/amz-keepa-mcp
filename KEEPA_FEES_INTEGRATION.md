@@ -1,63 +1,63 @@
-# Keepa API 真实费用集成指南
+# Keepa API True Fee Integration Guide
 
-## 概述
+## Overview
 
-现在系统使用 **Keepa API 真实数据** 来计算FBA费用和佣金，而不是估算值。
+The system now uses **Keepa API real data** to calculate FBA fees and commissions, not estimates.
 
-## 数据来源
+## Data source
 
-### Keepa API 提供的数据
+### Data provided by Keepa API
 
-| 数据项 | 字段名 | 说明 |
+| data item | Field name | Description |
 |--------|--------|------|
-| 产品长度 | `packageLength` | cm |
-| 产品宽度 | `packageWidth` | cm |
-| 产品高度 | `packageHeight` | cm |
-| 产品重量 | `packageWeight` | g |
-| 类目树 | `categoryTree` | 用于确定佣金比例 |
-| FBA费用 | `fbaFees` | 直接返回或估算 |
+| Product length | `packageLength` | cm |
+| Product width | `packageWidth` | cm |
+| Product height | `packageHeight` | cm |
+| Product weight | `packageWeight` | g |
+| Category tree | `categoryTree` | Used to determine commission ratio |
+| FBA fees | `fbaFees` | Direct return or estimate |
 
-### 佣金比例表 (基于类目)
+### Commission scale table (Based on category)
 
-| 类目 | 佣金比例 | 示例产品 |
+| Category | Commission ratio | Sample products |
 |------|----------|----------|
-| Electronics | 8% | 耳机、相机、手机 |
-| Clothing | 17% | T恤、鞋子、包包 |
-| Jewelry | 20% | 项链、戒指 |
-| Home | 15% | 厨具、家居 |
-| Books | 15% | 图书 |
-| Beauty | 15% | 化妆品 |
-| 其他 | 15% | 默认值 |
+| Electronics | 8% | Headphones, cameras, mobile phones |
+| Clothing | 17% | T-shirts, shoes, bags |
+| Jewelry | 20% | Necklaces, rings |
+| Home | 15% | kitchenware, home furnishing |
+| Books | 15% | books |
+| Beauty | 15% | Cosmetics |
+| Others | 15% | Default value |
 
-## 费用计算流程
+## Cost calculation process
 
 ```
-Keepa API 产品数据
+Keepa API product data
        ↓
 ┌─────────────────────────────────────┐
 │  KeepaFeeExtractor                  │
-│  - 提取尺寸重量                      │
-│  - 确定类目佣金比例                  │
-│  - 获取/估算FBA费用                  │
+│  - Extract dimensional weight │
+│  - Determine category commission ratio │
+│  - get/Estimate FBA Fees │
 └─────────────────────────────────────┘
        ↓
-费用明细:
-  ├─ FBA费用: $X.XX (基于2026年费率)
-  ├─ 佣金: $X.XX (售价 × 类目比例)
-  └─ 其他: 退货、仓储等
+Cost details:
+  ├─ FBA fees: $X.XX (Based on 2026 rates)
+  ├─ Commission: $X.XX (Selling price × Category ratio)
+  └─ Others: Returns, warehousing, etc.
        ↓
-利润计算:
-  利润 = 售价 - COGS - 总费用 - 广告成本
+Profit calculation:
+  profit = selling price - COGS - total cost - advertising cost
 ```
 
-## 使用示例
+## Usage example
 
-### 基础使用
+### Basic usage
 
 ```python
 from keepa_fee_extractor import KeepaFeeExtractor
 
-# 从Keepa API获取的产品数据
+# Product data obtained from Keepa API
 product = {
     'asin': 'B0XXXXXXX',
     'packageLength': 20,
@@ -69,34 +69,34 @@ product = {
 
 price = 45.99
 
-# 提取所有费用
+# Withdraw all fees
 fees = KeepaFeeExtractor.extract_all_fees(product, price)
 
-print(f"FBA费用: ${fees['fba_fee']:.2f}")
-print(f"佣金比例: {fees['referral_rate']*100:.1f}%")
-print(f"佣金金额: ${fees['referral_fee']:.2f}")
-print(f"总费用: ${fees['total_fees']:.2f}")
+print(f"FBA fees: ${fees['fba_fee']:.2f}")
+print(f"Commission ratio: {fees['referral_rate']*100:.1f}%")
+print(f"Commission amount: ${fees['referral_fee']:.2f}")
+print(f"total cost: ${fees['total_fees']:.2f}")
 ```
 
-### 在精算师系统中使用
+### Used in Actuarial Systems
 
 ```python
 from amazon_actuary_final import generate_actuary_report_auto
 
-# 自动生成报告，使用Keepa真实费用数据
+# Automatically generate reports using Keepa real expense data
 report_path, analysis, info = generate_actuary_report_auto('B0XXXXXXX')
 
-# 报告中的费用分析将基于:
-# - 真实的FBA费用 (从Keepa获取或基于尺寸计算)
-# - 准确的佣金比例 (基于类目)
-# - 精确的产品尺寸和重量
+# The cost analysis in the report will be based on:
+# - True FBA fees (Get from Keepa or calculate based on dimensions)
+# - Accurate commission ratio (Based on category)
+# - Exact product dimensions and weight
 ```
 
-## FBA费用计算详情
+## FBA fee calculation details
 
-### 2026年FBA费率表 (标准尺寸)
+### 2026 FBA Rate Schedule (Standard size)
 
-| 计费重量 | 费用 |
+| Billing weight | cost |
 |----------|------|
 | ≤ 0.75 lb | $3.22 |
 | ≤ 1.0 lb | $3.86 |
@@ -105,77 +105,77 @@ report_path, analysis, info = generate_actuary_report_auto('B0XXXXXXX')
 | ≤ 3.0 lb | $6.47 |
 | > 3.0 lb | $7.25 + $0.32/lb |
 
-### 计费重量计算
+### Billing weight calculation
 
 ```
-计费重量 = max(实际重量, 体积重量)
+Billing weight = max(actual weight, Volume weight)
 
-体积重量 = (长 × 宽 × 高) / 166  (单位: inches)
+Volume weight = (Length × Width × Height) / 166  (unit: inches)
 ```
 
-示例:
+Example:
 ```
-产品尺寸: 20×15×8 cm = 7.9×5.9×3.1 inches
-实际重量: 450g = 0.99 lb
-体积重量: (7.9 × 5.9 × 3.1) / 166 = 0.87 lb
+Product size: 20×15×8 cm = 7.9×5.9×3.1 inches
+actual weight: 450g = 0.99 lb
+Volume weight: (7.9 × 5.9 × 3.1) / 166 = 0.87 lb
 
-计费重量: max(0.99, 0.87) = 0.99 lb
-FBA费用: $3.86
+Billing weight: max(0.99, 0.87) = 0.99 lb
+FBA fees: $3.86
 ```
 
-## 与其他系统的对比
+## Comparison with other systems
 
-### vs 固定15%佣金估算
+### vs fixed 15%Commission estimate
 
-| 类目 | 固定估算 | Keepa真实 | 差异 |
+| Category | Fixed estimate | Keep it real | difference |
 |------|----------|-----------|------|
-| Electronics | 15% | 8% | 节省7% |
-| Clothing | 15% | 17% | 多付2% |
-| Jewelry | 15% | 20% | 多付5% |
+| Electronics | 15% | 8% | Save 7% |
+| Clothing | 15% | 17% | Pay 2 more% |
+| Jewelry | 15% | 20% | Pay 5 more% |
 
-**影响**: 对于$50售价的产品，佣金差异可达$2.50-$3.50
+**influence**: for$For products priced at 50, the commission difference can be up to$2.50-$3.50
 
-### vs 简化FBA估算
+### vs Simplified FBA Estimation
 
-简化估算:
-- 仅基于重量
-- 忽略体积重量
-- 使用旧费率
+Simplify estimating:
+- Based on weight only
+- Ignore volumetric weight
+- Use old rates
 
-Keepa集成:
-- 考虑尺寸和重量
-- 计算体积重量
-- 使用2026年最新费率
+Keepa integration:
+- Consider size and weight
+- Calculate volumetric weight
+- Use the latest rates for 2026
 
-**影响**: 大件轻量产品FBA费用可能差异$2-$5
+**influence**: FBA fees for large and lightweight products may vary$2-$5
 
-## 更新日志
+## Change log
 
 ### v3.1 (2026-02-16)
-- ✅ 添加 `keepa_fee_extractor.py` 模块
-- ✅ 集成类目佣金比例表
-- ✅ 更新FBA费率为2026年标准
-- ✅ 自动计算体积重量
-- ✅ 更新 `amazon_actuary_final.py` 使用真实费用
-- ✅ 更新 `keepa_metrics_collector.py` 提取费用指标
+- ✅ Add `keepa_fee_extractor.py` module
+- ✅ Integrated category commission ratio table
+- ✅ Updated FBA rates to 2026 standards
+- ✅ Automatically calculate volumetric weight
+- ✅ Update `amazon_actuary_final.py` Use true costs
+- ✅ Update `keepa_metrics_collector.py` Extract cost metrics
 
-## 文件结构
+## File structure
 
 ```
 src/
-├── keepa_fee_extractor.py          # 新增: 费用提取器
-├── amazon_actuary_final.py          # 更新: 使用真实费用
-├── keepa_metrics_collector.py       # 更新: 提取费用指标
+├── keepa_fee_extractor.py          # New: fee extractor
+├── amazon_actuary_final.py          # renew: Use true costs
+├── keepa_metrics_collector.py       # renew: Extract cost metrics
 └── ...
 ```
 
-## 下一步
+## Next step
 
-现在系统可以:
-1. ✅ 从Keepa API获取真实产品尺寸
-2. ✅ 基于类目确定准确佣金比例
-3. ✅ 使用2026年FBA费率计算费用
-4. ✅ 自动处理体积重量计算
-5. ✅ 生成基于真实数据的利润分析
+Now the system can:
+1. ✅ Get the real product size from Keepa API
+2. ✅ Determine accurate commission ratio based on category
+3. ✅ Use 2026 FBA rates to calculate fees
+4. ✅ Automatically handle volumetric weight calculations
+5. ✅ Generate profit analysis based on real data
 
-所有财务模型都基于 **Keepa API 的真实数据**!
+All financial models are based on **Real data from Keepa API**!

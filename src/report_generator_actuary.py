@@ -1,7 +1,7 @@
 """
-亚马逊运营精算师报告生成器
+Amazon Operations Actuary Report Generator
 =============================
-基于Keepa数据的专业财务分析和风险评估
+Professional financial analysis and risk assessment based on Keepa data
 """
 
 import json
@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 @dataclass
 class FinancialModel:
-    """财务模型"""
+    """financial model"""
     selling_price: float
     cogs_estimate: float
     fba_fee: float
@@ -29,7 +29,7 @@ class FinancialModel:
 
 @dataclass
 class Scenario:
-    """情景分析"""
+    """Scenario analysis"""
     name: str
     price: float
     volume: int
@@ -41,22 +41,22 @@ class Scenario:
 
 
 class ActuaryReportGenerator:
-    """精算师报告生成器"""
+    """Actuary Report Generator"""
     
     def __init__(self):
-        self.referral_rate = 0.15  # 默认15%
-        self.return_loss_rate = 0.30  # 退货损失率
-        self.storage_rate_per_cuft = 0.87  # 仓储费率 $/cu.ft/month
-        self.acos_default = 0.15  # 默认ACOS 15%
+        self.referral_rate = 0.15  # Default 15%
+        self.return_loss_rate = 0.30  # return loss rate
+        self.storage_rate_per_cuft = 0.87  # Warehousing rates $/cu.ft/month
+        self.acos_default = 0.15  # Default ACOS 15%
         
     def generate_actuary_report(self,
                                asin: str,
                                product_data: dict,
                                factors: dict,
                                market_report: dict) -> str:
-        """生成精算师级HTML报告"""
+        """Generate actuarial grade HTML reports"""
         
-        # 提取基础数据
+        # Extract basic data
         title = product_data.get('Title', 'Unknown Product')
         brand = product_data.get('Brand', 'N/A')
         current_price = self._safe_float(product_data.get('New: Current', 0))
@@ -64,22 +64,22 @@ class ActuaryReportGenerator:
         monthly_sales = self._estimate_monthly_sales(rank)
         return_rate = self._parse_percentage(product_data.get('Return Rate', '5%'))
         
-        # 构建已知成本结构
+        # Build a known cost structure
         cost_structure = self._build_financial_model(current_price, monthly_sales, return_rate, product_data)
         
-        # 基于不同COGS比例计算情景
+        # Calculation scenarios based on different COGS ratios
         cogs_scenarios = self._build_cogs_scenarios(current_price, monthly_sales, cost_structure)
         
-        # 盈亏平衡分析 (不同COGS下的最低售价)
+        # Break-even analysis (The lowest selling price under different COGS)
         breakeven = self._calculate_breakeven_by_cogs(current_price, cost_structure)
         
-        # 敏感性分析 (对COGS敏感)
+        # sensitivity analysis (Sensitive to COGS)
         sensitivity = self._calculate_cogs_sensitivity(current_price, cost_structure)
         
-        # 风险评估 (基于已知成本)
+        # risk assessment (Based on known costs)
         risks = self._assess_risks_without_cogs(product_data, cost_structure, market_report)
         
-        # 生成HTML
+        # Generate HTML
         return self._render_html(
             asin=asin,
             title=title,
@@ -96,42 +96,42 @@ class ActuaryReportGenerator:
         )
     
     def _build_financial_model(self, price: float, volume: int, return_rate: float, data: dict) -> Dict:
-        """构建已知成本结构模型 (COGS由用户填写)"""
+        """Build a known cost structure model (COGS is filled in by the user)"""
         
-        # FBA费用 (从数据中获取或估算)
+        # FBA fees (Obtain or estimate from data)
         fba_fee = self._safe_float(data.get('FBA Pick&Pack Fee', 0))
         if fba_fee == 0:
             weight_g = self._safe_float(data.get('Package: Weight (g)', 0))
             if weight_g > 0:
                 fba_fee = self._estimate_fba_fee(weight_g)
             else:
-                fba_fee = 3.50  # 默认估计
+                fba_fee = 3.50  # Default estimate
         
-        # 佣金
+        # Commission
         referral_rate = self._safe_float(data.get('Referral Fee %', 15)) / 100
         referral_fee = price * referral_rate
         
-        # 退货成本
+        # return cost
         return_cost = price * return_rate * self.return_loss_rate
         
-        # 仓储费
+        # Storage fee
         storage_cost = self._calculate_storage_cost(data)
         
-        # 广告费 (按ACOS)
+        # Advertising fees (Press ACOS)
         ad_cost = price * self.acos_default
         
-        # 已知运营成本 (不含COGS)
+        # Known operating costs (COGS free)
         known_operating_cost = fba_fee + referral_fee + return_cost + storage_cost + ad_cost
         
-        # 假设COGS占位 (用户需要填入实际值)
-        placeholder_cogs = price * 0.35  # 仅作为参考占位，不用于最终计算
+        # Assume COGS occupancy (User needs to fill in the actual value)
+        placeholder_cogs = price * 0.35  # Only as a reference placeholder and not used in final calculations
         
-        # 总成本 (含占位COGS)
+        # total cost (Includes placeholder COGS)
         total_cost_with_placeholder = placeholder_cogs + known_operating_cost
         
         return {
             'selling_price': price,
-            'cogs_placeholder': placeholder_cogs,  # 仅参考
+            'cogs_placeholder': placeholder_cogs,  # Reference only
             'fba_fee': fba_fee,
             'referral_fee': referral_fee,
             'return_cost': return_cost,
@@ -144,18 +144,18 @@ class ActuaryReportGenerator:
         }
     
     def _build_cogs_scenarios(self, price: float, volume: int, cost_structure: Dict) -> List[Dict]:
-        """基于不同COGS比例计算利润情景"""
+        """Calculate profit scenarios based on different COGS ratios"""
         scenarios = []
         
         known_cost = cost_structure['known_operating_cost']
         
-        # 不同COGS比例情景
+        # Different COGS ratio scenarios
         cogs_rates = [
-            (0.20, "低COGS (20%)", "优质供应链"),
-            (0.30, "中低COGS (30%)", "良好供应链"),
-            (0.40, "中等COGS (40%)", "普通供应链"),
-            (0.50, "中高COGS (50%)", "较差供应链"),
-            (0.60, "高COGS (60%)", "需优化供应链"),
+            (0.20, "Low COGS (20%)", "Quality supply chain"),
+            (0.30, "Medium to low COGS (30%)", "good supply chain"),
+            (0.40, "Medium COGS (40%)", "Ordinary supply chain"),
+            (0.50, "Medium to high COGS (50%)", "Poor supply chain"),
+            (0.60, "High COGS (60%)", "Need to optimize supply chain"),
         ]
         
         for cogs_rate, label, desc in cogs_rates:
@@ -177,16 +177,16 @@ class ActuaryReportGenerator:
                 'net_margin': margin,
                 'monthly_profit': monthly_profit,
                 'monthly_revenue': monthly_revenue,
-                'is_viable': margin > 10,  # 10%以上利润率视为可行
+                'is_viable': margin > 10,  # 10%The above profit margin is considered feasible
             })
         
         return scenarios
     
     def _calculate_breakeven_by_cogs(self, price: float, cost_structure: Dict) -> Dict:
-        """计算不同COGS下的盈亏平衡"""
+        """Calculate break-even under different COGS"""
         known_cost = cost_structure['known_operating_cost']
         
-        # 不同COGS下的最低售价
+        # The lowest selling price under different COGS
         breakeven_prices = {}
         for cogs_rate in [0.20, 0.30, 0.40, 0.50]:
             cogs = price * cogs_rate
@@ -197,11 +197,11 @@ class ActuaryReportGenerator:
             'known_operating_cost': known_cost,
             'breakeven_by_cogs': breakeven_prices,
             'current_price': price,
-            'safety_margin': {},  # 将在渲染时计算
+            'safety_margin': {},  # will be calculated at render time
         }
     
     def _calculate_cogs_sensitivity(self, price: float, cost_structure: Dict) -> Dict:
-        """COGS敏感性分析"""
+        """COGS sensitivity analysis"""
         known_cost = cost_structure['known_operating_cost']
         base_cogs_rate = 0.35
         base_cogs = price * base_cogs_rate
@@ -209,7 +209,7 @@ class ActuaryReportGenerator:
         
         sensitivities = []
         
-        # COGS从20%到60%变化
+        # COGS from 20%to 60%change
         for cogs_rate in [0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60]:
             cogs = price * cogs_rate
             total_cost = cogs + known_cost
@@ -218,7 +218,7 @@ class ActuaryReportGenerator:
             
             profit_change = ((profit - base_profit) / base_profit * 100) if base_profit != 0 else 0
             
-            status = "🟢 健康" if margin > 15 else "🟡 一般" if margin > 5 else "🔴 危险"
+            status = "🟢 Health" if margin > 15 else "🟡 Average" if margin > 5 else "🔴 Danger"
             
             sensitivities.append({
                 'cogs_rate': cogs_rate,
@@ -236,17 +236,17 @@ class ActuaryReportGenerator:
         }
     
     def _calculate_breakeven(self, financial: FinancialModel) -> Dict:
-        """计算盈亏平衡"""
-        # 单位盈亏平衡 (售价已定，看最低需要多少销量)
-        fixed_costs_per_month = 0  # 假设无固定成本
+        """Calculate break-even"""
+        # unit breakeven (The selling price has been determined, it depends on the minimum sales volume required)
+        fixed_costs_per_month = 0  # Assume no fixed costs
         contribution_margin = financial.gross_profit
         
         breakeven_units = 0
         if contribution_margin > 0:
             breakeven_units = int(fixed_costs_per_month / contribution_margin) + 1
         
-        # 价格盈亏平衡 (给定销量，看最低售价)
-        target_volume = 100  # 假设月销100件
+        # price breakeven (Given the sales volume, look at the lowest selling price)
+        target_volume = 100  # Assume monthly sales of 100 pieces
         min_price = financial.total_cost
         
         return {
@@ -257,28 +257,28 @@ class ActuaryReportGenerator:
         }
     
     def _calculate_sensitivity(self, financial: FinancialModel) -> Dict:
-        """敏感性分析"""
+        """sensitivity analysis"""
         base_profit = financial.gross_profit
         base_margin = financial.net_margin
         
         sensitivities = []
         
-        # 价格变动 ±10%
+        # Price change ±10%
         for delta in [-0.10, -0.05, 0, 0.05, 0.10]:
             new_price = financial.selling_price * (1 + delta)
-            new_profit = new_price - financial.total_cost + (financial.selling_price - new_price) * 0.15  # 佣金变化
+            new_profit = new_price - financial.total_cost + (financial.selling_price - new_price) * 0.15  # Commission changes
             new_margin = (new_profit / new_price * 100) if new_price > 0 else 0
             profit_change = ((new_profit - base_profit) / base_profit * 100) if base_profit != 0 else 0
             
             sensitivities.append({
-                'variable': f'价格 {delta*100:+.0f}%',
+                'variable': f'price {delta*100:+.0f}%',
                 'value': new_price,
                 'profit': new_profit,
                 'margin': new_margin,
                 'change': profit_change
             })
         
-        # COGS变动 ±10%
+        # COGS variation ±10%
         for delta in [-0.10, 0, 0.10]:
             new_cogs = financial.cogs_estimate * (1 + delta)
             new_total = new_cogs + financial.fba_fee + financial.referral_fee + financial.return_cost + financial.storage_cost + financial.ad_cost
@@ -301,72 +301,72 @@ class ActuaryReportGenerator:
         }
     
     def _assess_risks_without_cogs(self, data: dict, cost_structure: Dict, market_report: dict) -> List[Dict]:
-        """风险评估 (不含COGS估算)"""
+        """risk assessment (Without COGS estimate)"""
         risks = []
         price = cost_structure['selling_price']
         known_cost = cost_structure['known_operating_cost']
         
-        # 已知成本占比风险
+        # Known cost share risk
         known_cost_ratio = known_cost / price if price > 0 else 0
         if known_cost_ratio > 0.50:
             risks.append({
                 'type': 'cost_structure',
                 'level': 'high',
-                'desc': f'已知运营成本占比过高 ({known_cost_ratio*100:.1f}%)，留给COGS的空间很小',
-                'mitigation': '降低FBA费用(轻小计划)或优化广告ACOS'
+                'desc': f'It is known that the proportion of operating costs is too high ({known_cost_ratio*100:.1f}%), leaving little space for COGS',
+                'mitigation': 'Reduce FBA fees(Small and light plan)Or optimize advertising ACOS'
             })
         
-        # 退货率风险
+        # Return rate risk
         return_rate = cost_structure['return_rate']
         if return_rate > 0.15:
             risks.append({
                 'type': 'returns',
                 'level': 'high',
-                'desc': f'退货率过高 ({return_rate*100:.0f}%)，严重侵蚀利润',
-                'mitigation': '改善产品质量或描述'
+                'desc': f'Return rate is too high ({return_rate*100:.0f}%), seriously eroding profits',
+                'mitigation': 'Improve product quality or description'
             })
         elif return_rate > 0.10:
             risks.append({
                 'type': 'returns',
                 'level': 'medium',
-                'desc': f'退货率偏高 ({return_rate*100:.0f}%)',
-                'mitigation': '关注退货原因'
+                'desc': f'Return rate is high ({return_rate*100:.0f}%)',
+                'mitigation': 'Pay attention to the reason for return'
             })
         
-        # 竞争风险
+        # Competing risks
         offer_count = self._safe_int(data.get('New Offer Count: Current', 0))
         if offer_count > 15:
             risks.append({
                 'type': 'competition',
                 'level': 'high',
-                'desc': f'竞争激烈 ({offer_count}个卖家)，价格战风险高',
-                'mitigation': '差异化或寻找蓝海'
+                'desc': f'Competition is fierce ({offer_count}sellers), the risk of price war is high',
+                'mitigation': 'Differentiation or looking for blue ocean'
             })
         
-        # 排名下滑风险
+        # Risk of ranking decline
         rank_drops = self._safe_int(data.get('Sales Rank: Drops last 90 days', 0))
         if rank_drops > 40:
             risks.append({
                 'type': 'demand',
                 'level': 'high',
-                'desc': f'需求下滑迹象 (90天排名下降{rank_drops}次)',
-                'mitigation': '关注市场趋势'
+                'desc': f'Signs of falling demand (90 days ranking drop{rank_drops}Second-rate)',
+                'mitigation': 'Pay attention to market trends'
             })
         
-        # FBA费用风险
+        # FBA fee risk
         fba_fee = cost_structure['fba_fee']
         if fba_fee > price * 0.20:
             risks.append({
                 'type': 'fba_cost',
                 'level': 'medium',
-                'desc': f'FBA费用占比过高 (${fba_fee:.2f})',
-                'mitigation': '考虑轻小计划或自发货'
+                'desc': f'FBA fees are too high (${fba_fee:.2f})',
+                'mitigation': 'Consider small and light plans or self-shipping'
             })
         
         return risks
     
     def _render_html(self, **kwargs) -> str:
-        """渲染HTML报告"""
+        """Render HTML report"""
         asin = kwargs['asin']
         title = kwargs['title']
         cost_structure = kwargs.get('cost_structure', {})
@@ -380,31 +380,31 @@ class ActuaryReportGenerator:
         price = cost_structure.get('selling_price', 0)
         known_cost = cost_structure.get('known_operating_cost', 0)
         
-        # 计算综合评分
+        # Calculate overall score
         factor_score = sum(f.score * f.weight for f in kwargs['factors'].values())
         market_score = kwargs['market_report']['market_feasibility']['overall_score']
-        overall = (factor_score + market_score) / 2  # 不含财务评分，因为COGS未知
+        overall = (factor_score + market_score) / 2  # Financial score not included because COGS is unknown
         
-        # 决策建议 (基于已知信息)
+        # Decision suggestions (Based on known information)
         if overall >= 70 and known_cost / price < 0.40 if price > 0 else False:
-            decision = "🟢 推荐考虑"
+            decision = "🟢 Recommended to consider"
             decision_color = "#4ade80"
-            decision_detail = "市场可行性好，运营成本结构合理，待确认COGS后即可决策"
+            decision_detail = "The market feasibility is good and the operating cost structure is reasonable. The decision can be made after COGS is confirmed."
         elif overall >= 55:
-            decision = "🟡 谨慎评估"
+            decision = "🟡 Evaluate carefully"
             decision_color = "#fbbf24"
-            decision_detail = "有一定可行性，需确认实际COGS后评估"
+            decision_detail = "It is feasible to a certain extent and needs to be evaluated after confirming the actual COGS"
         else:
-            decision = "🔴 建议放弃"
+            decision = "🔴 It is recommended to give up"
             decision_color = "#f87171"
-            decision_detail = "市场可行性不足或运营成本过高"
+            decision_detail = "Insufficient market feasibility or too high operating costs"
         
         html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亚马逊运营精算师分析报告 - {asin}</title>
+    <title>Amazon Operations Actuary Analysis Report - {asin}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{
@@ -557,137 +557,137 @@ class ActuaryReportGenerator:
         <!-- Header -->
         <div class="header">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span class="badge badge-professional">🏆 精算师级分析</span>
+                <span class="badge badge-professional">🏆 Actuary-level analysis</span>
                 <span style="opacity: 0.8;">{current_date}</span>
             </div>
-            <h1>亚马逊运营精算师分析报告</h1>
+            <h1>Amazon Operations Actuary Analysis Report</h1>
             <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 15px;">
                 <span>ASIN: {asin}</span>
-                <span>品牌: {kwargs.get('brand', 'N/A')}</span>
+                <span>brand: {kwargs.get('brand', 'N/A')}</span>
             </div>
             <div style="font-size: 1.1em; opacity: 0.9; line-height: 1.5;">{title}</div>
         </div>
         
         <!-- COGS Notice -->
         <div class="cogs-notice">
-            <h2>⚠️ COGS (采购成本) 待填写</h2>
+            <h2>⚠️ COGS (Procurement cost) To be filled in</h2>
             <p style="font-size: 1.1em; margin-bottom: 15px;">
-                本报告仅基于<strong>已知运营成本</strong>进行分析，不包含COGS估算。
+                This report is based solely on<strong>Known operating costs</strong>The analysis is performed without COGS estimates.
             </p>
             <p style="opacity: 0.9;">
-                请在下方表格填入您的实际COGS，查看对应利润率。
-                <br>COGS = 产品采购价 + 头程运费 + 关税 + 其他到仓成本
+                Please fill in your actual COGS in the form below to see the corresponding profit margin.
+                <br>COGS = Product purchase price + First leg freight + tariff + Other arrival costs
             </p>
         </div>
         
         <!-- Executive Summary -->
         <div class="card">
-            <h2 class="card-title">💼 执行摘要</h2>
+            <h2 class="card-title">💼 Executive Summary</h2>
             <div class="verdict">{decision}</div>
             <p style="text-align: center; font-size: 1.1em; margin-bottom: 30px;">{decision_detail}</p>
             
             <div class="metrics-grid">
                 <div class="metric-box">
                     <div class="metric-value" style="color: #60a5fa;">{overall:.0f}</div>
-                    <div class="metric-label">综合评分</div>
+                    <div class="metric-label">Overall rating</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: #fbbf24;">{factor_score:.0f}</div>
-                    <div class="metric-label">六维因子</div>
+                    <div class="metric-label">six-dimensional factor</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: #a78bfa;">{market_score:.0f}</div>
-                    <div class="metric-label">市场可行性</div>
+                    <div class="metric-label">market feasibility</div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-value" style="color: #fbbf24;">{known_cost/price*100:.1f}%</div>
-                    <div class="metric-label">已知成本占比</div>
+                    <div class="metric-label">Known cost ratio</div>
                 </div>
             </div>
         </div>
         
         <!-- Known Cost Structure -->
         <div class="card">
-            <h2 class="card-title">💰 已知成本结构 (不含COGS)</h2>
+            <h2 class="card-title">💰 Known cost structure (COGS free)</h2>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                 <div>
-                    <h3 style="margin-bottom: 20px; color: #94a3b8;">单位运营成本 (每件)</h3>
+                    <h3 style="margin-bottom: 20px; color: #94a3b8;">unit operating cost (per piece)</h3>
                     <div class="cost-breakdown">
                         <div class="cost-item known">
-                            <span>售价 (Selling Price)</span>
+                            <span>selling price (Selling Price)</span>
                             <span style="font-weight: 600;">${price:.2f}</span>
                         </div>
                         <div class="cost-item tbd">
-                            <span>➖ COGS (待填写)</span>
+                            <span>➖ COGS (To be filled in)</span>
                             <span style="font-weight: 600;">?</span>
                         </div>
                         <div class="cost-item known">
-                            <span>➖ FBA费用</span>
+                            <span>➖ FBA fees</span>
                             <span>-${cost_structure.get('fba_fee', 0):.2f}</span>
                         </div>
                         <div class="cost-item known">
-                            <span>➖ 平台佣金 ({cost_structure.get('referral_rate', 0.15)*100:.0f}%)</span>
+                            <span>➖Platform commission ({cost_structure.get('referral_rate', 0.15)*100:.0f}%)</span>
                             <span>-${cost_structure.get('referral_fee', 0):.2f}</span>
                         </div>
                         <div class="cost-item known">
-                            <span>➖ 退货成本 ({cost_structure.get('return_rate', 0.05)*100:.0f}%退货率)</span>
+                            <span>➖ Return costs ({cost_structure.get('return_rate', 0.05)*100:.0f}%return rate)</span>
                             <span>-${cost_structure.get('return_cost', 0):.2f}</span>
                         </div>
                         <div class="cost-item known">
-                            <span>➖ 仓储费</span>
+                            <span>➖ Storage fee</span>
                             <span>-${cost_structure.get('storage_cost', 0):.3f}</span>
                         </div>
                         <div class="cost-item known">
-                            <span>➖ 广告费 (ACoS 15%)</span>
+                            <span>➖ Advertising fees (ACoS 15%)</span>
                             <span>-${cost_structure.get('ad_cost', 0):.2f}</span>
                         </div>
                         <div class="cost-item total">
-                            <span>已知运营成本合计</span>
+                            <span>Total known operating costs</span>
                             <span style="color: #f87171;">${known_cost:.2f}</span>
                         </div>
                         <div class="cost-item" style="background: rgba(251, 191, 36, 0.1); border-radius: 8px; padding: 15px; margin-top: 10px;">
-                            <span style="color: #fbbf24; font-weight: 600;">COGS上限空间</span>
-                            <span style="color: #fbbf24; font-weight: 600;">${price - known_cost:.2f} (最高{(price-known_cost)/price*100:.0f}%)</span>
+                            <span style="color: #fbbf24; font-weight: 600;">COGS cap space</span>
+                            <span style="color: #fbbf24; font-weight: 600;">${price - known_cost:.2f} (highest{(price-known_cost)/price*100:.0f}%)</span>
                         </div>
                     </div>
                 </div>
                 
                 <div>
-                    <h3 style="margin-bottom: 20px; color: #94a3b8;">月度运营数据</h3>
+                    <h3 style="margin-bottom: 20px; color: #94a3b8;">Monthly operating data</h3>
                     <div class="cost-breakdown">
                         <div class="cost-item">
-                            <span>估算月销量</span>
-                            <span style="font-weight: 600;">{monthly_sales} 件</span>
+                            <span>Estimated monthly sales</span>
+                            <span style="font-weight: 600;">{monthly_sales} pieces</span>
                         </div>
                         <div class="cost-item">
-                            <span>月销售额 (Gross Revenue)</span>
+                            <span>monthly sales (Gross Revenue)</span>
                             <span>${price * monthly_sales:,.2f}</span>
                         </div>
                         <div class="cost-item">
-                            <span>月已知运营成本</span>
+                            <span>Monthly known operating costs</span>
                             <span style="color: #f87171;">${known_cost * monthly_sales:,.2f}</span>
                         </div>
                         <div class="cost-item" style="background: rgba(251, 191, 36, 0.1); border-radius: 8px; padding: 15px; margin-top: 10px;">
-                            <span style="color: #fbbf24; font-weight: 600;">月COGS上限</span>
+                            <span style="color: #fbbf24; font-weight: 600;">Monthly COGS upper limit</span>
                             <span style="color: #fbbf24; font-weight: 600;">${(price - known_cost) * monthly_sales:,.2f}</span>
                         </div>
                     </div>
                     
                     <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                        <h4 style="margin-bottom: 10px; color: #94a3b8;">关键指标</h4>
+                        <h4 style="margin-bottom: 10px; color: #94a3b8;">key indicators</h4>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span>已知成本占比</span>
+                            <span>Known cost ratio</span>
                             <span style="font-weight: 600;">{known_cost/price*100:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span>留给COGS的空间</span>
+                            <span>Space left for COGS</span>
                             <span style="font-weight: 600; color: #fbbf24;">{((price-known_cost)/price*100) if price > 0 else 0:.1f}%</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>要达到15%净利率</span>
+                            <span>To reach 15%net profit margin</span>
                             <span style="font-weight: 600; color: #4ade80;">
-                                COGS需≤${price*0.70-known_cost:.2f} (≤{(price*0.70-known_cost)/price*100:.0f}%)
+                                COGS needs to be ≤${price*0.70-known_cost:.2f} (≤{(price*0.70-known_cost)/price*100:.0f}%)
                             </span>
                         </div>
                     </div>
@@ -697,20 +697,20 @@ class ActuaryReportGenerator:
         
         <!-- COGS Scenarios -->
         <div class="card">
-            <h2 class="card-title">📊 不同COGS比例下的利润分析</h2>
-            <p style="color: #94a3b8; margin-bottom: 20px;">填入您的实际COGS比例，查看对应的财务表现</p>
+            <h2 class="card-title">📊 Profit analysis under different COGS ratios</h2>
+            <p style="color: #94a3b8; margin-bottom: 20px;">Fill in your actual COGS ratio to view the corresponding financial performance</p>
             
             <div style="overflow-x: auto;">
                 <table class="cogs-table">
                     <thead>
                         <tr>
-                            <th>COGS比例</th>
-                            <th>COGS金额</th>
-                            <th>总成本</th>
-                            <th>单位利润</th>
-                            <th>净利率</th>
-                            <th>月利润</th>
-                            <th>可行性</th>
+                            <th>COGS ratio</th>
+                            <th>COGS amount</th>
+                            <th>total cost</th>
+                            <th>unit profit</th>
+                            <th>net profit margin</th>
+                            <th>monthly profit</th>
+                            <th>Feasibility</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -722,26 +722,26 @@ class ActuaryReportGenerator:
         
         <!-- Breakeven Analysis -->
         <div class="card">
-            <h2 class="card-title">📈 盈亏平衡分析</h2>
+            <h2 class="card-title">📈 Break-even analysis</h2>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
-                    <h4 style="margin-bottom: 15px; color: #94a3b8;">不同COGS下的最低售价</h4>
+                    <h4 style="margin-bottom: 15px; color: #94a3b8;">The lowest selling price under different COGS</h4>
                     {self._render_breakeven_prices(breakeven)}
                 </div>
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
-                    <h4 style="margin-bottom: 15px; color: #94a3b8;">当前定价安全边际</h4>
+                    <h4 style="margin-bottom: 15px; color: #94a3b8;">Current pricing margin of safety</h4>
                     <div style="line-height: 2;">
                         <div style="display: flex; justify-content: space-between;">
-                            <span>当前售价</span>
+                            <span>Current selling price</span>
                             <span style="font-weight: 600;">${price:.2f}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span>已知运营成本</span>
+                            <span>Known operating costs</span>
                             <span style="color: #f87171;">${known_cost:.2f}</span>
                         </div>
                         <div style="border-top: 1px solid rgba(255,255,255,0.2); margin: 10px 0; padding-top: 10px; display: flex; justify-content: space-between;">
-                            <span>COGS上限空间</span>
+                            <span>COGS cap space</span>
                             <span style="color: #fbbf24; font-weight: 600;">${price - known_cost:.2f}</span>
                         </div>
                     </div>
@@ -751,15 +751,15 @@ class ActuaryReportGenerator:
         
         <!-- Risk Assessment -->
         <div class="card">
-            <h2 class="card-title">⚠️ 已知成本结构风险评估</h2>
+            <h2 class="card-title">⚠️ Known cost structure risk assessment</h2>
             {self._render_risks(risks)}
         </div>
         
         <!-- Footer -->
         <div class="footer">
-            <p>本报告基于Keepa API已知数据生成 | 不包含COGS估算</p>
+            <p>This report is generated based on known data from Keepa API | Does not include COGS estimates</p>
             <p style="margin-top: 10px; opacity: 0.7; font-size: 0.9em;">
-                © 2026 Amz-Keepa-MCP | 请填入实际COGS后进行投资决策
+                © 2026 Amz-Keepa-MCP | Please fill in the actual COGS before making an investment decision
             </p>
         </div>
     </div>
@@ -769,7 +769,7 @@ class ActuaryReportGenerator:
         return html
     
     def _render_cogs_scenarios(self, scenarios: List[Dict], monthly_sales: int) -> str:
-        """渲染COGS情景表格"""
+        """Render COGS scenario table"""
         html = ''
         for s in scenarios:
             viable_class = 'viable' if s['is_viable'] else 'risky'
@@ -781,28 +781,28 @@ class ActuaryReportGenerator:
                     <td>${s['unit_profit']:.2f}</td>
                     <td>{s['net_margin']:.1f}%</td>
                     <td>${s['monthly_profit']:,.0f}</td>
-                    <td>{'✅ 可行' if s['is_viable'] else '⚠️ 风险'}</td>
+                    <td>{'✅ feasible' if s['is_viable'] else '⚠️ Risk'}</td>
                 </tr>
             '''
         return html
     
     def _render_breakeven_prices(self, breakeven: Dict) -> str:
-        """渲染盈亏平衡价格"""
+        """Render breakeven price"""
         html = '<div style="line-height: 2;">'
         for cogs_rate, price in breakeven.get('breakeven_by_cogs', {}).items():
             html += f'''
                 <div style="display: flex; justify-content: space-between;">
-                    <span>COGS {cogs_rate*100:.0f}%时</span>
-                    <span style="font-weight: 600;">最低售价 ${price:.2f}</span>
+                    <span>COGS {cogs_rate*100:.0f}%time</span>
+                    <span style="font-weight: 600;">lowest selling price ${price:.2f}</span>
                 </div>
             '''
         html += '</div>'
         return html
     
     def _render_risks(self, risks: List[Dict]) -> str:
-        """渲染风险项"""
+        """Render risk items"""
         if not risks:
-            return '<p style="color: #4ade80;">✅ 未发现基于已知成本的风险</p>'
+            return '<p style="color: #4ade80;">✅ No risks based on known costs found</p>'
         
         html = ''
         for risk in risks:
@@ -813,13 +813,13 @@ class ActuaryReportGenerator:
                         {risk['type'].upper()} - {risk['level'].upper()}
                     </div>
                     <p style="margin-bottom: 10px;">{risk['desc']}</p>
-                    <p style="opacity: 0.8; font-size: 0.9em;"><strong>缓解措施:</strong> {risk.get('mitigation', '')}</p>
+                    <p style="opacity: 0.8; font-size: 0.9em;"><strong>Mitigation measures:</strong> {risk.get('mitigation', '')}</p>
                 </div>
             '''
         return html
     
     def _estimate_monthly_sales(self, rank: int) -> int:
-        """根据排名估算月销量"""
+        """Estimated monthly sales based on ranking"""
         if rank < 1000:
             return 1000 + int((1000 - rank) * 5)
         elif rank < 10000:
@@ -832,7 +832,7 @@ class ActuaryReportGenerator:
             return max(5, int(500000 / rank))
     
     def _estimate_fba_fee(self, weight_g: float) -> float:
-        """估算FBA费用"""
+        """Estimate FBA fees"""
         weight_lb = weight_g / 453.592
         if weight_lb < 1:
             return 3.22
@@ -842,8 +842,8 @@ class ActuaryReportGenerator:
             return 4.71 + (weight_lb - 1) * 0.50
     
     def _calculate_storage_cost(self, data: dict) -> float:
-        """计算仓储费"""
-        length = self._safe_float(data.get('Package: Length (cm)', 0)) / 2.54  # 转英寸
+        """Calculate storage fees"""
+        length = self._safe_float(data.get('Package: Length (cm)', 0)) / 2.54  # Turn inches
         width = self._safe_float(data.get('Package: Width (cm)', 0)) / 2.54
         height = self._safe_float(data.get('Package: Height (cm)', 0)) / 2.54
         
@@ -853,7 +853,7 @@ class ActuaryReportGenerator:
         return 0.05
     
     def _parse_percentage(self, val) -> float:
-        """解析百分比"""
+        """parse percentage"""
         if isinstance(val, str):
             val = val.replace('%', '').strip()
         try:
@@ -862,7 +862,7 @@ class ActuaryReportGenerator:
             return 0.05
     
     def _safe_float(self, val) -> float:
-        """安全转float"""
+        """Convert safely to float"""
         try:
             if val is None:
                 return 0.0
@@ -873,7 +873,7 @@ class ActuaryReportGenerator:
             return 0.0
     
     def _safe_int(self, val) -> int:
-        """安全转int"""
+        """safe transfer to int"""
         try:
             if val is None:
                 return 0
@@ -887,7 +887,7 @@ def generate_actuary_report(asin: str,
                            factors: dict,
                            market_report: dict,
                            output_path: str):
-    """便捷函数：生成精算师报告"""
+    """Convenience function: generate actuary report"""
     generator = ActuaryReportGenerator()
     html = generator.generate_actuary_report(asin, product_data, factors, market_report)
     
