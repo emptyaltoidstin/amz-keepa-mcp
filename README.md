@@ -1,6 +1,6 @@
 # Amz-Keepa-MCP v3.0 🚀
 
-> **Amazon Operations Actuary System - Data-driven product selection decisions**
+DO NOT USE NOT PRODUCTION READY THIS FORK IS FOR TRANSLATION AND ANALYSIS PURPOSES
 >
 > 163 Keepa indicators + Real COGS + TACOS model = Professional-grade FBA profit analysis
 
